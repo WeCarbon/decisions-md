@@ -9,6 +9,8 @@ markdown 檔案。你在一個常駐的終端畫面上看到全部，這就是 *
 
 沒有資料庫、沒有常駐程式、沒有伺服器，只有 git 裡的 `decisions/`。
 
+![示範：新增一個任務，進度從一條管道指令即時跑進來，節點變成待決策問題，按一個鍵在看板上回覆](docs/demo.gif)
+
 ![decs 的看板：左邊是一棵帶進度條的任務樹，右邊是一個待決策節點和它的選項](docs/screenshot.zh-Hant.png)
 
 <sub>範例資料，用真實的看板程式碼透過 `node scripts/render-screenshot.ts` 渲染而成。</sub>

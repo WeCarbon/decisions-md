@@ -8,6 +8,8 @@
 
 没有数据库，没有常驻进程，没有服务器，只有 git 里的 `decisions/`。
 
+![演示：新建一个任务，进度从一条管道命令里实时跑进来，节点变成待决策问题，按一个键在看板上答复](docs/demo.gif)
+
 ![decs 的看板：左边是一棵带进度条的任务树，右边是一个待决策节点和它的选项](docs/screenshot.zh-Hans.png)
 
 <sub>示例数据，用真实的看板代码通过 `node scripts/render-screenshot.ts` 渲染而成。</sub>

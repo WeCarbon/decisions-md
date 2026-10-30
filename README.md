@@ -9,6 +9,8 @@ screen, the **bench**, and answer with a keystroke.
 
 No database. No daemon. No server. Just `decisions/` in git.
 
+![Demo: add a task, watch its progress stream in from a piped command, turn a node into a decision, then answer it with a keystroke on the bench](docs/demo.gif)
+
 ![The decs bench: a tree of running work with progress bars on the left, a pending decision with its options on the right](docs/screenshot.en.png)
 
 ---

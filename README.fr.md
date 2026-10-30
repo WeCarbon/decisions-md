@@ -10,6 +10,8 @@ terminal permanent, le **tableau**, et vous répondez d’une touche.
 Pas de base de données. Pas de démon. Pas de serveur. Juste un dossier
 `decisions/` dans git.
 
+![Démo : ajouter une tâche, voir sa progression arriver en direct depuis une commande en pipe, transformer un nœud en décision, puis y répondre d’une touche sur le tableau](docs/demo.gif)
+
 ![Le tableau de decs : un arbre de tâches en cours avec des barres de progression à gauche, une décision en attente avec ses options à droite](docs/screenshot.fr.png)
 
 <sub>Données fictives, générées par le vrai code du tableau avec `node scripts/render-screenshot.ts`.</sub>
