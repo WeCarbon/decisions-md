@@ -9,9 +9,9 @@ screen, the **bench**, and answer with a keystroke.
 
 No database. No daemon. No server. Just `decisions/` in git.
 
-![Demo: add a task, watch its progress stream in from a piped command, turn a node into a decision, then answer it with a keystroke on the bench](docs/demo.gif)
+![Demo: add a task, watch its progress stream in from a piped command, turn a node into a decision, then answer it with a keystroke on the bench](https://raw.githubusercontent.com/WeCarbon/decisions-md/main/docs/demo.gif)
 
-![The decs bench: a tree of running work with progress bars on the left, a pending decision with its options on the right](docs/screenshot.en.png)
+![The decs bench: a tree of running work with progress bars on the left, a pending decision with its options on the right](https://raw.githubusercontent.com/WeCarbon/decisions-md/main/docs/screenshot.en.png)
 
 ---
 
@@ -123,7 +123,22 @@ until you lift it.
 
 ## Quickstart
 
-Requires Node 22.18+ (TypeScript runs directly; there is no build step).
+Requires Node 22.18+.
+
+```sh
+npm i -g @wecarbon/decisions-md
+
+cd ~/code/your-project
+decs init --letter W                  # creates decisions/, registers the project
+decs add "Try decs" --task --author "me · kicking the tyres"
+decs                                  # the bench (same as decs bench); q to quit
+```
+
+No install: `npx @wecarbon/decisions-md init --letter W` works the same way, one command at a time.
+
+### From source
+
+TypeScript runs directly; there is no build step.
 
 ```sh
 git clone https://github.com/wecarbon/decisions-md.git
@@ -131,9 +146,9 @@ cd decisions-md && npm install
 export PATH="$PWD/bin:$PATH"          # add to your shell profile
 
 cd ~/code/your-project
-decs init --letter W                  # creates decisions/, registers the project
+decs init --letter W
 decs add "Try decs" --task --author "me · kicking the tyres"
-decs                                  # the bench (same as decs bench); q to quit
+decs
 ```
 
 ### With Claude Code
