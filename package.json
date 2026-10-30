@@ -1,0 +1,37 @@
+{
+  "name": "decisions-md",
+  "version": "0.1.0",
+  "description": "decs — a task & decision hub for long-running AI agents, stored as plain markdown files in your repo",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wecarbon/decisions-md.git"
+  },
+  "homepage": "https://github.com/wecarbon/decisions-md",
+  "type": "module",
+  "private": true,
+  "bin": {
+    "decs": "./bin/decs.ts"
+  },
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "test": "node --test --import ./test/setup.ts test/*.test.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "bidi-js": "^1.1.0",
+    "dayjs": "^1.11.23",
+    "i18next": "^26.5.11",
+    "ink": "^7.1.1",
+    "react": "^19.2.8",
+    "string-width": "^8.2.2",
+    "yaml": "^2.6.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/react": "^19.2.18",
+    "typescript": "^5.7.0"
+  }
+}

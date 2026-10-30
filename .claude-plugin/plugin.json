@@ -1,0 +1,9 @@
+{
+  "name": "decs",
+  "displayName": "decs",
+  "version": "0.2.0",
+  "description": "decs 是 AI 的任务中枢和决策中枢：每个 session 开头注入使用规则，owner 提到节点编号时提醒先转记。",
+  "author": { "name": "WeCarbon" },
+  "license": "MIT",
+  "repository": "https://github.com/wecarbon/decisions-md"
+}

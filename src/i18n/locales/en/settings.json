@@ -1,0 +1,23 @@
+{
+  "title": "Settings",
+  "hint": "↑↓ choose  ←→ / ⏎ change  esc close",
+  "setBy": "set by {{env}}",
+  "saved": "saved to {{path}}",
+  "label": {
+    "lang": "Language",
+    "bidi": "Right-to-left text",
+    "view": "View on open",
+    "images": "Inline images",
+    "mouse": "Mouse",
+    "idle-exit": "Monitor stops after idle",
+    "unclaimed-after": "Unclaimed answer after"
+  },
+  "value": {
+    "auto": "automatic",
+    "off": "off",
+    "on": "on",
+    "never": "never"
+  },
+  "unknown": "unknown setting \"{{key}}\" — settings: {{keys}}",
+  "invalid": "\"{{value}}\" is not a value for {{key}} — use one of: {{values}}"
+}

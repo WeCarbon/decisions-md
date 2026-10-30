@@ -1,0 +1,170 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1388" height="813" viewBox="0 0 1388 813">
+<rect width="1388" height="813" rx="12" fill="#16181d"/>
+<path d="M0 12a12 12 0 0 1 12-12h1364a12 12 0 0 1 12 12v22h-1388z" fill="#22252c"/>
+<circle cx="22" cy="17" r="6" fill="#ff5f57"/>
+<circle cx="42" cy="17" r="6" fill="#febc2e"/>
+<circle cx="62" cy="17" r="6" fill="#28c840"/>
+<text x="694" y="22" fill="#6b7280" font-family="Menlo, monospace" font-size="13" text-anchor="middle">decs bench</text>
+<g font-family="'JetBrains Mono', 'SF Mono', Menlo, Consolas, 'PingFang SC', 'Noto Sans CJK SC', 'SF Arabic', 'Noto Sans Arabic', monospace" font-size="16">
+<text y="73" fill="#d8dee9" font-weight="700"><tspan x="22.0">d</tspan><tspan x="31.6">e</tspan><tspan x="41.2">c</tspan><tspan x="50.8">s</tspan></text>
+<text x="204.4" y="73" direction="rtl" text-anchor="start" fill="#6b7280">في الانتظار 1</text>
+<text x="262.0" y="73" direction="rtl" text-anchor="start" fill="#6b7280">الكل</text>
+<text x="415.6" y="73" direction="rtl" text-anchor="start" fill="#f2c66d">بانتظار قرار 2</text>
+<text x="482.8" y="73" direction="rtl" text-anchor="start" fill="#6b7280">نشط 6</text>
+<rect x="492.4" y="58" width="76.8" height="21" fill="#d8dee9"/>
+<text x="559.6" y="73" direction="rtl" text-anchor="start" fill="#16181d" font-weight="700">متاح 8</text>
+<text x="89.2" y="94" direction="rtl" text-anchor="start" fill="#a3d98b">✓ منتهي</text>
+<text y="94" fill="#6b7280"><tspan x="98.8">W</tspan><tspan x="108.4">7</tspan><tspan x="127.6">1</tspan></text>
+<text y="94" fill="#d8dee9" font-weight="700"><tspan x="166.0">s</tspan><tspan x="175.6">u</tspan><tspan x="185.2">p</tspan><tspan x="194.8">p</tspan><tspan x="204.4">o</tspan><tspan x="214.0">r</tspan><tspan x="223.6">t</tspan><tspan x="233.2">-</tspan><tspan x="242.8">i</tspan><tspan x="252.4">n</tspan><tspan x="262.0">b</tspan><tspan x="271.6">o</tspan><tspan x="281.2">x</tspan></text>
+<text x="367.6" y="94" direction="rtl" text-anchor="start" fill="#6b7280">بانتظار</text>
+<text x="482.8" y="94" direction="rtl" text-anchor="start" fill="#f07178">غير معالج 2</text>
+<text y="94" fill="#f07178" font-weight="700"><tspan x="492.4">✗</tspan></text>
+<text y="94" fill="#d8dee9" font-weight="700"><tspan x="511.6">g</tspan><tspan x="521.2">i</tspan><tspan x="530.8">t</tspan><tspan x="540.4">h</tspan><tspan x="550.0">u</tspan><tspan x="559.6">b</tspan><tspan x="569.2">-</tspan><tspan x="578.8">i</tspan><tspan x="588.4">s</tspan><tspan x="598.0">s</tspan><tspan x="607.6">u</tspan><tspan x="617.2">e</tspan><tspan x="626.8">s</tspan></text>
+<text x="713.2" y="94" direction="rtl" text-anchor="start" fill="#d8dee9" font-weight="700">المصادر</text>
+<text y="115" fill="#6b7280"><tspan x="22.0">─</tspan><tspan x="31.6">─</tspan><tspan x="41.2">─</tspan><tspan x="50.8">─</tspan><tspan x="60.4">─</tspan><tspan x="70.0">─</tspan><tspan x="79.6">─</tspan><tspan x="89.2">─</tspan><tspan x="98.8">─</tspan><tspan x="108.4">─</tspan><tspan x="118.0">─</tspan><tspan x="127.6">─</tspan><tspan x="137.2">─</tspan><tspan x="146.8">─</tspan><tspan x="156.4">─</tspan><tspan x="166.0">─</tspan><tspan x="175.6">─</tspan><tspan x="185.2">─</tspan><tspan x="194.8">─</tspan><tspan x="204.4">─</tspan><tspan x="214.0">─</tspan><tspan x="223.6">─</tspan><tspan x="233.2">─</tspan><tspan x="242.8">─</tspan><tspan x="252.4">─</tspan><tspan x="262.0">─</tspan><tspan x="271.6">─</tspan><tspan x="281.2">─</tspan><tspan x="290.8">─</tspan><tspan x="300.4">─</tspan><tspan x="310.0">─</tspan><tspan x="319.6">─</tspan><tspan x="329.2">─</tspan><tspan x="338.8">─</tspan><tspan x="348.4">─</tspan><tspan x="358.0">─</tspan><tspan x="367.6">─</tspan><tspan x="377.2">─</tspan><tspan x="386.8">─</tspan><tspan x="396.4">─</tspan><tspan x="406.0">─</tspan><tspan x="415.6">─</tspan><tspan x="425.2">─</tspan><tspan x="434.8">─</tspan><tspan x="444.4">─</tspan><tspan x="454.0">─</tspan><tspan x="463.6">─</tspan><tspan x="473.2">─</tspan><tspan x="482.8">─</tspan><tspan x="492.4">─</tspan><tspan x="502.0">─</tspan><tspan x="511.6">─</tspan><tspan x="521.2">─</tspan><tspan x="530.8">─</tspan><tspan x="540.4">─</tspan><tspan x="550.0">─</tspan><tspan x="559.6">─</tspan><tspan x="569.2">─</tspan><tspan x="578.8">─</tspan><tspan x="588.4">─</tspan><tspan x="598.0">─</tspan><tspan x="607.6">─</tspan><tspan x="617.2">─</tspan><tspan x="626.8">─</tspan><tspan x="636.4">─</tspan><tspan x="646.0">─</tspan><tspan x="655.6">─</tspan><tspan x="665.2">─</tspan><tspan x="674.8">─</tspan><tspan x="684.4">─</tspan><tspan x="694.0">─</tspan><tspan x="703.6">─</tspan><tspan x="713.2">─</tspan><tspan x="722.8">─</tspan><tspan x="732.4">─</tspan><tspan x="742.0">─</tspan><tspan x="751.6">─</tspan><tspan x="761.2">─</tspan><tspan x="770.8">─</tspan><tspan x="780.4">─</tspan><tspan x="790.0">─</tspan><tspan x="799.6">─</tspan><tspan x="809.2">─</tspan><tspan x="818.8">─</tspan><tspan x="828.4">─</tspan><tspan x="838.0">─</tspan><tspan x="847.6">─</tspan><tspan x="857.2">─</tspan><tspan x="866.8">─</tspan><tspan x="876.4">─</tspan><tspan x="886.0">─</tspan><tspan x="895.6">─</tspan><tspan x="905.2">─</tspan><tspan x="914.8">─</tspan><tspan x="924.4">─</tspan><tspan x="934.0">─</tspan><tspan x="943.6">─</tspan><tspan x="953.2">─</tspan><tspan x="962.8">─</tspan><tspan x="972.4">─</tspan><tspan x="982.0">─</tspan><tspan x="991.6">─</tspan><tspan x="1001.2">─</tspan><tspan x="1010.8">─</tspan><tspan x="1020.4">─</tspan><tspan x="1030.0">─</tspan><tspan x="1039.6">─</tspan><tspan x="1049.2">─</tspan><tspan x="1058.8">─</tspan><tspan x="1068.4">─</tspan><tspan x="1078.0">─</tspan><tspan x="1087.6">─</tspan><tspan x="1097.2">─</tspan><tspan x="1106.8">─</tspan><tspan x="1116.4">─</tspan><tspan x="1126.0">─</tspan><tspan x="1135.6">─</tspan><tspan x="1145.2">─</tspan><tspan x="1154.8">─</tspan><tspan x="1164.4">─</tspan><tspan x="1174.0">─</tspan><tspan x="1183.6">─</tspan><tspan x="1193.2">─</tspan><tspan x="1202.8">─</tspan><tspan x="1212.4">─</tspan><tspan x="1222.0">─</tspan><tspan x="1231.6">─</tspan><tspan x="1241.2">─</tspan><tspan x="1250.8">─</tspan><tspan x="1260.4">─</tspan><tspan x="1270.0">─</tspan><tspan x="1279.6">─</tspan><tspan x="1289.2">─</tspan><tspan x="1298.8">─</tspan><tspan x="1308.4">─</tspan><tspan x="1318.0">─</tspan><tspan x="1327.6">─</tspan><tspan x="1337.2">─</tspan><tspan x="1346.8">─</tspan><tspan x="1356.4">─</tspan></text>
+<text x="569.2" y="136" direction="rtl" text-anchor="start" fill="#f2c66d" font-weight="700">· الوكيل متعطل</text>
+<text x="694.0" y="136" direction="rtl" text-anchor="start" fill="#f2c66d" font-weight="700">بانتظار قرار</text>
+<text y="136" fill="#f2c66d" font-weight="700"><tspan x="703.6">◆</tspan></text>
+<text y="136" fill="#78d1e1" font-weight="700"><tspan x="732.4">W</tspan><tspan x="742.0">5</tspan></text>
+<text y="136" fill="#6b7280"><tspan x="761.2">│</tspan></text>
+<text x="1270.0" y="136" direction="rtl" text-anchor="start" fill="#c792ea" font-weight="700">متاح 5</text>
+<text y="136" fill="#c792ea" font-weight="700"><tspan x="1289.2">W</tspan><tspan x="1308.4">·</tspan><tspan x="1327.6">w</tspan><tspan x="1337.2">e</tspan><tspan x="1346.8">b</tspan></text>
+<text x="751.6" y="157" direction="rtl" text-anchor="start" fill="#d8dee9" font-weight="700">اختيار نص الترحيب</text>
+<text y="157" fill="#6b7280"><tspan x="761.2">│</tspan></text>
+<text x="886.0" y="157" direction="rtl" text-anchor="start" fill="#6b7280">قبل 7 دقائق</text>
+<text y="157" fill="#d8dee9"><tspan x="895.6">2</tspan><tspan x="905.2">5</tspan><tspan x="914.8">%</tspan></text>
+<text y="157" fill="#78d1e1"><tspan x="934.0">░</tspan><tspan x="943.6">░</tspan><tspan x="953.2">░</tspan><tspan x="962.8">░</tspan><tspan x="972.4">░</tspan><tspan x="982.0">░</tspan><tspan x="991.6">█</tspan><tspan x="1001.2">█</tspan></text>
+<text x="1298.8" y="157" direction="rtl" text-anchor="start" fill="#d8dee9">إطلاق الإصدار 2.4</text>
+<text y="157" fill="#78d1e1"><tspan x="1308.4">W</tspan><tspan x="1318.0">1</tspan></text>
+<text y="157" fill="#78d1e1"><tspan x="1337.2">◐</tspan></text>
+<text y="157" fill="#6b7280"><tspan x="1346.8">▾</tspan></text>
+<text y="157" fill="#f2c66d" font-weight="700"><tspan x="1356.4">◆</tspan></text>
+<text y="178" fill="#6b7280"><tspan x="22.0">─</tspan><tspan x="31.6">─</tspan><tspan x="41.2">─</tspan><tspan x="50.8">─</tspan><tspan x="60.4">─</tspan><tspan x="70.0">─</tspan><tspan x="79.6">─</tspan><tspan x="89.2">─</tspan><tspan x="98.8">─</tspan><tspan x="108.4">─</tspan><tspan x="118.0">─</tspan><tspan x="127.6">─</tspan><tspan x="137.2">─</tspan><tspan x="146.8">─</tspan><tspan x="156.4">─</tspan><tspan x="166.0">─</tspan><tspan x="175.6">─</tspan><tspan x="185.2">─</tspan><tspan x="194.8">─</tspan><tspan x="204.4">─</tspan><tspan x="214.0">─</tspan><tspan x="223.6">─</tspan><tspan x="233.2">─</tspan><tspan x="242.8">─</tspan><tspan x="252.4">─</tspan><tspan x="262.0">─</tspan><tspan x="271.6">─</tspan><tspan x="281.2">─</tspan><tspan x="290.8">─</tspan><tspan x="300.4">─</tspan><tspan x="310.0">─</tspan><tspan x="319.6">─</tspan><tspan x="329.2">─</tspan><tspan x="338.8">─</tspan><tspan x="348.4">─</tspan><tspan x="358.0">─</tspan><tspan x="367.6">─</tspan><tspan x="377.2">─</tspan><tspan x="386.8">─</tspan><tspan x="396.4">─</tspan><tspan x="406.0">─</tspan><tspan x="415.6">─</tspan><tspan x="425.2">─</tspan><tspan x="434.8">─</tspan><tspan x="444.4">─</tspan><tspan x="454.0">─</tspan><tspan x="463.6">─</tspan><tspan x="473.2">─</tspan><tspan x="482.8">─</tspan><tspan x="492.4">─</tspan><tspan x="502.0">─</tspan><tspan x="511.6">─</tspan><tspan x="521.2">─</tspan><tspan x="530.8">─</tspan><tspan x="540.4">─</tspan><tspan x="550.0">─</tspan><tspan x="559.6">─</tspan><tspan x="569.2">─</tspan><tspan x="578.8">─</tspan><tspan x="588.4">─</tspan><tspan x="598.0">─</tspan><tspan x="607.6">─</tspan><tspan x="617.2">─</tspan><tspan x="626.8">─</tspan><tspan x="636.4">─</tspan><tspan x="646.0">─</tspan><tspan x="655.6">─</tspan><tspan x="665.2">─</tspan><tspan x="674.8">─</tspan><tspan x="684.4">─</tspan><tspan x="694.0">─</tspan><tspan x="703.6">─</tspan><tspan x="713.2">─</tspan><tspan x="722.8">─</tspan><tspan x="732.4">─</tspan><tspan x="742.0">─</tspan><tspan x="751.6">─</tspan></text>
+<text y="178" fill="#6b7280"><tspan x="761.2">│</tspan></text>
+<text x="886.0" y="178" direction="rtl" text-anchor="start" fill="#6b7280">قبل 7 دقائق</text>
+<text y="178" fill="#d8dee9"><tspan x="895.6">6</tspan><tspan x="905.2">2</tspan><tspan x="914.8">%</tspan></text>
+<text y="178" fill="#78d1e1"><tspan x="934.0">░</tspan><tspan x="943.6">░</tspan><tspan x="953.2">░</tspan><tspan x="962.8">█</tspan><tspan x="972.4">█</tspan><tspan x="982.0">█</tspan><tspan x="991.6">█</tspan><tspan x="1001.2">█</tspan></text>
+<text x="1279.6" y="178" direction="rtl" text-anchor="start" fill="#d8dee9">تشغيل كل الاختبارات</text>
+<text y="178" fill="#78d1e1"><tspan x="1289.2">W</tspan><tspan x="1298.8">3</tspan></text>
+<text y="178" fill="#78d1e1"><tspan x="1318.0">◐</tspan></text>
+<text x="569.2" y="199" direction="rtl" text-anchor="start" fill="#6b7280">بانتظار منذ 7 دقائق</text>
+<text x="674.8" y="199" direction="rtl" text-anchor="start" fill="#6b7280">· الترحيب</text>
+<text y="199" fill="#6b7280"><tspan x="684.4">l</tspan><tspan x="694.0">a</tspan><tspan x="703.6">n</tspan><tspan x="713.2">e</tspan><tspan x="722.8">-</tspan><tspan x="732.4">u</tspan><tspan x="742.0">x</tspan></text>
+<text y="199" fill="#6b7280"><tspan x="761.2">│</tspan></text>
+<rect x="780.4" y="184" width="115.2" height="21" fill="#f2c66d"/>
+<text x="895.6" y="199" direction="rtl" text-anchor="start" fill="#16181d" font-weight="700">بانتظار قرار</text>
+<rect x="895.6" y="184" width="48.0" height="21" fill="#f07178"/>
+<text x="943.6" y="199" direction="rtl" text-anchor="start" fill="#16181d" font-weight="700">عاجل</text>
+<rect x="943.6" y="184" width="172.8" height="21" fill="#d8dee9"/>
+<rect x="1116.4" y="184" width="163.2" height="21" fill="#d8dee9"/>
+<text x="1279.6" y="199" direction="rtl" text-anchor="start" fill="#16181d" font-weight="700">اختيار نص الترحيب</text>
+<rect x="1279.6" y="184" width="38.4" height="21" fill="#78d1e1"/>
+<text y="199" fill="#16181d"><tspan x="1289.2">W</tspan><tspan x="1298.8">5</tspan></text>
+<rect x="1318.0" y="184" width="9.6" height="21" fill="#f2c66d"/>
+<text y="199" fill="#16181d" font-weight="700"><tspan x="1318.0">◆</tspan></text>
+<rect x="1327.6" y="184" width="9.6" height="21" fill="#d8dee9"/>
+<rect x="1337.2" y="184" width="19.2" height="21" fill="#d8dee9"/>
+<rect x="1356.4" y="184" width="9.6" height="21" fill="#f2c66d"/>
+<text x="703.6" y="220" direction="rtl" text-anchor="start" fill="#d8dee9">إن لم تجُب: الإطلاق بالخيار 2 (قابل للتراجع)</text>
+<text x="751.6" y="220" direction="rtl" text-anchor="start" fill="#f07178" font-weight="700">عاجل</text>
+<text y="220" fill="#6b7280"><tspan x="761.2">│</tspan></text>
+<text x="818.8" y="220" direction="rtl" text-anchor="start" fill="#a3d98b">أجُيب</text>
+<text y="220" fill="#d8dee9"><tspan x="1154.8">C</tspan><tspan x="1164.4">D</tspan><tspan x="1174.0">N</tspan></text>
+<text x="1298.8" y="220" direction="rtl" text-anchor="start" fill="#d8dee9">اختيار شبكة</text>
+<text y="220" fill="#78d1e1"><tspan x="1308.4">W</tspan><tspan x="1318.0">6</tspan></text>
+<text y="220" fill="#a3d98b"><tspan x="1337.2">◆</tspan></text>
+<text x="646.0" y="241" direction="rtl" text-anchor="start" fill="#6b7280">إطلاق الإصدار 2.4</text>
+<text y="241" fill="#78d1e1"><tspan x="655.6">W</tspan><tspan x="665.2">1</tspan></text>
+<text y="241" fill="#78d1e1"><tspan x="674.8">◐</tspan></text>
+<text x="751.6" y="241" direction="rtl" text-anchor="start" fill="#6b7280">الأصل</text>
+<text y="241" fill="#6b7280"><tspan x="761.2">│</tspan></text>
+<text x="1020.4" y="241" direction="rtl" text-anchor="start" fill="#c792ea">في الانتظار · قبل 7 دقائق</text>
+<text x="1298.8" y="241" direction="rtl" text-anchor="start" fill="#d8dee9">تحسين الوضع الداكن</text>
+<text y="241" fill="#78d1e1"><tspan x="1308.4">W</tspan><tspan x="1318.0">7</tspan></text>
+<text y="241" fill="#c792ea"><tspan x="1337.2">⏸</tspan></text>
+<text y="262" fill="#6b7280"><tspan x="79.6">┄</tspan><tspan x="98.8">┄</tspan><tspan x="118.0">┄</tspan><tspan x="137.2">┄</tspan><tspan x="156.4">┄</tspan><tspan x="175.6">┄</tspan><tspan x="194.8">┄</tspan><tspan x="214.0">┄</tspan><tspan x="233.2">┄</tspan><tspan x="252.4">┄</tspan><tspan x="271.6">┄</tspan><tspan x="290.8">┄</tspan><tspan x="310.0">┄</tspan><tspan x="329.2">┄</tspan><tspan x="348.4">┄</tspan><tspan x="367.6">┄</tspan><tspan x="386.8">┄</tspan><tspan x="406.0">┄</tspan><tspan x="425.2">┄</tspan><tspan x="444.4">┄</tspan><tspan x="463.6">┄</tspan><tspan x="482.8">┄</tspan><tspan x="502.0">┄</tspan><tspan x="521.2">┄</tspan><tspan x="540.4">┄</tspan><tspan x="559.6">┄</tspan><tspan x="578.8">┄</tspan><tspan x="598.0">┄</tspan><tspan x="617.2">┄</tspan><tspan x="636.4">┄</tspan><tspan x="655.6">┄</tspan><tspan x="674.8">┄</tspan><tspan x="694.0">┄</tspan><tspan x="713.2">┄</tspan><tspan x="732.4">┄</tspan><tspan x="751.6">┄</tspan></text>
+<text y="262" fill="#6b7280"><tspan x="761.2">│</tspan></text>
+<text x="1270.0" y="262" direction="rtl" text-anchor="start" fill="#c792ea" font-weight="700">متاح 3</text>
+<text y="262" fill="#c792ea" font-weight="700"><tspan x="1289.2">A</tspan><tspan x="1308.4">·</tspan><tspan x="1327.6">a</tspan><tspan x="1337.2">p</tspan><tspan x="1346.8">i</tspan></text>
+<text y="283" fill="#6b7280"><tspan x="761.2">│</tspan></text>
+<text x="886.0" y="283" direction="rtl" text-anchor="start" fill="#6b7280">قبل 7 دقائق</text>
+<text y="283" fill="#d8dee9"><tspan x="895.6">5</tspan><tspan x="905.2">0</tspan><tspan x="914.8">%</tspan></text>
+<text y="283" fill="#78d1e1"><tspan x="934.0">░</tspan><tspan x="943.6">░</tspan><tspan x="953.2">░</tspan><tspan x="962.8">░</tspan><tspan x="972.4">█</tspan><tspan x="982.0">█</tspan><tspan x="991.6">█</tspan><tspan x="1001.2">█</tspan></text>
+<text y="283" fill="#d8dee9"><tspan x="1087.6">S</tspan><tspan x="1097.2">t</tspan><tspan x="1106.8">r</tspan><tspan x="1116.4">i</tspan><tspan x="1126.0">p</tspan><tspan x="1135.6">e</tspan></text>
+<text x="1298.8" y="283" direction="rtl" text-anchor="start" fill="#d8dee9">نقل الفوترة إلى</text>
+<text y="283" fill="#78d1e1"><tspan x="1308.4">A</tspan><tspan x="1318.0">1</tspan></text>
+<text y="283" fill="#78d1e1"><tspan x="1337.2">◐</tspan></text>
+<text y="283" fill="#6b7280"><tspan x="1346.8">▾</tspan></text>
+<text y="283" fill="#f2c66d" font-weight="700"><tspan x="1356.4">◆</tspan></text>
+<text x="751.6" y="304" direction="rtl" text-anchor="start" fill="#d8dee9" font-weight="700">ما هو. أول شاشة يراها المستخدم الجديد بعد التسجيل. صيغتان جديدتان</text>
+<text y="304" fill="#6b7280"><tspan x="761.2">│</tspan></text>
+<text x="886.0" y="304" direction="rtl" text-anchor="start" fill="#6b7280">قبل 7 دقائق</text>
+<text y="304" fill="#d8dee9"><tspan x="895.6">4</tspan><tspan x="905.2">0</tspan><tspan x="914.8">%</tspan></text>
+<text y="304" fill="#78d1e1"><tspan x="934.0">░</tspan><tspan x="943.6">░</tspan><tspan x="953.2">░</tspan><tspan x="962.8">░</tspan><tspan x="972.4">░</tspan><tspan x="982.0">█</tspan><tspan x="991.6">█</tspan><tspan x="1001.2">█</tspan></text>
+<text x="1279.6" y="304" direction="rtl" text-anchor="start" fill="#d8dee9">كتابة مزدوجة للفواتير</text>
+<text y="304" fill="#78d1e1"><tspan x="1289.2">A</tspan><tspan x="1298.8">2</tspan></text>
+<text y="304" fill="#78d1e1"><tspan x="1318.0">◐</tspan></text>
+<text x="751.6" y="325" direction="rtl" text-anchor="start" fill="#d8dee9">جاهزتان؛ والنص الحالي من الإصدار 2.3.</text>
+<text y="325" fill="#6b7280"><tspan x="761.2">│</tspan></text>
+<text x="895.6" y="325" direction="rtl" text-anchor="start" fill="#f2c66d" font-weight="700">بانتظار قرار</text>
+<text x="1279.6" y="325" direction="rtl" text-anchor="start" fill="#d8dee9" font-weight="700">نافذة التحويل</text>
+<text y="325" fill="#78d1e1"><tspan x="1289.2">A</tspan><tspan x="1298.8">4</tspan></text>
+<text y="325" fill="#f2c66d" font-weight="700"><tspan x="1318.0">◆</tspan></text>
+<text y="346" fill="#6b7280"><tspan x="761.2">│</tspan></text>
+<text x="751.6" y="367" direction="rtl" text-anchor="start" fill="#d8dee9" font-weight="700">لماذا الآن. يقتبسه سجل التغييرات ولقطات شاشة الإصدار.</text>
+<text y="367" fill="#6b7280"><tspan x="761.2">│</tspan></text>
+<text y="388" fill="#6b7280"><tspan x="761.2">│</tspan></text>
+<text x="751.6" y="409" direction="rtl" text-anchor="start" fill="#78d1e1" font-weight="700">الخيارات</text>
+<text y="409" fill="#6b7280"><tspan x="761.2">│</tspan></text>
+<text y="430" fill="#6b7280"><tspan x="761.2">│</tspan></text>
+<text x="751.6" y="451" direction="rtl" text-anchor="start" fill="#78d1e1" font-weight="700">1 · قصير ومرح</text>
+<text y="451" fill="#6b7280"><tspan x="761.2">│</tspan></text>
+<text x="751.6" y="472" direction="rtl" text-anchor="start" fill="#d8dee9">«لنجهزّ لك كل شيء — دقيقة واحدة فقط.» لقي استحسان مجموعة التجربة (14 من 20</text>
+<text y="472" fill="#6b7280"><tspan x="761.2">│</tspan></text>
+<text x="751.6" y="493" direction="rtl" text-anchor="start" fill="#d8dee9">فضلّوه)، لكنه يبدو غير رسمي لعملاء الشركات.</text>
+<text y="493" fill="#6b7280"><tspan x="761.2">│</tspan></text>
+<text y="514" fill="#6b7280"><tspan x="761.2">│</tspan></text>
+<text x="751.6" y="535" direction="rtl" text-anchor="start" fill="#78d1e1" font-weight="700">2 · بسيط ومباشر   ← يؤُخذ إن لم تجُب</text>
+<text y="535" fill="#6b7280"><tspan x="761.2">│</tspan></text>
+<text x="751.6" y="556" direction="rtl" text-anchor="start" fill="#d8dee9">«أنشئ مشروعك الأول.» يوافق نبرة التوثيق؛ ولا يحتاج إلى تعديل الترجمات.</text>
+<text y="556" fill="#6b7280"><tspan x="761.2">│</tspan></text>
+<text y="577" fill="#6b7280"><tspan x="761.2">│</tspan></text>
+<text x="751.6" y="598" direction="rtl" text-anchor="start" fill="#78d1e1" font-weight="700">3 · إبقاء نص 2.3</text>
+<text y="598" fill="#6b7280"><tspan x="761.2">│</tspan></text>
+<text x="751.6" y="619" direction="rtl" text-anchor="start" fill="#d8dee9">لا عمل مطلوب. لكن النص ما زال يذكر صفحة الأسعار القديمة.</text>
+<text y="619" fill="#6b7280"><tspan x="761.2">│</tspan></text>
+<text y="640" fill="#6b7280"><tspan x="761.2">│</tspan></text>
+<text x="751.6" y="661" direction="rtl" text-anchor="start" fill="#d8dee9" font-weight="700">القياس: نتائج استبيان التجربة مرفقة؛ والصيغتان تتسعان في سطرين على</text>
+<text y="661" fill="#6b7280"><tspan x="761.2">│</tspan></text>
+<text x="751.6" y="682" direction="rtl" text-anchor="start" fill="#d8dee9">الجوال.</text>
+<text y="682" fill="#6b7280"><tspan x="761.2">│</tspan></text>
+<text y="703" fill="#6b7280"><tspan x="761.2">│</tspan></text>
+<text y="724" fill="#6b7280"><tspan x="761.2">│</tspan></text>
+<text y="745" fill="#6b7280"><tspan x="22.0">─</tspan><tspan x="31.6">─</tspan><tspan x="41.2">─</tspan><tspan x="50.8">─</tspan><tspan x="60.4">─</tspan><tspan x="70.0">─</tspan><tspan x="79.6">─</tspan><tspan x="89.2">─</tspan><tspan x="98.8">─</tspan><tspan x="108.4">─</tspan><tspan x="118.0">─</tspan><tspan x="127.6">─</tspan><tspan x="137.2">─</tspan><tspan x="146.8">─</tspan><tspan x="156.4">─</tspan><tspan x="166.0">─</tspan><tspan x="175.6">─</tspan><tspan x="185.2">─</tspan><tspan x="194.8">─</tspan><tspan x="204.4">─</tspan><tspan x="214.0">─</tspan><tspan x="223.6">─</tspan><tspan x="233.2">─</tspan><tspan x="242.8">─</tspan><tspan x="252.4">─</tspan><tspan x="262.0">─</tspan><tspan x="271.6">─</tspan><tspan x="281.2">─</tspan><tspan x="290.8">─</tspan><tspan x="300.4">─</tspan><tspan x="310.0">─</tspan><tspan x="319.6">─</tspan><tspan x="329.2">─</tspan><tspan x="338.8">─</tspan><tspan x="348.4">─</tspan><tspan x="358.0">─</tspan><tspan x="367.6">─</tspan><tspan x="377.2">─</tspan><tspan x="386.8">─</tspan><tspan x="396.4">─</tspan><tspan x="406.0">─</tspan><tspan x="415.6">─</tspan><tspan x="425.2">─</tspan><tspan x="434.8">─</tspan><tspan x="444.4">─</tspan><tspan x="454.0">─</tspan><tspan x="463.6">─</tspan><tspan x="473.2">─</tspan><tspan x="482.8">─</tspan><tspan x="492.4">─</tspan><tspan x="502.0">─</tspan><tspan x="511.6">─</tspan><tspan x="521.2">─</tspan><tspan x="530.8">─</tspan><tspan x="540.4">─</tspan><tspan x="550.0">─</tspan><tspan x="559.6">─</tspan><tspan x="569.2">─</tspan><tspan x="578.8">─</tspan><tspan x="588.4">─</tspan><tspan x="598.0">─</tspan><tspan x="607.6">─</tspan><tspan x="617.2">─</tspan><tspan x="626.8">─</tspan><tspan x="636.4">─</tspan><tspan x="646.0">─</tspan><tspan x="655.6">─</tspan><tspan x="665.2">─</tspan><tspan x="674.8">─</tspan><tspan x="684.4">─</tspan><tspan x="694.0">─</tspan><tspan x="703.6">─</tspan><tspan x="713.2">─</tspan><tspan x="722.8">─</tspan><tspan x="732.4">─</tspan><tspan x="742.0">─</tspan><tspan x="751.6">─</tspan></text>
+<text y="745" fill="#6b7280"><tspan x="761.2">│</tspan></text>
+<text x="434.8" y="766" direction="rtl" text-anchor="start" fill="#d8dee9">إبقاء نص 2.3</text>
+<text y="766" fill="#78d1e1" font-weight="700"><tspan x="444.4">3</tspan></text>
+<text y="766" fill="#6b7280"><tspan x="473.2">(</tspan><tspan x="482.8">⏎</tspan><tspan x="492.4">)</tspan></text>
+<text x="617.2" y="766" direction="rtl" text-anchor="start" fill="#a3d98b">بسيط ومباشر</text>
+<text y="766" fill="#78d1e1" font-weight="700"><tspan x="626.8">2</tspan></text>
+<text x="742.0" y="766" direction="rtl" text-anchor="start" fill="#d8dee9">قصير ومرح</text>
+<text y="766" fill="#78d1e1" font-weight="700"><tspan x="751.6">1</tspan></text>
+<text y="766" fill="#6b7280"><tspan x="761.2">│</tspan></text>
+<text x="60.4" y="787" direction="rtl" text-anchor="start" fill="#6b7280">خروج</text>
+<text y="787" fill="#6b7280"><tspan x="70.0">q</tspan></text>
+<text x="425.2" y="787" direction="rtl" text-anchor="start" fill="#6b7280">اختيار صورة  , الإعدادات  ? مساعدة</text>
+<text y="787" fill="#6b7280"><tspan x="434.8">i</tspan></text>
+<text x="559.6" y="787" direction="rtl" text-anchor="start" fill="#6b7280">رؤية+أرشفة</text>
+<text y="787" fill="#6b7280"><tspan x="569.2">A</tspan></text>
+<text x="646.0" y="787" direction="rtl" text-anchor="start" fill="#6b7280">إغلاق</text>
+<text y="787" fill="#6b7280"><tspan x="655.6">X</tspan></text>
+<text x="703.6" y="787" direction="rtl" text-anchor="start" fill="#6b7280">رد</text>
+<text y="787" fill="#6b7280"><tspan x="713.2">N</tspan></text>
+<text x="790.0" y="787" direction="rtl" text-anchor="start" fill="#6b7280">تأجيل</text>
+<text y="787" fill="#6b7280"><tspan x="799.6">d</tspan></text>
+<text x="886.0" y="787" direction="rtl" text-anchor="start" fill="#6b7280">انتقال</text>
+<text y="787" fill="#6b7280"><tspan x="895.6">g</tspan></text>
+<text x="1049.2" y="787" direction="rtl" text-anchor="start" fill="#6b7280">القرار التالي</text>
+<text y="787" fill="#6b7280"><tspan x="1058.8">w</tspan></text>
+<text x="1366.0" y="787" direction="rtl" text-anchor="start" fill="#6b7280">… العرض  1-9 إجابة  ⏎ افتراضي</text>
+</g></svg>

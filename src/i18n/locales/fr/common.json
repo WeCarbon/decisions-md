@@ -1,0 +1,38 @@
+{
+  "listSeparator": ", ",
+  "status": {
+    "not_started": "À faire",
+    "in_progress": "En cours",
+    "waiting": "En attente",
+    "needs_decision": "À décider",
+    "decided": "Décidé, pour l’IA",
+    "completed": "Terminé",
+    "closed": "Fermé"
+  },
+  "noteKind": {
+    "answered": "Répondu",
+    "followUp": "Relance",
+    "reply": "Réponse",
+    "addendum": "Note",
+    "seen": "Vu",
+    "log": "Journal",
+    "waiting": "En attente",
+    "deferred": "Reporté",
+    "undeferred": "Repris",
+    "completed": "Terminé",
+    "superseded": "Remplacé",
+    "newQuestion": "Nouvelle question"
+  },
+  "lang": {
+    "unknown": "langue inconnue « {{code}} » — utilisez l’une de : {{codes}}",
+    "current": "{{name}} ({{code}}), d’après {{source}}",
+    "source": {
+      "flag": "--lang",
+      "env": "DECS_LANG",
+      "config": "decs config lang",
+      "system": "la langue du système",
+      "default": "la valeur par défaut"
+    },
+    "set": "Langue réglée sur {{name}} ({{code}})  {{path}}"
+  }
+}

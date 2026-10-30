@@ -1,0 +1,38 @@
+{
+  "listSeparator": "، ",
+  "status": {
+    "not_started": "لم يبدأ",
+    "in_progress": "قيد التنفيذ",
+    "waiting": "في الانتظار",
+    "needs_decision": "بانتظار قرار",
+    "decided": "تقرّر، بانتظار الوكيل",
+    "completed": "مكتمل",
+    "closed": "مغلق"
+  },
+  "noteKind": {
+    "answered": "أُجيب",
+    "followUp": "متابعة",
+    "reply": "رد",
+    "addendum": "ملاحظة",
+    "seen": "اطُّلع عليه",
+    "log": "سجل التنفيذ",
+    "waiting": "انتظار",
+    "deferred": "مؤجَّل",
+    "undeferred": "استئناف",
+    "completed": "اكتمل",
+    "superseded": "استُبدل",
+    "newQuestion": "سؤال جديد"
+  },
+  "lang": {
+    "unknown": "لغة غير معروفة \"{{code}}\" — استخدم إحدى: {{codes}}",
+    "current": "{{name}} ({{code}})، من {{source}}",
+    "source": {
+      "flag": "--lang",
+      "env": "DECS_LANG",
+      "config": "decs config lang",
+      "system": "لغة النظام",
+      "default": "القيمة الافتراضية"
+    },
+    "set": "ضُبطت لغة الواجهة على {{name}} ({{code}})  {{path}}"
+  }
+}

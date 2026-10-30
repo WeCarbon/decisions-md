@@ -1,0 +1,148 @@
+import { execFileSync } from 'node:child_process'
+import { existsSync } from 'node:fs'
+import { resolve } from 'node:path'
+import { readProjects } from '../core/config.ts'
+import { findLayout, layoutFor, type Layout } from '../core/paths.ts'
+import { Store, sameAgent } from '../core/store.ts'
+import type { NoteRole } from '../core/types.ts'
+import { many, one, type Args } from './args.ts'
+import { list, t } from '../i18n/index.ts'
+
+/**
+ * Resolves which projects a command works on. Explicit `--dir` wins;
+ * otherwise walk up from cwd (so a lane deep in a worktree doesn't write
+ * into a sibling project's list); only then fall back to the registry, for
+ * commands that span projects. `preferRegistry` flips that order for
+ * `decs bench`, which defaults to every registered folder.
+ */
+export function resolveStore(
+  args: Args,
+  opts: { allowRegistry?: boolean; preferRegistry?: boolean; positionalDirs?: boolean } = {},
+): Store {
+  const dirs = many(args, 'dir', 'd')
+  // A positional path walks up to its project, same as cwd.
+  if (opts.positionalDirs) {
+    for (const p of args._) {
+      const found = findLayout(resolve(p))
+      if (!found) throw new Error(t('cli.context.noDecisionsAbove', { path: p }))
+      dirs.push(found.projectRoot)
+    }
+  }
+  if (dirs.length) {
+    const layouts: Layout[] = []
+    for (const d of dirs) {
+      const l = layoutFor(resolve(d))
+      if (layouts.some((x) => x.projectRoot === l.projectRoot)) continue
+      if (!existsSync(l.activeDir)) {
+        process.emitWarning(t('cli.context.noActiveDir', { path: d }))
+        continue
+      }
+      layouts.push(l)
+    }
+    if (!layouts.length) throw new Error(t('cli.context.noDirHasDecisions'))
+    return warnClashes(new Store(layouts))
+  }
+
+  const registered = () =>
+    readProjects()
+      .map((p) => layoutFor(resolve(p.root)))
+      .filter((l) => existsSync(l.activeDir))
+
+  if (opts.preferRegistry) {
+    const all = registered()
+    if (all.length) return warnClashes(new Store(all))
+  }
+
+  const here = findLayout()
+  if (here) return new Store([here])
+
+  if (opts.allowRegistry) {
+    const all = registered()
+    if (all.length) return warnClashes(new Store(all))
+  }
+
+  throw new Error(t('cli.context.noDecisionsHere'))
+}
+
+/** Two projects sharing a letter make `W305` ambiguous; say so once, up front. */
+function warnClashes(store: Store): Store {
+  for (const c of store.letterClashes())
+    process.emitWarning(t('cli.context.letterClash', { letter: c.letter, projects: list(c.projects), example: c.projects[0] }))
+  return store
+}
+
+/** `313`, `W313`, `D313`, `W:313` and `api:313` — see core/ref.ts. */
+export { parseRef } from '../core/ref.ts'
+
+/**
+ * Who is at the keyboard when no flag says: Claude Code sets `CLAUDECODE`;
+ * `DECS_ROLE=agent|human` covers other harnesses. Anything else is the
+ * owner's own terminal.
+ */
+export function shellRole(env: NodeJS.ProcessEnv = process.env): NoteRole {
+  if (env.DECS_ROLE === 'agent' || env.DECS_ROLE === 'human') return env.DECS_ROLE
+  return env.CLAUDECODE ? 'agent' : 'human'
+}
+
+export function requireDecision(store: Store, raw: string, args: Args) {
+  return store.resolve(raw, one(args, 'project', 'p'))
+}
+
+/**
+ * Who is writing — inferred from the branch name when not given explicitly,
+ * since every node needs a signer to know who can answer a follow-up.
+ */
+export function resolveAuthor(args: Args, cwd = process.cwd()): string {
+  const explicit = one(args, 'author', 'a')
+  if (explicit) return explicit
+  if (process.env.DECS_AUTHOR) return process.env.DECS_AUTHOR
+  try {
+    const branch = execFileSync('git', ['rev-parse', '--abbrev-ref', 'HEAD'], {
+      cwd,
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    }).trim()
+    if (branch && branch !== 'HEAD') return `${branch} · lane`
+  } catch {
+    /* not a git repo; fall through */
+  }
+  throw new Error(t('cli.context.noAuthor'))
+}
+
+/**
+ * Reads a piped body without hanging on stdin that is an idle pipe, not a
+ * body — waiting briefly for the first chunk tells the two apart.
+ */
+export function readStdin(firstChunkTimeoutMs = 1500): Promise<string> {
+  if (process.stdin.isTTY) return Promise.resolve('')
+  return new Promise((resolve) => {
+    const chunks: Buffer[] = []
+    let settled = false
+    const done = () => {
+      if (settled) return
+      settled = true
+      clearTimeout(timer)
+      process.stdin.pause()
+      resolve(Buffer.concat(chunks).toString('utf8'))
+    }
+    const timer = setTimeout(done, firstChunkTimeoutMs)
+
+    process.stdin.on('data', (c: Buffer) => {
+      clearTimeout(timer)
+      chunks.push(c)
+    })
+    process.stdin.once('end', done)
+    process.stdin.once('error', done)
+  })
+}
+
+/**
+ * A node signed by another agent is invisible to this shell's
+ * `decs monitor --mine`; say so once, on stderr.
+ */
+export function warnOtherAuthor(nodeAuthor: string, ref: string): void {
+  const me = process.env.DECS_AUTHOR
+  if (!me || sameAgent(nodeAuthor, me) || sameAgent(me, nodeAuthor)) return
+  const name = nodeAuthor.split(/[ \t]*·[ \t]*/)[0]
+  process.stderr.write(`${t('cli.context.otherAuthor', { ref, author: name, me: me.split(/[ \t]*·[ \t]*/)[0] })}\n`)
+}

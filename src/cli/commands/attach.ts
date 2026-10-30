@@ -1,0 +1,51 @@
+import { basename, resolve } from 'node:path'
+import { bool, many, one, type Args } from '../args.ts'
+import { refOf } from '../../core/ref.ts'
+import { requireDecision, resolveStore } from '../context.ts'
+import { dim } from '../../core/render.ts'
+import { t } from '../../i18n/index.ts'
+
+const help = () => t('cli.help.attach')
+
+export function run(args: Args): number {
+  if (bool(args, 'help', 'h')) {
+    console.log(help())
+    return 0
+  }
+  const [ref, ...sources] = args._
+  if (!ref || !sources.length) throw new Error(`${t('cli.attach.usage')}\n\n${help()}`)
+
+  const store = resolveStore(args, { allowRegistry: true })
+  const d = requireDecision(store, ref, args)
+  const groups = many(args, 'label')
+  const captions = many(args, 'caption')
+  const approvalContent = bool(args, 'approval-content')
+  const approveOn = many(args, 'approve-on').flatMap((v) => v.split(/[,，\s]+/)).filter(Boolean)
+
+  const next = store.attach(d, sources, {
+    link: bool(args, 'link'),
+    name: one(args, 'name'),
+    replace: bool(args, 'replace'),
+    groups: groups.length ? groups : undefined,
+    captions: captions.length ? captions : undefined,
+    approvalContent,
+    approveOn: approveOn.length ? approveOn : undefined,
+  })
+
+  for (const src of sources) {
+    const isUrl = /^[a-z][a-z0-9+.-]*:\/\//i.test(src)
+    const match = isUrl
+      ? next.attachments.find((a) => a.target === src)
+      : next.attachments.find((a) => a.target === resolve(src) || basename(a.target) === basename(src))
+    if (!match) continue
+    const hist = store.historyCount(next, match)
+    const bits = [`${refOf(next)} + ${match.target}`]
+    if (hist) bits.push(dim(t('cli.get.historyVersion', { n: hist })))
+    if (approvalContent) {
+      const approval = store.findApproval(next, match.target)
+      if (approval) bits.push(dim(t('cli.attach.pending', { approveOn: approval.approveOn?.join(' / '), hash: approval.hash })))
+    }
+    console.log(bits.join('  '))
+  }
+  return 0
+}

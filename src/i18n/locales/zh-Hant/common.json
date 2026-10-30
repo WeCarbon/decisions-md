@@ -1,0 +1,38 @@
+{
+  "listSeparator": "、",
+  "status": {
+    "not_started": "待開始",
+    "in_progress": "執行中",
+    "waiting": "等待",
+    "needs_decision": "待決策",
+    "decided": "已決策待 AI 取走",
+    "completed": "已完成",
+    "closed": "已關閉"
+  },
+  "noteKind": {
+    "answered": "已答",
+    "followUp": "追問",
+    "reply": "回覆",
+    "addendum": "補充",
+    "seen": "已看過",
+    "log": "執行紀錄",
+    "waiting": "等待",
+    "deferred": "延後",
+    "undeferred": "解除延後",
+    "completed": "完成",
+    "superseded": "被取代",
+    "newQuestion": "新問題"
+  },
+  "lang": {
+    "unknown": "無法辨識的語言「{{code}}」——可用：{{codes}}",
+    "current": "{{name}}（{{code}}），來自 {{source}}",
+    "source": {
+      "flag": "--lang",
+      "env": "DECS_LANG",
+      "config": "decs config lang",
+      "system": "系統語言設定",
+      "default": "預設值"
+    },
+    "set": "介面語言設為 {{name}}（{{code}}）  {{path}}"
+  }
+}

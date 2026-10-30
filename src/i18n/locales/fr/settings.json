@@ -1,0 +1,23 @@
+{
+  "title": "Réglages",
+  "hint": "↑↓ choisir  ←→ / ⏎ changer  échap fermer",
+  "setBy": "imposé par {{env}}",
+  "saved": "enregistré dans {{path}}",
+  "label": {
+    "lang": "Langue",
+    "bidi": "Texte de droite à gauche",
+    "view": "Vue à l’ouverture",
+    "images": "Images intégrées",
+    "mouse": "Souris",
+    "idle-exit": "Arrêt du monitor inactif",
+    "unclaimed-after": "Réponse non reprise après"
+  },
+  "value": {
+    "auto": "automatique",
+    "off": "non",
+    "on": "oui",
+    "never": "jamais"
+  },
+  "unknown": "réglage inconnu « {{key}} » — réglages : {{keys}}",
+  "invalid": "« {{value}} » n’est pas une valeur pour {{key}} — utilisez l’une de : {{values}}"
+}

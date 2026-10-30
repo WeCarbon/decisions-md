@@ -1,0 +1,38 @@
+{
+  "listSeparator": "、",
+  "status": {
+    "not_started": "待开始",
+    "in_progress": "执行中",
+    "waiting": "等待",
+    "needs_decision": "待决策",
+    "decided": "已决策待 AI 取走",
+    "completed": "已完成",
+    "closed": "已关闭"
+  },
+  "noteKind": {
+    "answered": "已答",
+    "followUp": "追问",
+    "reply": "回复",
+    "addendum": "补充",
+    "seen": "已看过",
+    "log": "执行记录",
+    "waiting": "等待",
+    "deferred": "延迟",
+    "undeferred": "解除延迟",
+    "completed": "完成",
+    "superseded": "被取代",
+    "newQuestion": "新问题"
+  },
+  "lang": {
+    "unknown": "不认识的语言「{{code}}」——可用：{{codes}}",
+    "current": "{{name}}（{{code}}），来自 {{source}}",
+    "source": {
+      "flag": "--lang",
+      "env": "DECS_LANG",
+      "config": "decs config lang",
+      "system": "系统语言设置",
+      "default": "默认值"
+    },
+    "set": "界面语言设为 {{name}}（{{code}}）  {{path}}"
+  }
+}

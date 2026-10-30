@@ -1,0 +1,23 @@
+{
+  "title": "設定",
+  "hint": "↑↓ 選擇  ←→ / ⏎ 修改  esc 關閉",
+  "setBy": "由 {{env}} 指定",
+  "saved": "已存到 {{path}}",
+  "label": {
+    "lang": "語言",
+    "bidi": "從右到左的文字",
+    "view": "開啟時的檢視",
+    "images": "內嵌圖片",
+    "mouse": "滑鼠",
+    "idle-exit": "monitor 閒置多久下線",
+    "unclaimed-after": "答覆多久沒人取算沒人管"
+  },
+  "value": {
+    "auto": "自動",
+    "off": "關",
+    "on": "開",
+    "never": "從不"
+  },
+  "unknown": "無法辨識的設定「{{key}}」——可用：{{keys}}",
+  "invalid": "「{{value}}」不是 {{key}} 的可用值——可用：{{values}}"
+}

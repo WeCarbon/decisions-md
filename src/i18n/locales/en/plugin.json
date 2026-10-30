@@ -1,0 +1,12 @@
+{
+  "sessionStart": {
+    "monitorRunning": "**This project has decisions/**: the decs plugin has already started `decs monitor` — don't start another. After DECS-IDLE (it goes offline after 2 idle hours), start `decs monitor` again with the Monitor tool when you need it.",
+    "openHeading": "Open nodes in this project",
+    "more_one": "…and {{count}} more",
+    "more_other": "…and {{count}} more",
+    "truncated": "…(truncated)"
+  },
+  "promptRefs": {
+    "reminder": "The owner's message mentions node(s) {{refs}}. If it is an answer, reply or feedback on one: before replying, record their words with decs note <id> --human --by \"owner (said in chat, logged by <you>)\" (screenshots with decs attach), then decs read to collect it; when done, log what you did with --agent."
+  }
+}

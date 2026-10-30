@@ -1,0 +1,38 @@
+{
+  "listSeparator": ", ",
+  "status": {
+    "not_started": "To do",
+    "in_progress": "In progress",
+    "waiting": "Waiting",
+    "needs_decision": "Needs decision",
+    "decided": "Answered, for AI",
+    "completed": "Done",
+    "closed": "Closed"
+  },
+  "noteKind": {
+    "answered": "Answered",
+    "followUp": "Follow-up",
+    "reply": "Reply",
+    "addendum": "Note",
+    "seen": "Seen",
+    "log": "Log",
+    "waiting": "Waiting",
+    "deferred": "Deferred",
+    "undeferred": "Resumed",
+    "completed": "Completed",
+    "superseded": "Superseded",
+    "newQuestion": "New question"
+  },
+  "lang": {
+    "unknown": "unknown language \"{{code}}\" — use one of: {{codes}}",
+    "current": "{{name}} ({{code}}), from {{source}}",
+    "source": {
+      "flag": "--lang",
+      "env": "DECS_LANG",
+      "config": "decs config lang",
+      "system": "the system locale",
+      "default": "the default"
+    },
+    "set": "Language set to {{name}} ({{code}})  {{path}}"
+  }
+}

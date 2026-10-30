@@ -1,0 +1,11 @@
+{
+  "sessionStart": {
+    "monitorRunning": "**这个项目有 decisions/**：decs plugin 已经自动启动了 `decs monitor`，不用再挂；看到 DECS-IDLE（空闲 2 小时下线）后需要时再用 Monitor 工具挂 `decs monitor`。",
+    "openHeading": "这个项目里还开着的节点",
+    "more_other": "…还有 {{count}} 个",
+    "truncated": "…（截断）"
+  },
+  "promptRefs": {
+    "reminder": "owner 这条消息提到了节点 {{refs}}。如果是对它的答复、回复或反馈：回复之前先 decs note <id> --human --by \"owner（对话里说，<你> 转记）\" 记原话（截图用 decs attach），再 decs read 取走；处理完用 --agent 记做了什么。"
+  }
+}
