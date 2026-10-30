@@ -8,6 +8,6 @@
     "truncated": "… (tronqué)"
   },
   "promptRefs": {
-    "reminder": "Le message de l’owner mentionne le(s) nœud(s) {{refs}}. Si c’est une réponse, une remarque ou un retour sur l’un d’eux : avant de répondre, consignez ses mots avec decs note <id> --human --by \"owner (dit dans la conversation, consigné par <vous>)\" (captures avec decs attach), puis decs read pour le récupérer ; une fois traité, notez ce que vous avez fait avec --agent."
+    "reminder": "Le message du responsable mentionne le(s) nœud(s) {{refs}}. Si c’est une réponse, une remarque ou un retour sur l’un d’eux : avant de répondre, consignez ses mots avec `decs note <id> --human --by \"owner (dit dans la conversation, consigné par <vous>)\"` (captures avec decs attach), puis decs read pour le récupérer ; une fois traité, notez ce que vous avez fait avec --agent."
   }
 }

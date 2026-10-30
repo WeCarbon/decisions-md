@@ -1,11 +1,11 @@
 {
   "sessionStart": {
-    "monitorRunning": "**這個專案有 decisions/**：decs plugin 已經自動啟動了 `decs monitor`，不用再掛；看到 DECS-IDLE（閒置 2 小時後下線）後需要時再用 Monitor 工具掛 `decs monitor`。",
+    "monitorRunning": "**這個專案有 decisions/**：decs 外掛已經自動啟動了 `decs monitor`，不用再掛；看到 DECS-IDLE（閒置 2 小時後下線）後需要時再用 Monitor 工具掛 `decs monitor`。",
     "openHeading": "這個專案裡還開著的節點",
     "more_other": "…還有 {{count}} 個",
     "truncated": "…（截斷）"
   },
   "promptRefs": {
-    "reminder": "owner 這則訊息提到了節點 {{refs}}。如果是對它的答覆、回覆或回饋：回覆之前先用 decs note <id> --human --by \"owner（對話裡說，<你> 轉記）\" 記下原話（截圖用 decs attach），再 decs read 取走；處理完用 --agent 記下做了什麼。"
+    "reminder": "負責人這則訊息提到了節點 {{refs}}。如果是對它的答覆、回覆或回饋：回覆之前先用 `decs note <id> --human --by \"owner（對話裡說，<你> 轉記）\"` 記下原話（截圖用 decs attach），再 decs read 取走；處理完用 --agent 記下做了什麼。"
   }
 }

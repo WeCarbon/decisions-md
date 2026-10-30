@@ -54,15 +54,17 @@ test('percentFromCount is lines/total, clamped, zero-total safe', () => {
 // Throttle
 // ---------------------------------------------------------------------------
 
-test('throttle: writes immediately on a cold start, then at most once per interval', async () => {
+test('throttle: writes immediately on a cold start, then at most once per interval', (t) => {
+  t.mock.timers.enable({ apis: ['setTimeout', 'Date'], now: 1_000_000 })
   const writes: number[] = []
-  const t = createThrottle<number>(60, (v) => writes.push(v))
-  t.push(1)
+  const th = createThrottle<number>(60, (v) => writes.push(v))
+  th.push(1)
   assert.deepEqual(writes, [1], 'first push writes immediately')
-  t.push(2)
-  t.push(3)
+  th.push(2)
+  th.push(3)
+  t.mock.timers.tick(59)
   assert.deepEqual(writes, [1], 'rapid pushes inside the window do not write yet')
-  await new Promise((r) => setTimeout(r, 90))
+  t.mock.timers.tick(1)
   assert.deepEqual(writes, [1, 3], 'the trailing write is the LAST value pushed, not every value')
 })
 
@@ -78,12 +80,13 @@ test('throttle: flush() forces the pending value immediately, and is a no-op wit
   assert.deepEqual(writes, [1, 2], 'a second flush with nothing pending writes nothing')
 })
 
-test('throttle: a value pushed well after the interval writes immediately again', async () => {
+test('throttle: a value pushed well after the interval writes immediately again', (t) => {
+  t.mock.timers.enable({ apis: ['setTimeout', 'Date'], now: 1_000_000 })
   const writes: number[] = []
-  const t = createThrottle<number>(30, (v) => writes.push(v))
-  t.push(1)
-  await new Promise((r) => setTimeout(r, 50))
-  t.push(2)
+  const th = createThrottle<number>(30, (v) => writes.push(v))
+  th.push(1)
+  t.mock.timers.tick(50)
+  th.push(2)
   assert.deepEqual(writes, [1, 2])
 })
 

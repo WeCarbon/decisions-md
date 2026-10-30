@@ -6,6 +6,6 @@
     "truncated": "…（截断）"
   },
   "promptRefs": {
-    "reminder": "owner 这条消息提到了节点 {{refs}}。如果是对它的答复、回复或反馈：回复之前先 decs note <id> --human --by \"owner（对话里说，<你> 转记）\" 记原话（截图用 decs attach），再 decs read 取走；处理完用 --agent 记做了什么。"
+    "reminder": "负责人这条消息提到了节点 {{refs}}。如果是对它的答复、回复或反馈：回复之前先 `decs note <id> --human --by \"owner（对话里说，<你> 转记）\"` 记原话（截图用 decs attach），再 decs read 取走；处理完用 --agent 记做了什么。"
   }
 }

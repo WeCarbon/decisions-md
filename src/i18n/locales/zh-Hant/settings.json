@@ -9,7 +9,7 @@
     "view": "開啟時的檢視",
     "images": "內嵌圖片",
     "mouse": "滑鼠",
-    "idle-exit": "monitor 閒置多久下線",
+    "idle-exit": "監聽閒置多久下線",
     "unclaimed-after": "答覆多久沒人取算沒人管"
   },
   "value": {

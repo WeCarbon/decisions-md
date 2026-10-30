@@ -9,7 +9,7 @@
     "view": "Vue à l’ouverture",
     "images": "Images intégrées",
     "mouse": "Souris",
-    "idle-exit": "Arrêt du monitor inactif",
+    "idle-exit": "Arrêt de la surveillance après inactivité",
     "unclaimed-after": "Réponse non reprise après"
   },
   "value": {

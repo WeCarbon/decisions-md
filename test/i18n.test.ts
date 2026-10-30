@@ -182,15 +182,30 @@ test('French puts a no-break space before : ; ? ! » and after «', () => {
 })
 
 /** What is left of a value once code-like tokens are taken out: commands, flags, env vars, refs, paths, placeholders. */
+function codeless(value: string): string {
+  return (
+    value
+      .split('\n')
+      // a synopsis line ("decs add <title> …") or a value lined up before its description ("open      …")
+      .map((line) => line.replace(/^\s*decs\b(?: [a-z<>[\]|.…0-9=" -]+?)?(?=\s{2,}|$)|^\s*[\w<>.]+(?:\s*\|\s*[\w<>.]+)*(?=\s{2,})/, ''))
+      .join('\n')
+      .replace(/\{\{[^}]*\}\}|`[^`]*`|<[^>\n]*>|\[[^\]\n]*\]/g, ' ')
+      .replace(/(?:^|\s)--?[\w-]+/g, ' ')
+      .replace(/\b[A-Z][A-Z0-9_-]{1,}\b|\b\w*\d\w*\b|\S*[/.~:=]\S*/g, ' ')
+      // a command named inline: "… run decs monitor", "decs show fyi"
+      .replace(/\bdecs\s+[a-z][a-z-]*/gi, ' ')
+      // the Monitor tool's name; the lowercase noun stays checkable
+      .replace(/\bMonitor\b/g, ' ')
+      // a list of literal values: tree|owner|running
+      .replace(/\b[\w-]+(?:\|[\w-]+)+\b/g, ' ')
+      // a note heading as written in the file: "(human · owner · …)", "(agent · lead/ship-v2 · …)"
+      .replace(/\b(?:human|agent)\s*·\s*\S+/g, ' ')
+  )
+}
+
+/** `codeless`, also without the literal words commands and their arguments use. */
 function prose(value: string): string {
-  return value
-    .split('\n')
-    .map((line) => line.replace(/^\s*decs(?: [a-z<>[\]|.…0-9=" -]+?)?(?=\s{2,}|$)/, ''))
-    .join('\n')
-    .replace(/\{\{[^}]*\}\}|`[^`]*`|<[^>\n]*>|\[[^\]\n]*\]/g, ' ')
-    .replace(/(?:^|\s)--?[\w-]+/g, ' ')
-    .replace(/\b[A-Z][A-Z0-9_-]{1,}\b|\b\w*\d\w*\b|\S*[/.~:=]\S*/g, ' ')
-    .replace(/\b(?:decs|register|sync|push|heartbeat|list|items|ack|wait|events|top|bottom|off|superseded|obsolete|merged-into|markdown|bench|owner|agent|lane|adapter|front matter|id|ids|en|fr|ar|zh-Hans|zh-Hant)\b/gi, ' ')
+  return codeless(value).replace(/\b(?:decs|register|sync|push|heartbeat|list|items|ack|wait|events|top|bottom|off|superseded|obsolete|merged-into|markdown|id|ids|en|fr|ar|zh-Hans|zh-Hant)\b/gi, ' ')
 }
 
 /** Words French shares with English, which a translation may keep as they are. */
@@ -230,3 +245,17 @@ test('the condensed body keeps the what / why paragraphs whatever language they 
     assert.equal(condense({ body: body(what, why) } as never), `${what} first.\n\n${why} second.`, what)
   }
 })
+
+/** English words a translation should say in its own language; French already has agent and session. */
+const LOANWORDS = ['owner', 'agent', 'lane', 'lead', 'teammate', 'session', 'adapter', 'bench', 'monitor', 'front matter', 'fyi', 'shell']
+
+for (const lng of ['zh-Hans', 'zh-Hant', 'fr', 'ar'] as const) {
+  test(`${lng} says owner, lane, bench and the like in its own words`, () => {
+    const words = lng === 'fr' ? LOANWORDS.filter((w) => w !== 'agent' && w !== 'session') : LOANWORDS
+    const found = Object.entries(flatten(loadResources(lng))).flatMap(([key, value]) => {
+      const text = codeless(value).toLowerCase()
+      return words.filter((w) => new RegExp(`(?<![\\w-])${w}s?(?![\\w-])`).test(text)).map((w) => `${key}: ${w}`)
+    })
+    assert.deepEqual(found, [])
+  })
+}

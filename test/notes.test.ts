@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 import { parseNoteHeading, parseNotes } from '../src/core/parse.ts'
@@ -315,23 +315,40 @@ test('a node the owner replied to before the turn rule existed reads as the AI\'
   assert.equal(store.deliver(read).state, 'in_progress')
 })
 
+/** Polls until `ok`, failing the test after `ms` — load decides how long a spawned monitor takes, not the test. */
+async function waitFor(ok: () => boolean, what: string, ms = 15_000): Promise<void> {
+  for (const start = Date.now(); Date.now() - start < ms; ) {
+    if (ok()) return
+    await new Promise((r) => setTimeout(r, 50))
+  }
+  assert.fail(`timed out waiting for ${what}`)
+}
+
+/** A monitor has finished a poll once it has saved its cursor under DECS_HOME. */
+const monitorReady = (home: string) => () => existsSync(join(home, 'monitor')) && readdirSync(join(home, 'monitor')).some((f) => f.endsWith('.json'))
+
+/** Time for a line that should NOT appear to have shown up if it were going to: a few polls. */
+const settle = () => new Promise((r) => setTimeout(r, 800))
+
 test('decs monitor prints one line per owner reply or answer, never an agent record, and resumes with since=', async (t) => {
   const root = scratch()
   t.after(() => rmSync(root, { recursive: true, force: true }))
   decs(root, ['init', '--no-register'])
   decs(root, ['add', 'should we ship', '-o', '1=ship', '2=hold off', '--default', '1'])
   const { spawn } = await import('node:child_process')
+  const home = join(root, 'home')
   const child = spawn(process.execPath, [BIN, 'monitor', '--interval', '200'], {
     cwd: root,
-    env: { ...process.env, NO_COLOR: '1', DECS_AUTHOR: 'cli-test · lane', CLAUDECODE: '1' },
+    env: { ...process.env, NO_COLOR: '1', DECS_AUTHOR: 'cli-test · lane', CLAUDECODE: '1', DECS_HOME: home },
   })
   let out = ''
   child.stdout.on('data', (b) => (out += b))
   t.after(() => child.kill())
-  await new Promise((r) => setTimeout(r, 600))
+  await waitFor(monitorReady(home), 'the monitor to start')
   decs(root, ['note', '1', '--human', "wait for Carol's reply first"])
   decs(root, ['note', '1', '--agent', "lane's own note"])
-  await new Promise((r) => setTimeout(r, 900))
+  await waitFor(() => out.includes("Carol's reply"), 'the reply line')
+  await settle()
   const lines = out.trim().split('\n').filter(Boolean)
   assert.equal(lines.length, 1, out)
   assert.match(lines[0], /^X1 owner Reply: should we ship —— wait for Carol's reply first  since=\S+$/)
@@ -342,13 +359,12 @@ test('decs monitor prints one line per owner reply or answer, never an agent rec
   decs(root, ['note', '1', '--human', 'ship it after all'])
   const replay = spawn(process.execPath, [BIN, 'monitor', '--since', since, '--interval', '200'], {
     cwd: root,
-    env: { ...process.env, NO_COLOR: '1', DECS_AUTHOR: 'cli-test · lane', CLAUDECODE: '1' },
+    env: { ...process.env, NO_COLOR: '1', DECS_AUTHOR: 'cli-test · lane', CLAUDECODE: '1', DECS_HOME: home },
   })
   let out2 = ''
   replay.stdout.on('data', (b) => (out2 += b))
   t.after(() => replay.kill())
-  await new Promise((r) => setTimeout(r, 900))
-  assert.match(out2, /ship it after all/)
+  await waitFor(() => /ship it after all/.test(out2), 'the reply made while no monitor ran')
 })
 
 test('decs monitor --mine still reports an answer nobody collected on a node filed under another name', async (t) => {
@@ -361,12 +377,13 @@ test('decs monitor --mine still reports an answer nobody collected on a node fil
   const { spawn } = await import('node:child_process')
   const child = spawn(process.execPath, [BIN, 'monitor', '--mine', '--unclaimed-after', '0s', '--interval', '200'], {
     cwd: root,
-    env: { ...process.env, NO_COLOR: '1', DECS_AUTHOR: 'lead · collect the answer', CLAUDECODE: '1' },
+    env: { ...process.env, NO_COLOR: '1', DECS_AUTHOR: 'lead · collect the answer', CLAUDECODE: '1', DECS_HOME: join(root, 'home') },
   })
   let out = ''
   child.stdout.on('data', (b) => (out += b))
   t.after(() => child.kill())
-  await new Promise((r) => setTimeout(r, 900))
+  await waitFor(() => out.includes('DECS-UNCLAIMED'), 'the unclaimed-answer line')
+  await settle()
   const lines = out.trim().split('\n').filter((l) => l.startsWith('DECS-UNCLAIMED'))
   assert.equal(lines.length, 1, out)
   // The exact span (dayjs-formatted, "a few seconds" for anything under a minute) isn't the point here.
@@ -398,15 +415,14 @@ test('a bare decs monitor re-armed after a gap picks up what happened in between
     return { c, out: () => out }
   }
   const first = start()
-  await new Promise((r) => setTimeout(r, 700))
+  await waitFor(monitorReady(join(root, 'home')), 'the first monitor to save where it got to')
   first.c.kill()
-  await new Promise((r) => setTimeout(r, 200))
+  await new Promise((r) => first.c.once('exit', r))
   // Happens while no monitor is running — the gap between expiry and re-arm.
   decs(root, ['note', '1', '--human', 'said in the gap'])
   decs(root, ['read', '1'])
   const second = start()
-  await new Promise((r) => setTimeout(r, 900))
-  assert.match(second.out(), /said in the gap/)
+  await waitFor(() => /said in the gap/.test(second.out()), 'the reply made in the gap')
 })
 
 test('decs monitor goes offline by itself after --idle-exit with no events, saying so', async (t) => {
@@ -446,9 +462,10 @@ async function monitorAs(teammate: string, args: string[], act: (root: string) =
   })
   let out = ''
   child.stdout.on('data', (b) => (out += b))
-  await new Promise((r) => setTimeout(r, 700))
+  await waitFor(monitorReady(join(root, 'home')), 'the monitor to start')
   act(root)
-  await new Promise((r) => setTimeout(r, 900))
+  await waitFor(() => out.includes('for lane-a'), "lane-a's reply")
+  await settle()
   child.kill()
   rmSync(root, { recursive: true, force: true })
   return out

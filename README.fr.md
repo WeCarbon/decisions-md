@@ -5,14 +5,14 @@
 **`decs` est un centre de tâches et de décisions pour les agents IA de longue durée.**
 Chaque action d’un agent — et chaque question qu’il doit vous poser — est un simple
 fichier markdown dans votre dépôt. Vous regardez tout cela sur un seul écran de
-terminal permanent, le **bench**, et vous répondez d’une touche.
+terminal permanent, le **tableau**, et vous répondez d’une touche.
 
 Pas de base de données. Pas de démon. Pas de serveur. Juste un dossier
 `decisions/` dans git.
 
-![Le bench de decs : un arbre de tâches en cours avec des barres de progression à gauche, une décision en attente avec ses options à droite](docs/screenshot.fr.png)
+![Le tableau de decs : un arbre de tâches en cours avec des barres de progression à gauche, une décision en attente avec ses options à droite](docs/screenshot.fr.png)
 
-<sub>Données fictives, générées par le vrai code du bench avec `node scripts/render-screenshot.ts`.</sub>
+<sub>Données fictives, générées par le vrai code du tableau avec `node scripts/render-screenshot.ts`.</sub>
 
 ---
 
@@ -39,7 +39,7 @@ sienne. Et ensuite :
 Une seule sorte de chose — un **nœud** — et un seul espace d’identifiants.
 
 Un nœud est quelque chose que l’IA fait. Quand l’agent sait comment faire,
-il le fait, tout simplement. Quand il a d’abord besoin du propriétaire, le
+il le fait, tout simplement. Quand il a d’abord besoin du responsable, le
 nœud devient **à décider**, avec des options, une valeur par défaut, et ce
 qui se passe si personne ne répond. Un nœud en cours qui tombe sur une
 question ne crée pas une deuxième entrée ; il se transforme lui-même en
@@ -62,7 +62,7 @@ l’historique, les diffs, la revue et `grep` gratuitement.
 
 ## Ce que vous obtenez
 
-**Pour l’humain — le bench.** `decs bench` est une interface terminal en
+**Pour l’humain — le tableau.** `decs bench` est une interface terminal en
 direct sur tous les projets que vous avez enregistrés. Cinq onglets :
 
 | onglet | affiche |
@@ -97,7 +97,7 @@ EOF
 ```
 
 **Des notifications sans interrogation.** `decs monitor` affiche une ligne
-pour chaque chose qu’un agent doit traiter — une réponse du propriétaire,
+pour chaque chose qu’un agent doit traiter — une réponse du responsable,
 une relance, un nouvel élément d’une source externe, une réponse que
 personne n’a récupérée depuis cinq minutes — et se souvient d’où chaque
 session s’est arrêtée. Le plugin Claude Code le démarre pour toute la
@@ -118,7 +118,7 @@ le nœud attend alors **à faire** et démarre quand son tour vient.
 une boîte de support ou un formulaire de retour. Il synchronise
 *uniquement des références* (identifiant + titre, url/état/origine en
 option), jamais le corps, jamais les identifiants de connexion. L’en-tête
-du bench vous dit, par source, si elle est à jour et qui détient quoi :
+du tableau vous dit, par source, si elle est à jour et qui détient quoi :
 
 ```
 Sources github-issues ✗ non traité 2 W7 1   support-inbox ✓ à jour
@@ -133,7 +133,7 @@ votre nom.
 
 **Reporter.** Appuyez sur `d` sur tout ce que vous voulez mettre de côté.
 Cela retire l’élément des vues de travail sans changer son état, et
-l’agent qui le traite reçoit 「owner 延迟」 et s’arrête jusqu’à ce que vous
+l’agent qui le traite apprend que le responsable l’a reporté et s’arrête jusqu’à ce que vous
 le leviez.
 
 ## Démarrage rapide
@@ -172,7 +172,7 @@ clone local.)
 Le guide complet pour les agents est [`AGENTS.md`](AGENTS.md) — copiez-le
 dans votre propre `AGENTS.md` / `CLAUDE.md` si vous utilisez un autre
 harnais d’agent. Les règles sont des appels CLI, donc n’importe quel agent
-avec un shell peut les suivre.
+avec un terminal peut les suivre.
 
 ## Langue
 
@@ -196,7 +196,7 @@ ordre :
    traduit pas
 
 Codes : `en`, `zh-Hans`, `zh-Hant`, `fr`, `ar`. Les règles de début de
-session et le rappel de prompt du plugin suivent la même
+session et le rappel d’invite du plugin suivent la même
 résolution (`plugin/rules.<code>.md`).
 
 L’arabe s’écrit de droite à gauche. `DECS_BIDI=visual|terminal` (ou
@@ -208,8 +208,8 @@ dessinent strictement de gauche à droite (par ex. le Terminal de macOS) ;
 de gauche à droite intégrés (références comme W12, nombres, commandes,
 titres en anglais) dans des isolats Unicode, pour les terminaux qui
 appliquent eux-mêmes le bidi (iTerm2 avec bidi activé, kitty, les
-terminaux basés sur VTE). En arabe, le bench se met aussi en miroir : la
-liste à droite, les détails à gauche. La sortie vers un pipe et `--json`
+terminaux basés sur VTE). En arabe, le tableau se met aussi en miroir : la
+liste à droite, les détails à gauche. La sortie vers un tube et `--json`
 reste toujours dans l’ordre logique, donc les scripts et les agents la
 lisent sans changement. Les heures relatives (« il y a 3 jours ») suivent
 aussi la langue.
@@ -230,10 +230,10 @@ ci-dessous.
    enfants avec des dépendances `--after`.
 2. Il distribue des voies (sous-agents) avec leurs propres nœuds. Chaque
    voie connecte ses longues commandes à `decs progress` ; les barres du
-   bench avancent seules.
+   tableau avancent seules.
 3. Une voie tombe sur une fourche. Elle lance `decs ask <id> -o …` avec des
    options, des coûts et une valeur par défaut. Le nœud devient un `◆`
-   jaune sur votre bench.
+   jaune sur votre tableau.
 4. Vous appuyez sur `2`. `decs monitor` réveille la voie ; elle lance
    `decs read`, continue, et termine par
    `decs done <id> --note "412/412 passing"`.
@@ -248,11 +248,11 @@ ci-dessous.
 | `decs add <title> [--task] [-o 1=… 2=…]` | nouveau nœud ; avec des options, il devient à décider. Le corps vient de stdin |
 | `decs add <title> --parent W12 --after W13` | nœud enfant, ordonné après un autre |
 | `decs start / done / close <id>` | À faire → En cours → Terminé / Fermé (`--reason obsolete\|superseded\|merged-into:W15`) |
-| `decs ask <id> -o 1=… 2=…` | un nœud en cours a besoin du propriétaire |
+| `decs ask <id> -o 1=… 2=…` | un nœud en cours a besoin du responsable |
 | `decs hold <id> --on "Carol: icon set"` | en attente de quelqu’un à l’extérieur ; ne compte pas comme bloqué |
-| `decs progress <pct> "msg"` · `… \| decs progress --parse pytest` | rapporter la progression (ou laisser un pipe le faire) |
+| `decs progress <pct> "msg"` · `… \| decs progress --parse pytest` | rapporter la progression (ou laisser un tube le faire) |
 | `decs steps <id> "a" "b" "c"` · `decs step <id> 2` | travail en plusieurs étapes, le pourcentage est calculé pour vous |
-| `decs note <id> "…"` | ajoute une note (agent par défaut ; `--human` pour le propriétaire) |
+| `decs note <id> "…"` | ajoute une note (agent par défaut ; `--human` pour le responsable) |
 | `decs push <id> 2 [--note …]` | enregistre une réponse |
 | `decs monitor [--mine] [--here] [--idle-exit 2h]` | le flux de notifications de l’agent |
 | `decs read <id>` · `decs queue` | récupère les réponses / voir ce qui n’est pas encore récupéré |
@@ -264,13 +264,13 @@ ci-dessous.
 | `decs source register/sync/push/list/items/ack` | sources externes |
 | `decs changes --since <t>` | tout ce qui suit un curseur, pour se remettre à niveau |
 | `decs bench [.\|<dir>…] [--view decide]` | l’écran en direct |
-| `decs` | dans un terminal, comme `decs bench` ; en pipe ou dans un script, affiche l’aide |
-| `decs config [<réglage> [<valeur>\|--off]]` | vos réglages : lang, bidi, view, images, mouse, idle-exit, unclaimed-after (aussi dans le bench : `,`) |
+| `decs` | dans un terminal, comme `decs bench` ; en tube ou dans un script, affiche l’aide |
+| `decs config [<réglage> [<valeur>\|--off]]` | vos réglages : lang, bidi, view, images, mouse, idle-exit, unclaimed-after (aussi dans le tableau : `,`) |
 
 Les identifiants s’écrivent `305`, `W305` (lettre du projet), `web:305`
 (nom du projet), ou l’ancien `D305`. `decs <command> --help` a le reste.
 
-## Raccourcis du bench
+## Raccourcis du tableau
 
 | touche | |
 |---|---|
@@ -295,7 +295,7 @@ pièce jointe ; la molette fait défiler le panneau sous le curseur.
 ## Le format de fichier
 
 Un nœud est du markdown avec un en-tête YAML. Les humains peuvent le lire
-dans n’importe quel éditeur ; les agents et le bench passent par la CLI,
+dans n’importe quel éditeur ; les agents et le tableau passent par la CLI,
 qui gère le verrouillage et l’historique.
 
 ```markdown
@@ -349,7 +349,7 @@ tient toujours.
 - **Une seule sorte de chose.** Tâches et décisions sont le même nœud.
   Moins de concepts, un seul espace d’identifiants, un seul arbre.
 - **L’humain n’a jamais à demander.** Statut, progression, péremption, qui
-  attend quoi — tout est sur le bench, pas dans un fil de chat.
+  attend quoi — tout est sur le tableau, pas dans un fil de chat.
 - **Les rôles sont explicites.** Chaque section ajoutée dit si c’est un
   humain ou un agent qui l’a écrite, qui, et quand. Seules les réponses
   humaines approuvent le contenu sortant.
@@ -360,9 +360,9 @@ tient toujours.
 ## FAQ
 
 **Est-ce seulement pour Claude Code ?**
-Non. La CLI est agnostique côté agent — tout ce qui a un shell peut
+Non. La CLI est agnostique côté agent — tout ce qui a un terminal peut
 l’appeler. Le plugin Claude Code ajoute des règles de début de session et
-utilise `CLAUDECODE` / `CLAUDE_SESSION_ID` pour distinguer les shells
+utilise `CLAUDECODE` / `CLAUDE_SESSION_ID` pour distinguer les terminaux
 d’agent des vôtres, et marquer qui a écrit quoi. Ailleurs, réglez
 `DECS_ROLE=agent` et `DECS_SESSION`.
 

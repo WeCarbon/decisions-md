@@ -27,6 +27,13 @@ load the decs skill.
 - **Need the owner to decide**: `decs ask <id> -o …` on the current node,
   or a new child node with options; the answer arrives via decs monitor
   (below).
+- **Whoever finishes a node closes it — don't wait for anyone**: once the work
+  is merged and the checks (tests, gate) pass, run `decs done <id> --note
+  "<result, commit>"` right away. A reviewer who finds a problem reopens it
+  with `decs start <id>` — reviewing is not closing. When delegating, never
+  tell a sub-agent "don't mark it done, wait for me". Before merging, the lead
+  runs `decs tree <parent>` and checks every child node, including ones
+  sub-agents created.
 - **Wrapping up**: `decs done <id> --note "<result>"`; not doing it after
   all → `decs close <id> --reason obsolete|superseded|merged-into:<id>`.
   `decs read` collects the owner's answer; `done` only once the question
