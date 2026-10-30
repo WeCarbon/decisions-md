@@ -176,9 +176,7 @@ avec un terminal peut les suivre.
 
 ## Langue
 
-`decs` parle anglais, 简体中文 (chinois simplifié), 繁體中文 (chinois
-traditionnel), français et العربية (arabe). Il en choisit une, dans cet
-ordre :
+`decs` choisit la langue de l’interface dans cet ordre :
 
 1. `--lang <code>` sur n’importe quelle commande, par ex. `decs bench --lang fr`
 2. la variable d’environnement `DECS_LANG`
@@ -365,14 +363,6 @@ l’appeler. Le plugin Claude Code ajoute des règles de début de session et
 utilise `CLAUDECODE` / `CLAUDE_SESSION_ID` pour distinguer les terminaux
 d’agent des vôtres, et marquer qui a écrit quoi. Ailleurs, réglez
 `DECS_ROLE=agent` et `DECS_SESSION`.
-
-**Pourquoi l’interface est-elle en chinois ?**
-Elle ne l’est plus — `decs` parle anglais par défaut, plus 简体中文,
-繁體中文, français et العربية ; voir [Langue](#langue) ci-dessus. Les
-commandes, les options et le format de fichier sur disque restent les
-mêmes jetons chinois fixes dans chaque langue, pour qu’un dépôt écrit par
-une équipe multilingue continue de s’analyser. Les titres et les corps
-peuvent toujours être dans n’importe quelle langue, comme avant.
 
 **Ça marche avec les git worktrees ?**
 Oui. `decs` résout toujours vers le `decisions/` du clone principal, donc

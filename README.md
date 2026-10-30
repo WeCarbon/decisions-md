@@ -155,8 +155,7 @@ CLI calls, so any agent with a shell can follow them.
 
 ## Language
 
-`decs` speaks English, Simplified Chinese, Traditional Chinese, French and
-Arabic. It picks one, in this order:
+`decs` picks the UI language in this order:
 
 1. `--lang <code>` on any command, e.g. `decs bench --lang fr`
 2. the `DECS_LANG` environment variable
@@ -320,13 +319,6 @@ No. The CLI is agent-agnostic — anything with a shell can call it. The Claude
 Code plugin adds session-start rules and uses `CLAUDECODE` /
 `CLAUDE_SESSION_ID` to tell agent shells from yours and tag who wrote what.
 Elsewhere, set `DECS_ROLE=agent` and `DECS_SESSION`.
-
-**Why is the UI in Chinese?**
-It isn't, anymore — `decs` speaks English by default, plus Simplified Chinese,
-Traditional Chinese, French and Arabic; see [Language](#language) above. Commands, flags and
-the on-disk file format stay the same fixed tokens in every
-language, so a repo written by a mixed-language team keeps parsing. Titles
-and bodies can be in any language, as before.
 
 **Does it work with git worktrees?**
 Yes. `decs` always resolves to the main checkout's `decisions/`, so lanes in

@@ -142,7 +142,7 @@ decs                                  # the bench (same as decs bench); q to qui
 
 ## 语言
 
-`decs` 会说英语、简体中文、繁體中文、Français 和 العربية。它按下面的顺序选一个：
+`decs` 按下面的顺序选界面语言：
 
 1. 任何命令上的 `--lang <code>`，比如 `decs bench --lang fr`
 2. `DECS_LANG` 环境变量
@@ -303,12 +303,6 @@ Measured again: 1.9 s p95 from Singapore.
 加了会话开头的规则，并用 `CLAUDECODE` / `CLAUDE_SESSION_ID` 来区分智能体
 的终端和你自己的，顺便标记是谁写的。其他地方，自己设 `DECS_ROLE=agent` 和
 `DECS_SESSION`。
-
-**为什么界面是中文的？**
-现在不是了——`decs` 默认说英语，另外还会简体中文、繁體中文、Français 和
-العربية，见上面的[语言](#语言)。命令、flag 和磁盘上的文件格式在每种语言里都是
-同一批固定的中文词，这样混语言团队写的仓库照样能解析。标题和正文还是能用
-任何语言写，跟以前一样。
 
 **能用 git worktree 吗？**
 能。`decs` 总是解析到主工作区的 `decisions/`，所以各条工作线的 worktree
