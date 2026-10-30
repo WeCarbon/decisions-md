@@ -154,6 +154,11 @@ export function setLang(lng: Lang): void {
     initAsync: false,
     nsSeparator: false,
     interpolation: { escapeValue: false },
+    // A placeholder nobody filled in prints as {{name}}; the test suite makes that an error.
+    missingInterpolationHandler: (_text: string, match: RegExpMatchArray) => {
+      if (process.env.DECS_STRICT_I18N) throw new Error(`missing value for ${match[0]}`)
+      return ''
+    },
     returnNull: false,
   })
   instance = next

@@ -56,7 +56,7 @@ export async function run(args: Args): Promise<number> {
   const revived = d.archived && !next.archived
   const kind = next.notes[next.notes.length - 1]?.kind ?? ''
   console.log(
-    t('cli.note.appended', { ref: refOf(next), kind: kindLabel(kind) }) +
+    t('cli.note.appended', { ref: refOf(next), kind: kindLabel(kind), role }) +
       (revived ? t('cli.note.revived') : '') +
       (role === 'human' ? t('cli.note.queued') : ''),
   )
