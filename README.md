@@ -1,4 +1,4 @@
-**English** · [简体中文](README.zh-Hans.md) · [繁體中文](README.zh-Hant.md) · [Français](README.fr.md) · [العربية](README.ar.md)
+**English** · [Simplified Chinese](README.zh-Hans.md) · [Traditional Chinese](README.zh-Hant.md) · [French](README.fr.md) · [Arabic](README.ar.md)
 
 # decisions-md
 
@@ -10,8 +10,6 @@ screen, the **bench**, and answer with a keystroke.
 No database. No daemon. No server. Just `decisions/` in git.
 
 ![The decs bench: a tree of running work with progress bars on the left, a pending decision with its options on the right](docs/screenshot.en.png)
-
-<sub>Mock data, rendered by the real bench code with `node scripts/render-screenshot.ts`.</sub>
 
 ---
 
@@ -118,7 +116,7 @@ approving option *for exactly that content*. An agent relaying "send it" from
 the chat can't approve on your behalf.
 
 **Defer.** Press `d` on anything you want out of sight. It leaves the working
-views without changing state, and the agent on it gets「owner 延迟」and stops
+views without changing state, and the agent on it is told it was deferred and stops
 until you lift it.
 
 ## Quickstart
@@ -157,8 +155,8 @@ CLI calls, so any agent with a shell can follow them.
 
 ## Language
 
-`decs` speaks English, 简体中文 (Simplified Chinese), 繁體中文 (Traditional
-Chinese), Français and العربية (Arabic). It picks one, in this order:
+`decs` speaks English, Simplified Chinese, Traditional Chinese, French and
+Arabic. It picks one, in this order:
 
 1. `--lang <code>` on any command, e.g. `decs bench --lang fr`
 2. the `DECS_LANG` environment variable
@@ -191,11 +189,9 @@ pipes and `--json` always stays in logical order, so scripts and agents
 read it unchanged. Relative times ("3 days ago") follow the language too.
 
 The on-disk file format never changes with the language: `decs` always
-writes the same headings and tokens (`## 选项`, `### 1 · …`, `## 已答（…）`,
-`## 回复（…）`, `## 补充（…）`, `## 附件`, `## 子问题`, `验收通过`, …), so a
-repo stays readable by every teammate whatever language their CLI speaks.
-The parser also accepts `## Options`, `## Attachments`, `## Questions` when
-you write a file by hand. See [The file format](#the-file-format) below.
+writes one fixed set of section headings, so a repo stays readable by every
+teammate whatever language their CLI speaks. When you write a file by hand,
+`## Options`, `## Attachments` and `## Questions` are accepted. See [The file format](#the-file-format) below.
 
 ## How a session goes
 
@@ -284,20 +280,16 @@ reversible: true
 
 **Why now.** APAC p95 doubled last week.
 
-## 选项
+## Options
 
 ### 1 · Stay on current CDN
 
 ### 2 · Move to edge provider
-
-## 补充（agent · lane-perf · static assets · 2026-03-14 10:20:41）
-
-Measured again: 1.9 s p95 from Singapore.
 ```
 
-These headings — `## 选项`, `## 补充（…）`, and the rest — are fixed tokens,
-not translated: see [Language](#language) above for why, and how each person
-picks their own.
+Section headings are fixed tokens, not translated: see [Language](#language)
+above for why, and how each person picks their own. Replies and notes are
+appended as their own sections, each recording who wrote it and when.
 
 Statuses: `not_started` To do · `in_progress` In progress · `waiting`
 Waiting · `needs_decision` Needs decision · `decided` Answered, for AI ·
@@ -330,9 +322,9 @@ Code plugin adds session-start rules and uses `CLAUDECODE` /
 Elsewhere, set `DECS_ROLE=agent` and `DECS_SESSION`.
 
 **Why is the UI in Chinese?**
-It isn't, anymore — `decs` speaks English by default, plus 简体中文, 繁體中文,
-Français and العربية; see [Language](#language) above. Commands, flags and
-the on-disk file format stay the same fixed Chinese tokens in every
+It isn't, anymore — `decs` speaks English by default, plus Simplified Chinese,
+Traditional Chinese, French and Arabic; see [Language](#language) above. Commands, flags and
+the on-disk file format stay the same fixed tokens in every
 language, so a repo written by a mixed-language team keeps parsing. Titles
 and bodies can be in any language, as before.
 
