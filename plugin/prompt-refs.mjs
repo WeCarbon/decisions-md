@@ -2,7 +2,9 @@
 // remind the model to log the owner's words onto that node before replying.
 import { readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
-import { t } from '../src/i18n/index.ts'
+import { moduleUrl } from './resolve.mjs'
+
+const { t } = await import(moduleUrl('src', 'i18n', 'index.ts'))
 
 let input = {}
 try {

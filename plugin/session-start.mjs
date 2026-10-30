@@ -5,14 +5,16 @@ import { execFileSync } from 'node:child_process'
 import { existsSync, readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { lang, t } from '../src/i18n/index.ts'
+import { modulePath, moduleUrl } from './resolve.mjs'
+
+const { lang, t } = await import(moduleUrl('src', 'i18n', 'index.ts'))
 
 const here = dirname(fileURLToPath(import.meta.url))
 const localized = join(here, `rules.${lang()}.md`)
 let text = readFileSync(existsSync(localized) ? localized : join(here, 'rules.md'), 'utf8')
 
 try {
-  const raw = execFileSync(join(here, '..', 'bin', 'decs'), ['show', 'active', '--json'], {
+  const raw = execFileSync(process.execPath, [modulePath('bin', 'decs.ts'), 'show', 'active', '--json'], {
     encoding: 'utf8',
     stdio: ['ignore', 'pipe', 'ignore'],
     timeout: 8000,

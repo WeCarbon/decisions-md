@@ -1,5 +1,5 @@
 {
-  "name": "decisions-md",
+  "name": "@wecarbon/decisions-md",
   "version": "0.1.0",
   "description": "decs — a task & decision hub for long-running AI agents, stored as plain markdown files in your repo",
   "license": "MIT",
@@ -9,16 +9,33 @@
   },
   "homepage": "https://github.com/wecarbon/decisions-md",
   "type": "module",
-  "private": true,
-  "bin": {
-    "decs": "./bin/decs.ts"
+  "publishConfig": {
+    "access": "public"
   },
+  "bin": {
+    "decs": "./dist/bin/decs.js",
+    "decisions-md": "./dist/bin/decs.js"
+  },
+  "files": [
+    "dist",
+    "plugin",
+    "skills",
+    "hooks",
+    "monitors",
+    ".claude-plugin",
+    "adapters",
+    "README*",
+    "LICENSE"
+  ],
   "engines": {
     "node": ">=22.18"
   },
   "scripts": {
     "test": "node --test --import ./test/setup.ts test/*.test.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "build": "rm -rf dist && tsc -p tsconfig.build.json && node scripts/copy-build-assets.mjs",
+    "prepack": "npm run build",
+    "prepublishOnly": "npm run build && npm test"
   },
   "dependencies": {
     "bidi-js": "^1.1.0",
