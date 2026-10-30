@@ -60,8 +60,10 @@ export function wrapToWidth(line: string, width: number): string[] {
         used = 0
       }
       lastBreak = -1
-      // Don't start the continuation line with the space we broke on.
-      if (ch === ' ') continue
+      // Don't start a continuation line with a space: the one we broke on
+      // in the plain-push case, or — after a retreat — one left over from
+      // the word that moved down, if that word alone filled the line.
+      if (ch === ' ' && !cur) continue
     }
     cur += ch
     used += w

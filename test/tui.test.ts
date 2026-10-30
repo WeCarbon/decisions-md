@@ -6,6 +6,7 @@ import { join } from 'node:path'
 
 import { initLayout } from '../src/core/paths.ts'
 import { Store } from '../src/core/store.ts'
+import { LANGUAGES, setLang, t } from '../src/i18n/index.ts'
 import { fit, stringWidth, wrapToWidth } from '../src/tui/width.ts'
 import { buildFrame, caretFromColumn, geometry, hitTest, repaintRows, type FrameInput } from '../src/tui/app.ts'
 import { isMouse, parseMouse } from '../src/tui/mouse.ts'
@@ -98,6 +99,49 @@ test('wrapToWidth never exceeds the target and never drops characters', () => {
     const parts = wrapToWidth(line, w)
     for (const p of parts) assert.ok(stringWidth(p) <= w, `"${p}" is ${stringWidth(p)} wide, limit ${w}`)
     assert.equal(parts.join('').replace(/\s/g, ''), line.replace(/\s/g, ''))
+  }
+})
+
+/** Maximal non-space runs, in order — a space-delimited language's "words". */
+function words(s: string): string[] {
+  return s.split(/\s+/).filter(Boolean)
+}
+
+/** Wrapping must never change which words exist, only where the breaks fall:
+ *  re-joining with single spaces and re-splitting on whitespace must get back
+ *  the original word list, whichever width forced the break. This is blind
+ *  to *where* a line break landed (that's wrapToWidth's call), only to
+ *  whether two words got glued together or a character went missing. CJK is
+ *  out of scope here — it has no inter-word spaces, so "words" doesn't apply;
+ *  its contract (every character survives, width never exceeded) is the
+ *  test above. */
+function assertWordsPreserved(line: string, w: number): void {
+  const parts = wrapToWidth(line, w)
+  for (const p of parts) assert.ok(stringWidth(p) <= w, `"${p}" is ${stringWidth(p)} wide, limit ${w}`)
+  assert.deepEqual(words(parts.join(' ')), words(line), `width ${w}: ${JSON.stringify(parts)}`)
+}
+
+test('wrapToWidth keeps the bench’s "takes this if you don’t answer" hint intact — regression: a retreat used to swallow the space after the retreated word, gluing it to the next one (seen in docs/demo.gif)', () => {
+  const line = '### 1 · Keep current CDN   ← takes this if you don’t answer'
+  // 20–80 spans every detail-pane width a real terminal produces, including
+  // the ~52–53 columns docs/demo.tape renders at, where this used to merge
+  // "don’t" and "answer" into one word with no space between them.
+  for (let w = 20; w <= 80; w++) assertWordsPreserved(line, w)
+})
+
+test('wrapToWidth never drops or merges words, for every space-delimited language’s default-decision hint', () => {
+  // zh-Hans/zh-Hant have no inter-word spaces in their hint (CJK wraps
+  // anywhere by design) — word preservation isn't a meaningful contract
+  // there, so they're covered by the character-preservation test above instead.
+  const spaceDelimited = LANGUAGES.filter((l) => l !== 'zh-Hans' && l !== 'zh-Hant')
+  for (const lng of spaceDelimited) {
+    setLang(lng)
+    try {
+      const line = `### 1 · Some Option Title${t('bench.detail.defaultHint')}`
+      for (let w = 15; w <= 80; w++) assertWordsPreserved(line, w)
+    } finally {
+      setLang('en')
+    }
   }
 })
 
