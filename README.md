@@ -2,16 +2,58 @@
 
 # decisions-md
 
-**`decs` is a task & decision hub for long-running AI agents.**
-Every piece of work an agent does — and every question it needs *you* to answer —
-is a plain markdown file in your repo. You watch it all on one live terminal
-screen, the **bench**, and answer with a keystroke.
+Your AI agent asks "should I use A or B?" — and you miss it, because it's
+buried in a chat you weren't watching.
 
-No database. No daemon. No server. Just `decisions/` in git.
+**decs puts every question your agents ask, and everything they're working on,
+on one screen. You answer with a single keypress. The agent picks it up and
+keeps going.**
 
 ![Demo: the decs bench opens on a tree of running work; read a pending decision, answer it with a keystroke, then an agent picks up the answer with decs read](https://raw.githubusercontent.com/WeCarbon/decisions-md/main/docs/demo.gif)
 
-![The decs bench: a tree of running work with progress bars on the left, a pending decision with its options on the right](https://raw.githubusercontent.com/WeCarbon/decisions-md/main/docs/screenshot.en.png)
+## What it looks like
+
+1. Your agent hits a choice. Instead of asking in chat, it runs:
+
+   ```sh
+   decs ask W4 -o 1="Keep current CDN" 2="Switch to Fastly" --default 1
+   ```
+
+2. You run `decs` in any terminal. W4 is at the top, marked ◆ Decide, with
+   both options and what each one costs.
+
+3. You press `2`.
+
+4. The agent is told right away, reads "Switch to Fastly" and carries on.
+   The question and your answer stay in `decisions/active/4-pick-cdn.md`, in git.
+
+## Quickstart (Claude Code)
+
+```sh
+npm i -g @wecarbon/decisions-md
+cd your-project && decs init
+```
+
+Then, inside Claude Code:
+
+```
+/plugin marketplace add wecarbon/decisions-md
+/plugin install decs@decisions-md
+```
+
+That's it. Give your agent a task as usual. It logs its work and asks its
+questions through decs on its own. Run `decs` in another terminal to watch.
+
+Using a different agent? Paste [`AGENTS.md`](AGENTS.md) into its instructions —
+the rules are plain CLI calls, so any agent with a shell can follow them.
+
+## Three words
+
+- **Node** — one thing an agent is doing. One markdown file.
+- **Decide** — a node that needs your answer. It shows up with options; press a number.
+- **Bench** — the screen you get when you run `decs`. Everything, live.
+
+That's all you need to start. The rest of this page is how it works underneath.
 
 ---
 
@@ -121,7 +163,7 @@ the chat can't approve on your behalf.
 views without changing state, and the agent on it is told it was deferred and stops
 until you lift it.
 
-## Quickstart
+## Install
 
 Requires Node 22.18+.
 
