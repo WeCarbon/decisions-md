@@ -4,3 +4,5 @@ process.env.DECS_LANG ||= 'en'
 process.env.DECS_TEAMMATE = ''
 // A string printed with a placeholder left unfilled fails the test that printed it.
 process.env.DECS_STRICT_I18N = '1'
+// node --test sets FORCE_COLOR when run in a terminal; children would then colour plain output like console.log(2).
+delete process.env.FORCE_COLOR
