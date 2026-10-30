@@ -2,6 +2,7 @@ import { t } from '../i18n/index.ts'
 import { fromNow } from '../i18n/time.ts'
 import { ATTACHMENTS_HEADING_RE, OPTIONS_HEADING_RE, parseNoteHeading } from '../core/parse.ts'
 import { QUESTIONS_HEADING_RE } from '../core/questions.ts'
+import { NOTE_KIND, NOTE_TEXT } from '../core/format.ts'
 import type { Decision } from '../core/types.ts'
 import { nodeImages, placeholderText, splitImageLinks, walkBody, type NodeImage } from './images.ts'
 import { wrapToWidth } from './width.ts'
@@ -106,6 +107,32 @@ const OPTION_HEADING = /^###[ \t]+([A-Za-z0-9]{1,4})[ \t]*(?:[·:：．.\-—–
 export interface BodyRow {
   text: string
   image?: number
+  /** Set on every row of a wrapped heading: styled whole, before wrapping, so
+   *  its pieces don't each get re-read as body text. */
+  style?: Omit<Segment, 'text'>
+}
+
+/**
+ * The bodies decs writes under its own notes (`等 Carol`, `后面再做。…`) are
+ * file content in one fixed language; the bench shows them in its own.
+ */
+function generatedNoteText(line: string, kind: string | undefined): string | undefined {
+  if (kind === NOTE_KIND.waiting) {
+    const m = /^等 (.+)$/.exec(line)
+    return m ? t('core.render.waitingOn', { who: m[1] }) : undefined
+  }
+  if (kind === NOTE_KIND.deferred && line === NOTE_TEXT.deferred) return t('bench.noteText.deferred')
+  if (kind === NOTE_KIND.undeferred && line === NOTE_TEXT.undeferred) return t('bench.noteText.undeferred')
+  if (kind === NOTE_KIND.seen && line === NOTE_TEXT.seen) return t('bench.noteText.seen')
+  if (kind === NOTE_KIND.addendum) {
+    const m = /^(\S+) 已完成，这个节点的决定早已取走，开始执行。$/.exec(line)
+    if (m) return t('bench.noteText.dependencyDone', { ref: m[1] })
+  }
+  if (kind === NOTE_KIND.superseded) {
+    const m = /^被 (\S+) 取代：(.*)$/.exec(line)
+    if (m) return t('bench.noteText.supersededBy', { ref: m[1], title: m[2] })
+  }
+  return undefined
 }
 
 /**
@@ -120,8 +147,15 @@ export function bodyRows(d: Decision, width: number, condensed: boolean, images:
   const used = new Set<number>()
   const find = (alt: string, target: string) =>
     images.findIndex((im, i) => im.source === 'body' && !used.has(i) && im.alt === alt && im.target === target)
+  let noteKind: string | undefined
   const pushText = (raw: string) => {
-    const line = markDefault(raw, d)
+    if (/^#{1,6}[ \t]/.test(raw)) {
+      noteKind = parseNoteHeading(raw)?.kind
+      const { text, ...style } = styleLine(markDefault(raw, d))
+      for (const piece of wrapToWidth(text, width)) out.push({ text: piece, style })
+      return
+    }
+    const line = generatedNoteText(raw.trim(), noteKind) ?? raw
     for (const text of line.trim() ? wrapToWidth(line, width) : ['']) out.push({ text })
   }
   walkBody(condensed ? condense(d) : d.body, (raw, inCode) => {

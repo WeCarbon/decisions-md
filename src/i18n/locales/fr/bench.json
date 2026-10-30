@@ -222,5 +222,12 @@
     "optionsRound": "Options (tour {{round}})",
     "attachments": "Pièces jointes",
     "questions": "Sous-questions"
+  },
+  "noteText": {
+    "deferred": "Pour plus tard. N’y touchez pas avant la reprise.",
+    "undeferred": "On peut reprendre.",
+    "seen": "Vu, rien à faire.",
+    "dependencyDone": "{{ref}} est terminé et la décision de ce nœud a déjà été récupérée : le travail commence.",
+    "supersededBy": "Remplacé par {{ref}} : {{title}}"
   }
 }

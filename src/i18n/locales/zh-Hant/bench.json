@@ -218,5 +218,12 @@
     "optionsRound": "選項（第 {{round}} 輪）",
     "attachments": "附件",
     "questions": "子問題"
+  },
+  "noteText": {
+    "deferred": "之後再做。解除延遲之前先別動它。",
+    "undeferred": "可以接著做了。",
+    "seen": "看過了，不用處理。",
+    "dependencyDone": "{{ref}} 已完成，這個節點的決定早已取走，開始執行。",
+    "supersededBy": "被 {{ref}} 取代：{{title}}"
   }
 }

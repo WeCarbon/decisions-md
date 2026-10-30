@@ -551,3 +551,15 @@ test('repaintRows rewrites exactly the given frame rows, each at its own row and
   assert.equal(out, '\x1b[2;1H\x1b[2K\x1b[1ma\x1b[0m\x1b[36mb\x1b[0m\x1b[3;1H\x1b[2K')
   assert.ok(!out.includes('head') && !out.includes('tail'))
 })
+
+test('a note heading too long for the pane still reads as "Agent | name | when" on every wrapped line, and the text decs wrote under it shows in the bench language — regression: an English bench showed the raw 等待 heading and 等 Carol', (t) => {
+  const { store, root } = fixture()
+  t.after(() => rmSync(root, { recursive: true, force: true }))
+  const d = store.create({ title: 'dark mode polish', author: 'ui-lane · theming', task: true })
+  store.hold(d, 'Carol: final icon set', 'demo-setup · mock data with a long author line')
+  const held = store.all().find((x) => x.id === d.id)!
+  const text = bodyLines(held, 30, false).join('\n')
+  assert.match(text, /Agent \| demo-setup \|/)
+  assert.match(text, /waiting on Carol: final icon/)
+  assert.doesNotMatch(text, /等/)
+})

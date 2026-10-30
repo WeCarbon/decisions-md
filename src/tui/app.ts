@@ -1696,7 +1696,7 @@ export function detailBody(s: FrameInput, d: Decision, width: number): { lines: 
       lines.push([{ text: ` ${fit(r.text, width - 3, isRtl())}`, color: 'magenta' }])
       continue
     }
-    const styled = styleLine(r.text)
+    const styled = r.style ? { ...r.style, text: r.text } : styleLine(r.text)
     lines.push([{ ...styled, text: ` ${styled.text}` }])
   }
   return { lines, imageRows }
