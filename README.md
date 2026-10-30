@@ -9,7 +9,7 @@ screen, the **bench**, and answer with a keystroke.
 
 No database. No daemon. No server. Just `decisions/` in git.
 
-![Demo: add a task, watch its progress stream in from a piped command, turn a node into a decision, then answer it with a keystroke on the bench](https://raw.githubusercontent.com/WeCarbon/decisions-md/main/docs/demo.gif)
+![Demo: the decs bench opens on a tree of running work; read a pending decision, answer it with a keystroke, then an agent picks up the answer with decs read](https://raw.githubusercontent.com/WeCarbon/decisions-md/main/docs/demo.gif)
 
 ![The decs bench: a tree of running work with progress bars on the left, a pending decision with its options on the right](https://raw.githubusercontent.com/WeCarbon/decisions-md/main/docs/screenshot.en.png)
 
