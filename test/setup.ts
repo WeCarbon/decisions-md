@@ -6,3 +6,8 @@ process.env.DECS_TEAMMATE = ''
 process.env.DECS_STRICT_I18N = '1'
 // node --test sets FORCE_COLOR when run in a terminal; children would then colour plain output like console.log(2).
 delete process.env.FORCE_COLOR
+// ink stops redrawing when it detects CI; the bench tests read its frames.
+process.env.CI = 'false'
+process.env.CONTINUOUS_INTEGRATION = 'false'
+// Note headings carry local wall-clock time; fixtures are written in +08:00.
+process.env.TZ = 'Asia/Shanghai'
