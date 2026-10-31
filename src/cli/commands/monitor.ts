@@ -17,20 +17,74 @@ import { t } from '../../i18n/index.ts'
 
 const help = () => t('cli.help.monitor')
 
-/** The Claude Code process this monitor runs under — walks up to the first `claude` in the process tree. */
-function sessionPid(): number {
-  let pid = process.ppid
-  // No `ps` on Windows: the loop gives up and the session counts as the lead.
-  for (let i = 0; i < 8 && pid > 1; i++) {
-    try {
-      const [ppid, ...comm] = execFileSync('ps', ['-o', 'ppid=,comm=', '-p', String(pid)], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim().split(/\s+/)
-      if (/(^|\/)claude$/.test(comm.join(' '))) return pid
-      pid = Number(ppid)
-    } catch {
-      break
+interface ProcInfo {
+  ppid: number
+  /** POSIX: the image name only (`ps -o comm=`). Windows: the full command
+   *  line — CIM gives us that directly, so there's no second lookup. */
+  comm: string
+}
+
+/** `ps -o ppid=,comm=` for one pid, as `ps` prints it: `1234 node`. */
+export function parsePsLine(line: string): ProcInfo | null {
+  const m = /^(\d+)\s+(.+)$/.exec(line.trim())
+  return m ? { ppid: Number(m[1]), comm: m[2].trim() } : null
+}
+
+/** The one line `WIN_PROCESS_SCRIPT` prints: `1234|C:\...\node.exe --agent-name lane-a`. */
+export function parseWinProcessLine(line: string): ProcInfo | null {
+  const i = line.indexOf('|')
+  if (i === -1) return null
+  const ppid = Number(line.slice(0, i))
+  return Number.isInteger(ppid) ? { ppid, comm: line.slice(i + 1).trim() } : null
+}
+
+/** Windows PowerShell (always present, unlike `wmic` on 24H2+) via CIM —
+ *  the closest cross-version equivalent to `ps -o ppid=,comm=,command=`. */
+function winProcessScript(pid: number): string {
+  return `$p = Get-CimInstance Win32_Process -Filter "ProcessId=${pid}"; if ($p) { "$($p.ParentProcessId)|$($p.CommandLine)" }`
+}
+
+/** The image name only, no path or args — approximates `ps`'s `comm=` from
+ *  a Windows command line's own first (possibly quoted) token. */
+export function imageName(comm: string): string {
+  const trimmed = comm.trim()
+  if (trimmed.startsWith('"')) return trimmed.slice(1, trimmed.indexOf('"', 1))
+  return trimmed.split(/\s+/)[0] ?? trimmed
+}
+
+/** One ancestor's parent pid + command, or null if it can't be read — no
+ *  `ps` on this POSIX box, no PowerShell on this Windows one, pid is gone. */
+function processInfo(pid: number, platform: NodeJS.Platform = process.platform): ProcInfo | null {
+  try {
+    if (platform === 'win32') {
+      const out = execFileSync('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command', winProcessScript(pid)], {
+        encoding: 'utf8',
+        stdio: ['ignore', 'pipe', 'ignore'],
+      }).trim()
+      return out ? parseWinProcessLine(out) : null
     }
+    const out = execFileSync('ps', ['-o', 'ppid=,comm=', '-p', String(pid)], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim()
+    return out ? parsePsLine(out) : null
+  } catch {
+    return null
   }
-  return process.ppid
+}
+
+/** The Claude Code process this monitor runs under — walks up to the first `claude` in the process tree. */
+function locateSession(): { pid: number; info?: ProcInfo } {
+  let pid = process.ppid
+  // No `ps`/PowerShell reachable: the loop gives up and the session counts as the lead.
+  for (let i = 0; i < 8 && pid > 1; i++) {
+    const info = processInfo(pid)
+    if (!info) break
+    if (/(^|[\\/])claude(\.exe|\.cmd)?$/i.test(imageName(info.comm))) return { pid, info }
+    pid = info.ppid
+  }
+  return { pid: process.ppid }
+}
+
+function sessionPid(): number {
+  return locateSession().pid
 }
 
 /** The `--agent-name` a teammate session's agent process was started with; undefined for a lead. */
@@ -40,8 +94,12 @@ export function teammateName(command: string): string | undefined {
 
 function sessionCommand(): string {
   if (process.env.DECS_TEAMMATE !== undefined) return process.env.DECS_TEAMMATE ? `--agent-name ${process.env.DECS_TEAMMATE}` : ''
+  const { pid, info } = locateSession()
+  // Windows's CommandLine from the walk above is already the full command;
+  // `ps`'s `comm=` is only the image name, so POSIX needs one more call.
+  if (process.platform === 'win32') return info?.comm ?? ''
   try {
-    return execFileSync('ps', ['-o', 'command=', '-p', String(sessionPid())], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim()
+    return execFileSync('ps', ['-o', 'command=', '-p', String(pid)], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim()
   } catch {
     return ''
   }

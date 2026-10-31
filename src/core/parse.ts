@@ -33,6 +33,28 @@ const ATTACHMENT_GROUP_RE = /^\*\*([^*]+)\*\*[ \t]*$/
 /** `  *caption text*` right under an attachment line — single `*`, not `**`. */
 const ATTACHMENT_CAPTION_RE = /^\*([^*].*[^*]|[^*])\*[ \t]*$/
 
+/**
+ * `\r\n` (Windows editors, `git config core.autocrlf true`) and a lone `\r`
+ * both become `\n` — every heading/option/note regex below is anchored with
+ * `$` on a single line and would otherwise fail to match a line that still
+ * carries its `\r`.
+ */
+export function normalizeNewlines(text: string): string {
+  return text.includes('\r') ? text.replace(/\r\n?/g, '\n') : text
+}
+
+/**
+ * An attachment link committed from Windows (or written before this build
+ * normalised it, see `core/paths.ts#toPosixPath`) may still carry `\`
+ * separators. Windows' own file APIs accept `/` just as well, so turning
+ * `\` into `/` on read is safe everywhere and makes the link resolve on
+ * any OS that opens the repo. A URL's backslash, if ever intentional, is
+ * left alone.
+ */
+function normalizeTargetSlashes(target: string): string {
+  return /^[a-z][a-z0-9+.-]*:\/\//i.test(target) ? target : target.replace(/\\/g, '/')
+}
+
 export function splitFrontMatter(text: string): { data: Record<string, unknown>; body: string } {
   const m = FM_RE.exec(text)
   if (!m) return { data: {}, body: text }
@@ -133,7 +155,7 @@ export function parseAttachments(body: string): Attachment[] {
     }
     const m = ATTACHMENT_RE.exec(trimmed)
     if (m) {
-      const a: Attachment = { image: Boolean(m[1]), label: m[2].trim(), target: m[3].trim() }
+      const a: Attachment = { image: Boolean(m[1]), label: m[2].trim(), target: normalizeTargetSlashes(m[3].trim()) }
       if (group) a.group = group
       out.push(a)
       last = a
@@ -292,7 +314,7 @@ export function parseDecision(
   project = '',
   ctx: { queued?: boolean } = {},
 ): Decision {
-  const { data, body } = splitFrontMatter(text)
+  const { data, body } = splitFrontMatter(normalizeNewlines(text))
   const name = basename(file)
   const fromName = ENTRY_NAME_RE.exec(name)
 

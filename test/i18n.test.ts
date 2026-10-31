@@ -106,7 +106,13 @@ test('language resolution: --lang, DECS_LANG, decs config lang, system locale, E
   writeFileSync(join(home, 'config.json'), JSON.stringify({ projects: [] }))
   assert.match(run({ DECS_LANG: '', LANG: 'fr_FR.UTF-8' }), /^Français/)
   assert.match(run({ DECS_LANG: '', LANG: 'en_US.UTF-8' }), /^English/)
-  assert.match(run({ DECS_LANG: '' }), /^English/)
+  // Nothing configured at all falls through to the OS locale — covered
+  // directly, with an injected locale, by `systemLang`'s own tests above.
+  // Pinned to English here (rather than leaving DECS_LANG empty) because
+  // that last resort reads the real machine's locale via Intl, which on
+  // Windows comes from the OS, not from the LANG/LC_ALL this test clears —
+  // a Chinese-language Windows box would otherwise fail this assertion.
+  assert.match(run({ DECS_LANG: 'en' }), /^English/)
 })
 
 test('resolveLang ignores values it does not know and moves on', () => {

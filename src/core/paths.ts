@@ -1,6 +1,16 @@
 import { execFileSync } from 'node:child_process'
 import { existsSync, mkdirSync, readdirSync, realpathSync, statSync } from 'node:fs'
-import { dirname, join, resolve } from 'node:path'
+import { dirname, join, resolve, sep } from 'node:path'
+
+/**
+ * A relative markdown link target (attachment, `after`, a moved node's own
+ * link) is committed text other OSes read too — always `/`, never the
+ * host's own separator. Safe on Windows either way: its own file APIs
+ * accept `/` exactly like `\`.
+ */
+export function toPosixPath(p: string, hostSep: string = sep): string {
+  return hostSep === '/' ? p : p.split(hostSep).join('/')
+}
 
 export interface Layout {
   /** The directory that *contains* `decisions/` — i.e. the project root. */

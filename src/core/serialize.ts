@@ -1,6 +1,7 @@
 import { isAbsolute, relative, resolve } from 'node:path'
 import { stringify as stringifyYaml } from 'yaml'
 import { ATTACHMENT_GROUP_END, HEADING, optionsHeading } from './format.ts'
+import { toPosixPath } from './paths.ts'
 import type { Attachment, Decision, DecisionOption, NoteRole, AttachmentApproval } from './types.ts'
 
 /** Front matter key order — stable so diffs stay readable. */
@@ -179,7 +180,7 @@ export function relinkBody(body: string, fromDir: string, toDir: string, rename:
  *  `approvals[].target`, the join key with the body's link. */
 export function relinkTarget(target: string, fromDir: string, toDir: string, rename: (abs: string) => string = (p) => p): string {
   if (/^[a-z][a-z0-9+.-]*:/i.test(target) || target.startsWith('#') || isAbsolute(target)) return target
-  const rel = relative(toDir, rename(resolve(fromDir, target)))
+  const rel = toPosixPath(relative(toDir, rename(resolve(fromDir, target))))
   return rel === target ? target : rel
 }
 

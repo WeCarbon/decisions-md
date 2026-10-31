@@ -3,7 +3,7 @@ import { closeSync, copyFileSync, existsSync, mkdirSync, openSync, readdirSync, 
 import { basename, dirname, extname, join, relative, resolve, sep } from 'node:path'
 import { createFileAtomic, withFileLock, writeFileAtomic } from './lock.ts'
 import { collapseDuplicateOptions, type DuplicateOptionsBlock } from './repair.ts'
-import { attachmentDir, childDirOf, entryFileName, listEntryFiles, type Layout } from './paths.ts'
+import { attachmentDir, childDirOf, entryFileName, listEntryFiles, toPosixPath, type Layout } from './paths.ts'
 import { benchOrder } from './order.ts'
 import { projectLetter, readProjectConfig } from './project.ts'
 import { parseBodyRefs, parseRef, refOf } from './ref.ts'
@@ -463,7 +463,7 @@ export class Store {
         }
         copyFileSync(abs, dest)
 
-        const target = relative(dirname(d.file), dest)
+        const target = toPosixPath(relative(dirname(d.file), dest))
         upsert(target, isImagePath(dest), basename(dest), group, caption)
         if (opts.approvalContent) recordApproval(target, sha256File(dest))
       })

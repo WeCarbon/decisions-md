@@ -1,6 +1,6 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { homedir, tmpdir } from 'node:os'
-import { dirname, join, resolve } from 'node:path'
+import { basename, dirname, join, resolve, sep } from 'node:path'
 
 export interface ProjectEntry {
   name: string
@@ -34,11 +34,19 @@ export function readProjects(): ProjectEntry[] {
   }
 }
 
+/** The slice of `node:path` `isScratchPath` needs — swappable so a test can
+ *  drive the win32 table without actually running on Windows. */
+export interface PathOps {
+  resolve: (p: string) => string
+  sep: string
+}
+const NATIVE_PATH_OPS: PathOps = { resolve, sep }
+
 /** Temp directories are never registered as bench projects. */
-export function isScratchPath(root: string): boolean {
-  const abs = resolve(root)
-  return [tmpdir(), '/tmp', '/private/tmp', '/var/folders', '/private/var/folders'].some(
-    (t) => abs === t || abs.startsWith(`${resolve(t)}/`),
+export function isScratchPath(root: string, tmp = tmpdir(), ops: PathOps = NATIVE_PATH_OPS): boolean {
+  const abs = ops.resolve(root)
+  return [tmp, '/tmp', '/private/tmp', '/var/folders', '/private/var/folders'].some(
+    (t) => abs === ops.resolve(t) || abs.startsWith(`${ops.resolve(t)}${ops.sep}`),
   )
 }
 
@@ -70,7 +78,7 @@ export function writeProjects(projects: ProjectEntry[]): void {
 
 export function addProject(root: string, name?: string): ProjectEntry[] {
   const abs = resolve(root)
-  const entry: ProjectEntry = { name: name ?? abs.split('/').filter(Boolean).pop() ?? abs, root: abs }
+  const entry: ProjectEntry = { name: name || basename(abs) || abs, root: abs }
   const rest = readProjects().filter((p) => resolve(p.root) !== abs)
   const next = [...rest, entry].sort((a, b) => a.name.localeCompare(b.name))
   writeProjects(next)

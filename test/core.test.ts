@@ -14,6 +14,7 @@ import { Store, benchOrder, nowStamp, sha256File } from '../src/core/store.ts'
 import { elapsed } from '../src/i18n/time.ts'
 import { setLang } from '../src/i18n/index.ts'
 import { isScratchPath } from '../src/core/config.ts'
+import { openerFor } from '../src/core/opener.ts'
 import type { Decision } from '../src/core/types.ts'
 
 import { decs, decsResult } from './helpers.ts'
@@ -76,6 +77,22 @@ test('options come from the body and nowhere else', () => {
   )
   assert.equal(d.options[0].body, '挡掉最近 6 次里的 4 次。')
   assert.equal(d.default, '1')
+})
+
+test('a file saved with CRLF line endings (Windows editor, git core.autocrlf) parses the same as LF', () => {
+  const crlf = SAMPLE.replace(/\n/g, '\r\n')
+  const lf = parseDecision(SAMPLE, '/x/D415-a.md', false, 'web')
+  const d = parseDecision(crlf, '/x/D415-a.md', false, 'web')
+  assert.deepEqual(d.options.map((o) => [o.key, o.label, o.body]), lf.options.map((o) => [o.key, o.label, o.body]))
+  assert.equal(d.default, lf.default)
+  assert.equal(d.title, lf.title)
+  assert.equal(d.body.replace(/\r\n/g, '\n'), lf.body)
+})
+
+test('a lone CR (old-style Mac line endings) also normalises to LF', () => {
+  const cr = SAMPLE.replace(/\n/g, '\r')
+  const d = parseDecision(cr, '/x/D415-a.md', false, 'web')
+  assert.deepEqual(d.options.map((o) => o.key), ['1', '2'])
 })
 
 test('the options block stops at the next h2', () => {
@@ -607,6 +624,44 @@ test('parseAttachments stays backward compatible with a plain, ungrouped block (
       ['review-2.html', '../attachments/D304/review-2.html', false, undefined, undefined],
     ],
   )
+})
+
+test('an attachment link written with Windows backslashes still resolves (legacy content, or an old build)', () => {
+  const body = ['## 附件', '', '- [review.html](..\\attachments\\D304\\review.html)', ''].join('\n')
+  const atts = parseAttachments(body)
+  assert.equal(atts[0].target, '../attachments/D304/review.html', 'backslashes become forward slashes on read')
+})
+
+test('a URL attachment target is never mistaken for a Windows path', () => {
+  const body = ['## 附件', '', '- [issue](https://example.com/issues\\123)', ''].join('\n')
+  assert.equal(parseAttachments(body)[0].target, 'https://example.com/issues\\123')
+})
+
+test('toPosixPath: a Windows-separated relative path becomes forward-slash, so a link stays readable on any OS', async () => {
+  const { toPosixPath } = await import('../src/core/paths.ts')
+  assert.equal(toPosixPath('attachments\\12\\screenshot.png', '\\'), 'attachments/12/screenshot.png')
+  assert.equal(toPosixPath('attachments/12/screenshot.png', '/'), 'attachments/12/screenshot.png')
+})
+
+test('openerFor: start is not spawnable directly on Windows, so it goes through cmd.exe', () => {
+  const win = openerFor('C:\\Users\\eve\\decisions\\x\\shot.png', 'win32')
+  assert.equal(win.command, 'cmd.exe')
+  // The empty "" is required: start's first quoted argument is a window
+  // title, and a path with spaces would otherwise be misread as one.
+  assert.deepEqual(win.args, ['/c', 'start', '""', 'C:\\Users\\eve\\decisions\\x\\shot.png'])
+  assert.equal(win.options?.windowsVerbatimArguments, true)
+
+  assert.deepEqual(openerFor('/x/shot.png', 'darwin'), { command: 'open', args: ['/x/shot.png'] })
+  assert.deepEqual(openerFor('/x/shot.png', 'linux'), { command: 'xdg-open', args: ['/x/shot.png'] })
+})
+
+test('isScratchPath recognises a Windows temp subfolder, not just a POSIX one', async () => {
+  const { win32 } = await import('node:path')
+  const winTmp = 'C:\\Users\\eve\\AppData\\Local\\Temp'
+  const ops = { resolve: win32.resolve, sep: win32.sep }
+  assert.ok(isScratchPath(`${winTmp}\\decs-abc123`, winTmp, ops), 'a subfolder of the Windows temp dir')
+  assert.ok(isScratchPath(winTmp, winTmp, ops), 'the temp dir itself')
+  assert.ok(!isScratchPath('C:\\Users\\eve\\code\\web', winTmp, ops), 'an ordinary project folder')
 })
 
 test('store.attach: without --replace, a same-named file becomes name-2.ext (unchanged behaviour)', (t) => {

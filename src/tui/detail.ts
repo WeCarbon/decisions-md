@@ -1,3 +1,4 @@
+import { basename } from 'node:path'
 import { overdue } from '../core/order.ts'
 import { approvalLabel, deferredLabel } from '../core/render.ts'
 import { refOf } from '../core/ref.ts'
@@ -147,7 +148,7 @@ export function metaLines(d: Item, items: Item[], now: number, width: number, ba
 export function approvalLines(d: Item): Line[] {
   // The phrase is `decs get`'s, so the two never word the same state differently.
   return (d.approvals ?? []).map((ap): Line => {
-    const name = ap.target.split('/').pop() ?? ap.target
+    const name = basename(ap.target) || ap.target
     const ok = Boolean(ap.approvedHash) && ap.approvedHash === ap.hash
     const color = ok ? 'green' : ap.declined ? 'red' : 'yellow'
     return [{ text: ` ${t('bench.detail.outboundContent')}`, dim: true }, { text: `${name}  ` }, { text: approvalLabel(ap), color, bold: !ok && !ap.declined }]

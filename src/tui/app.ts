@@ -3,6 +3,7 @@ import { existsSync, watch, type FSWatcher } from 'node:fs'
 import { createElement as h, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Box, Text, useApp, useInput, useStdout } from 'ink'
 import { targetPath } from '../cli/commands/open.ts'
+import { openerFor } from '../core/opener.ts'
 import { buildOverview, type Overview } from '../core/overview.ts'
 import { refOf } from '../core/ref.ts'
 import { listSources, type SourceSummary } from '../core/sources.ts'
@@ -43,8 +44,6 @@ import {
 import { summaryLines } from './summary.ts'
 import { DEFERRED_FOLD_KEY, foldFor, foldKey, foldSets, groupFoldKey, loadFolds, saveFold, type FoldMap } from './folds.ts'
 import { cycleOption, initialPicks, metaLines, optionForKey, picksSummary, questionLines, statusSegments } from './detail.ts'
-
-const OPENER = process.platform === 'darwin' ? 'open' : process.platform === 'win32' ? 'start' : 'xdg-open'
 
 /** The box bench reserves for the big-image view: full screen minus the
  *  caption row and a 1-col margin. Must match what `imageLayout` lays out,
@@ -444,7 +443,8 @@ export function App({ store, view: initialView, openDeferred, project }: Props) 
     if (!current) return
     const p = targetPath(current.file, target)
     if (!p.includes('://') && !existsSync(p)) return say(t('bench.toast.fileGone', { path: p }))
-    spawn(OPENER, [p], { detached: true, stdio: 'ignore' }).unref()
+    const opener = openerFor(p)
+    spawn(opener.command, opener.args, { detached: true, stdio: 'ignore', ...opener.options }).unref()
     say(t('bench.toast.opened', { label }))
   }
 

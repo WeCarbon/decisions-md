@@ -4,10 +4,9 @@ import { existsSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { bool, type Args } from '../args.ts'
 import { requireDecision, resolveStore } from '../context.ts'
+import { openerFor } from '../../core/opener.ts'
 import { cyan, dim } from '../../core/render.ts'
 import { t } from '../../i18n/index.ts'
-
-const OPENER = process.platform === 'darwin' ? 'open' : process.platform === 'win32' ? 'start' : 'xdg-open'
 
 /** Resolves a link the way the markdown does: relative to the entry's own file. */
 export function targetPath(entryFile: string, target: string): string {
@@ -37,7 +36,10 @@ export function run(args: Args): number {
       continue
     }
     console.log(`${cyan(a.label)} ${dim(p)}`)
-    if (!bool(args, 'dry-run')) spawn(OPENER, [p], { detached: true, stdio: 'ignore' }).unref()
+    if (!bool(args, 'dry-run')) {
+      const opener = openerFor(p)
+      spawn(opener.command, opener.args, { detached: true, stdio: 'ignore', ...opener.options }).unref()
+    }
   }
   return 0
 }

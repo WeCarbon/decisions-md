@@ -1,0 +1,6 @@
+# Keep LF everywhere regardless of the checkout OS or a contributor's
+# core.autocrlf: the shebang in bin/decs breaks if it ever gains a \r, and
+# mixed line endings make every cross-platform diff noisy. decs's own
+# parser accepts CRLF in a *user's* decisions/*.md (see core/parse.ts);
+# this file is only about what this repo itself commits.
+* text=auto eol=lf

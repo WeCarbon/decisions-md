@@ -6,6 +6,7 @@
  * here is heuristic and fails closed: on doubt it emits nothing plus a
  * warning rather than a wrong option list.
  */
+import { normalizeNewlines } from '../core/parse.ts'
 import { renderOptionsBlock, slugify } from '../core/serialize.ts'
 import { nowStamp } from '../core/store.ts'
 import { ACCEPTANCE_OPTION, type Decision, type DecisionAnswer, type DecisionOption } from '../core/types.ts'
@@ -251,7 +252,7 @@ function processActiveBlock(lines: string[], id: number, headingRest: string): L
 }
 
 export function parseLegacyActive(text: string): LegacyEntry[] {
-  const lines = text.split('\n')
+  const lines = normalizeNewlines(text).split('\n')
   const boundaries: { idx: number; id: number; rest: string }[] = []
   for (let i = 0; i < lines.length; i++) {
     const m = /^##[ \t]+D(\d+)(.*)$/.exec(lines[i])
@@ -537,7 +538,7 @@ function processArchiveBlock(lines: string[]): LegacyEntry {
 }
 
 export function parseLegacyArchive(text: string): LegacyEntry[] {
-  const lines = text.split('\n')
+  const lines = normalizeNewlines(text).split('\n')
   const boundaries: number[] = []
   for (let i = 0; i < lines.length; i++) {
     if (matchArchiveBoundary(lines[i])) boundaries.push(i)

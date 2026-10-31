@@ -449,6 +449,33 @@ test('a teammate session is recognised from its agent process arguments', async 
   assert.equal(teammateName('claude --resume'), undefined)
 })
 
+test('parsePsLine reads a `ps -o ppid=,comm=` line, including a multi-word comm', async () => {
+  const { parsePsLine } = await import('../src/cli/commands/monitor.ts')
+  assert.deepEqual(parsePsLine('  1234 node'), { ppid: 1234, comm: 'node' })
+  assert.deepEqual(parsePsLine('1 /usr/local/bin/claude'), { ppid: 1, comm: '/usr/local/bin/claude' })
+  assert.equal(parsePsLine(''), null)
+  assert.equal(parsePsLine('not-a-pid node'), null)
+})
+
+test('parseWinProcessLine reads the `ppid|command line` a Windows CIM query prints', async () => {
+  const { parseWinProcessLine } = await import('../src/cli/commands/monitor.ts')
+  assert.deepEqual(parseWinProcessLine('4321|C:\\Program Files\\nodejs\\node.exe --agent-name lane-a'), {
+    ppid: 4321,
+    comm: 'C:\\Program Files\\nodejs\\node.exe --agent-name lane-a',
+  })
+  assert.equal(parseWinProcessLine('no pipe here'), null)
+  assert.equal(parseWinProcessLine('notanumber|node.exe'), null)
+})
+
+test('imageName strips the path and arguments off a command line, quoted or not', async () => {
+  const { imageName } = await import('../src/cli/commands/monitor.ts')
+  assert.equal(imageName('"C:\\Program Files\\Claude\\claude.exe" --agent-name lane-a'), 'C:\\Program Files\\Claude\\claude.exe')
+  assert.equal(imageName('C:\\Users\\eve\\AppData\\Local\\Programs\\claude.exe --resume'), 'C:\\Users\\eve\\AppData\\Local\\Programs\\claude.exe')
+  assert.equal(imageName('/usr/local/bin/claude --resume'), '/usr/local/bin/claude')
+  // The regex that actually decides "is this claude" only cares about the trailing component.
+  assert.match(imageName('"C:\\Program Files\\Claude\\claude.exe" --agent-name lane-a'), /claude\.exe$/i)
+})
+
 async function monitorAs(teammate: string, args: string[], act: (root: string) => void): Promise<string> {
   const root = scratch()
   decs(root, ['init', '--no-register'])

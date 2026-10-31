@@ -1,5 +1,6 @@
-import { closeSync, existsSync, mkdirSync, openSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs'
+import { closeSync, existsSync, mkdirSync, openSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { renameRetrying } from './lock.ts'
 import type { Layout } from './paths.ts'
 
 /**
@@ -30,7 +31,7 @@ function writeQueue(l: Layout, ids: number[]): void {
   mkdirSync(l.root, { recursive: true })
   const tmp = `${queuePath(l)}.${process.pid}.tmp`
   writeFileSync(tmp, `${JSON.stringify({ queue: ids }, null, 2)}\n`)
-  renameSync(tmp, queuePath(l))
+  renameRetrying(tmp, queuePath(l))
 }
 
 /**

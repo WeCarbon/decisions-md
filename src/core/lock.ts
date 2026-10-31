@@ -4,6 +4,27 @@ import { basename, dirname, join } from 'node:path'
 const sleep = (ms: number) => Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms)
 
 /**
+ * `renameSync` over an existing file can fail on Windows with EPERM/EBUSY
+ * when something else has it open without `FILE_SHARE_DELETE` — an
+ * antivirus scan, an editor, OneDrive/Dropbox syncing it — for just a
+ * moment. POSIX practically never raises either code here, so the retries
+ * cost it nothing; `rename` is swappable so a test can simulate the
+ * failure without real file locking.
+ */
+export function renameRetrying(from: string, to: string, attempts = 5, rename: (from: string, to: string) => void = renameSync): void {
+  for (let i = 1; ; i++) {
+    try {
+      rename(from, to)
+      return
+    } catch (e) {
+      const code = (e as NodeJS.ErrnoException).code
+      if (i >= attempts || (code !== 'EPERM' && code !== 'EBUSY')) throw e
+      sleep(20 * i)
+    }
+  }
+}
+
+/**
  * Runs `fn` while holding an O_EXCL lockfile, shared across processes. A
  * lock older than `staleMs` is assumed abandoned by a dead process and
  * taken over.
@@ -47,7 +68,7 @@ export function writeFileAtomic(path: string, data: string): void {
   const tmp = join(dirname(path), `.${basename(path)}.${process.pid}.${Date.now()}.tmp`)
   writeFileSync(tmp, data)
   try {
-    renameSync(tmp, path)
+    renameRetrying(tmp, path)
   } catch (e) {
     rmSync(tmp, { force: true })
     throw e

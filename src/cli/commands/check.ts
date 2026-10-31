@@ -1,5 +1,5 @@
 import { closeSync, existsSync, mkdirSync, openSync, readFileSync } from 'node:fs'
-import { basename, join } from 'node:path'
+import { basename, join, relative } from 'node:path'
 import { bool, type Args } from '../args.ts'
 import { resolveStore } from '../context.ts'
 import { listEntryFiles } from '../../core/paths.ts'
@@ -35,9 +35,9 @@ export function run(args: Args): number {
     })
   for (const layout of store.layouts) {
     for (const message of configProblems(layout))
-      problems.push({ level: 'error', file: `${layout.projectRoot.split('/').pop()}/decisions/decs.json`, message })
+      problems.push({ level: 'error', file: join(basename(layout.projectRoot), 'decisions', 'decs.json'), message })
     for (const f of listEntryFiles(layout)) {
-      const rel = f.path.replace(`${layout.projectRoot}/`, '')
+      const rel = relative(layout.projectRoot, f.path)
       let d
       let raw = ''
       try {
