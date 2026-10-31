@@ -10,6 +10,7 @@ export interface CommandModule {
 /** Commands load on demand, so `decs get` doesn't pay for the TUI or migrator. */
 const COMMANDS: Record<string, () => Promise<CommandModule>> = {
   init: () => import('./commands/init.ts'),
+  setup: () => import('./commands/setup.ts'),
   send: () => import('./commands/send.ts'),
   add: () => import('./commands/send.ts'),
   new: () => import('./commands/send.ts'),
