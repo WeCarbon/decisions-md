@@ -1,7 +1,4 @@
 import { existsSync } from 'node:fs'
-import { createElement as h } from 'react'
-import { render } from 'ink'
-import { App } from '../../tui/app.ts'
 import { viewFromArg } from '../../tui/views.ts'
 import { MOUSE_OFF, MOUSE_ON } from '../../tui/mouse.ts'
 import { settingValue } from '../../core/settings.ts'
@@ -15,6 +12,12 @@ const ALT_OFF = '\x1b[?1049l'
 export async function run(args: Args): Promise<number> {
   if (bool(args, 'help', 'h')) {
     console.log(t('bench.help'))
+    return 0
+  }
+  if (bool(args, 'json')) {
+    const { benchJson } = await import('../../tui/json.ts')
+    const store = resolveStore(args, { allowRegistry: true, preferRegistry: true, positionalDirs: true })
+    console.log(JSON.stringify(benchJson(store, { project: one(args, 'project', 'p') })))
     return 0
   }
   if (!process.stdout.isTTY) {
@@ -35,6 +38,7 @@ export async function run(args: Args): Promise<number> {
 
   // The alternate screen is entered here rather than inside the app so that
   // every exit path below — clean, signal, or throw — restores it exactly once.
+  const [{ createElement: h }, { render }, { App }] = await Promise.all([import('react'), import('ink'), import('../../tui/app.ts')])
   let restored = false
   const restore = () => {
     if (restored) return

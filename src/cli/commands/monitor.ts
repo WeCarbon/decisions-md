@@ -167,6 +167,7 @@ export async function run(args: Args): Promise<number> {
   const teammate = one(args, 'author') || bool(args, 'mine') || bool(args, 'all') ? undefined : teammateName(sessionCommand())
   const author = one(args, 'author') ?? (bool(args, 'mine') ? resolveAuthor(args) : teammate)
   const asJson = bool(args, 'json')
+  const updates = bool(args, 'updates')
   const withSources = !bool(args, 'no-sources')
   const interval = Math.max(200, Number(one(args, 'interval') ?? 2000) || 2000)
   const unclaimedMs = parseDuration(one(args, 'unclaimed-after') ?? settingValue('unclaimed-after').value)
@@ -196,8 +197,32 @@ export async function run(args: Args): Promise<number> {
     process.stdout.write(`${asJson ? JSON.stringify(json) : text}\n`)
   }
 
-  const pass = () => {
+  const versions = new Map<string, string>()
+  /** Any write at all — an agent's progress, a new node, one archived — as one line of refs, for a window that redraws. */
+  const reportUpdates = (first: boolean) => {
+    const changed: string[] = []
+    const now = new Map(store.all().filter((d) => !author || sameAgent(d.author, author)).map((d) => [`${d.project}#${d.id}`, d]))
+    for (const [key, d] of now) {
+      const version = JSON.stringify([d.updatedAt, d.state, d.archived, d.notes.length, d.answer?.at, d.deferredAt, d.progress, d.title])
+      if (versions.get(key) !== version && !first) changed.push(refOfNode(d))
+      versions.set(key, version)
+    }
+    const gone = [...versions.keys()].filter((k) => !now.has(k))
+    for (const k of gone) versions.delete(k)
+    if (!changed.length && !gone.length) return
+    lastEventAt = Date.now()
+    process.stdout.write(asJson ? `${JSON.stringify({ event: 'updated', refs: changed, gone, at: nowStamp(new Date(), { ms: true }) })}\n` : `DECS-UPDATED ${changed.join(' ')}\n`)
+  }
+
+  const pass = (first = false) => {
     const startedAt = nowStamp(new Date(), { ms: true })
+    if (updates) {
+      try {
+        reportUpdates(first)
+      } catch (err) {
+        process.stdout.write(`DECS-ERROR ${flat((err as Error).message)}\n`)
+      }
+    }
     try {
       for (const e of store.changes(cursor, { author, role: 'human' })) {
         if (e.event === 'created' || e.event === 'completed' || e.event === 'closed') continue
@@ -260,7 +285,7 @@ export async function run(args: Args): Promise<number> {
   } catch (err) {
     process.stdout.write(`DECS-ERROR ${flat((err as Error).message)}\n`)
   }
-  pass()
+  pass(true)
   setInterval(() => {
     pass()
     if (idleExitMs > 0 && Date.now() - lastEventAt >= idleExitMs) {

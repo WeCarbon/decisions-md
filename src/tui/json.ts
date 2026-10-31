@@ -1,0 +1,176 @@
+import { parseBodyRefs, refOf } from '../core/ref.ts'
+import { OPTIONS_HEADING_RE } from '../core/parse.ts'
+import { QUESTIONS_HEADING_RE } from '../core/questions.ts'
+import { toJSON } from '../core/render.ts'
+import { isTerminal } from '../core/status.ts'
+import type { Store } from '../core/store.ts'
+import type { Decision as Item } from '../core/types.ts'
+import { isRtl, lang, t } from '../i18n/index.ts'
+import { targetPath } from '../cli/commands/open.ts'
+import { metaLines, statusSegments, whoOf } from './detail.ts'
+import { bodyRows, canPin, canUseDefault, type BodyRow, type Segment } from './model.ts'
+import { imageName, nodeImages } from './images.ts'
+import {
+  DEFERRED_GROUP, VIEWS, VIEW_EMPTY, VIEW_LABEL, doneGroupKey, glyphOf, isCollapsed, isDeferHidden, isTreeView,
+  keyOf, progressOf, rowsFor, subtreeWaiting, suffixOf, viewCount, type Row, type View,
+} from './views.ts'
+
+/** Wide enough that nothing wraps: the window does its own wrapping. */
+const NO_WRAP = 100_000
+/** The meta block's progress bar is drawn at this many cells; a GUI redraws it as a bar. */
+const META_WIDTH = 60
+
+const plain = (segs: Segment[]) => segs.map(({ text, bold, dim, color }) => ({ text, ...(bold ? { bold } : {}), ...(dim ? { dim } : {}), ...(color ? { color } : {}) }))
+
+/** Who mentions whom, in one pass over every body instead of one per node. */
+function backlinkIndex(store: Store, items: Item[]): Map<string, Item[]> {
+  const letters = new Set(store.layouts.map((l) => store.letterOf(l)))
+  const byRef = new Map(items.map((i) => [`${i.letter ?? ''}${i.id}`, i]))
+  const out = new Map<string, Item[]>()
+  for (const o of items) {
+    const hit = new Set<string>()
+    for (const r of parseBodyRefs(o.body, letters)) {
+      const target = r.letter === 'D' && !letters.has('D') ? items.find((i) => i.project === o.project && i.id === r.id) : byRef.get(`${r.letter}${r.id}`)
+      if (!target || target === o || hit.has(keyOf(target))) continue
+      hit.add(keyOf(target))
+      out.set(keyOf(target), [...(out.get(keyOf(target)) ?? []), o])
+    }
+  }
+  return out
+}
+
+function everyFoldKey(items: Item[]): Set<string> {
+  const keys = new Set<string>([DEFERRED_GROUP])
+  for (const i of items) {
+    keys.add(doneGroupKey(i))
+    keys.add(doneGroupKey({ project: i.project }))
+  }
+  return keys
+}
+
+function rowJson(view: View, row: Row, items: Item[], now: number, fold: string | null): Record<string, unknown> {
+  const base = { key: row.key, kind: row.kind, depth: row.depth, fold }
+  if (row.kind === 'header') return { ...base, text: row.text }
+  if (row.kind === 'fold') return { ...base, text: withoutKeyHint(row.text ?? ''), count: row.finished?.length ?? 0 }
+  const d = row.node!
+  const collapsed = view === 'all' ? Boolean(row.hasKids) && isCollapsed(d, {}) : false
+  const forms = suffixOf(d, items, now, { ...row, collapsed: false })
+  const mark = isTreeView(view) ? subtreeWaiting(d, items) : null
+  return {
+    ...base,
+    node: keyOf(d),
+    ref: refOf(d),
+    title: d.title,
+    state: d.state,
+    glyph: plain([glyphOf(d, items, now)])[0],
+    mark,
+    has_kids: Boolean(row.hasKids),
+    collapsed,
+    context: Boolean(row.context),
+    deferred: isDeferHidden(d, items),
+    progress: progressOf(d) ?? null,
+    badge: plain(forms[0] ?? []),
+    badge_short: plain(forms.at(-1) ?? []),
+  }
+}
+
+/** A fold row's 「+ expands」 is the terminal's key; a window has its own. */
+function withoutKeyHint(text: string): string {
+  for (const hint of [t('bench.fold.collapseSuffix'), t('bench.fold.expandSuffix')]) if (hint && text.endsWith(hint)) return text.slice(0, -hint.length)
+  return text
+}
+
+/** The innermost fold row each row is listed under: a fold holds what follows it at its depth or deeper, until the tree climbs out. */
+function withFolds(rows: Row[]): (string | null)[] {
+  const out: (string | null)[] = []
+  const open: { key: string; depth: number }[] = []
+  for (const r of rows) {
+    if (r.kind === 'header') open.length = 0
+    while (open.length && open.at(-1)!.depth > r.depth) open.pop()
+    out.push(open.at(-1)?.key ?? null)
+    if (r.kind === 'fold') open.push({ key: r.key, depth: r.depth })
+  }
+  return out
+}
+
+/**
+ * The body minus the current round's options and sub-questions: a window
+ * draws those from `options` / `questions` as things to click. Older rounds stay.
+ */
+function withoutLiveChoices(body: string): string {
+  const lines = body.split('\n')
+  for (const re of [OPTIONS_HEADING_RE, QUESTIONS_HEADING_RE]) {
+    const start = lines.findLastIndex((l) => re.test(l))
+    if (start === -1) continue
+    let end = start + 1
+    while (end < lines.length && !/^##[ \t]+\S/.test(lines[end])) end++
+    lines.splice(start, end - start)
+  }
+  return lines.join('\n')
+}
+
+/** The 附件 line bench writes above attachment images is plain text in a terminal; a window draws it as the heading it is. */
+const asHeading = (heading: string) => (r: BodyRow, i: number, rows: BodyRow[]): BodyRow =>
+  !r.style && r.text === heading && rows[i + 1]?.image !== undefined ? { text: heading.replace(/^#+\s*/, ''), style: { bold: true, color: 'cyan' } } : r
+
+function nodeJson(d: Item, items: Item[], now: number, backlinks: Item[]): Record<string, unknown> {
+  const { body: _body, ...fields } = toJSON(d)
+  const images = nodeImages(d).map((im) => ({
+    name: imageName(im),
+    alt: im.alt,
+    target: im.target,
+    path: targetPath(d.file, im.target),
+    source: im.source,
+    attachment: im.attachment ?? null,
+    group: im.group ?? null,
+    caption: im.caption ?? null,
+  }))
+  return {
+    ...fields,
+    key: keyOf(d),
+    who: whoOf(d),
+    can_default: canUseDefault(d),
+    can_pin: canPin(d),
+    status_line: plain(statusSegments(d, items, now)),
+    meta: metaLines(d, items, now, META_WIDTH, backlinks).map(plain),
+    body_rows: bodyRows({ ...d, body: withoutLiveChoices(d.body) }, NO_WRAP, false, nodeImages(d)).map(asHeading(t('bench.detail.attachmentsHeading'))).map((r) => ({
+      text: r.text,
+      ...(r.image !== undefined ? { image: r.image } : {}),
+      ...(r.style ? { style: plain([{ text: '', ...r.style }])[0] } : {}),
+    })),
+    images,
+    attachments: d.attachments.map((a) => ({ label: a.label, target: a.target, path: targetPath(d.file, a.target), image: a.image, group: a.group ?? null, caption: a.caption ?? null })),
+    terminal: isTerminal(d.state),
+    backlinks: backlinks.map((b) => keyOf(b)),
+  }
+}
+
+/** Everything the bench shows, for a window that draws it itself: each view's rows and every node's detail pane. */
+export function benchJson(store: Store, opts: { project?: string; now?: number } = {}): Record<string, unknown> {
+  const now = opts.now ?? Date.now()
+  const all = store.all()
+  const items = opts.project ? all.filter((d) => d.project === opts.project) : all
+  const openAll = { expanded: new Set(items.map(keyOf)), openGroups: everyFoldKey(items) }
+  const views = VIEWS.map((view) => {
+    const rows = rowsFor(view, items, openAll)
+    const folds = withFolds(rows)
+    return {
+      view,
+      label: VIEW_LABEL[view],
+      empty: VIEW_EMPTY[view],
+      count: viewCount(view, items) ?? null,
+      rows: rows.map((r, i) => rowJson(view, r, items, now, folds[i])),
+    }
+  })
+  const links = backlinkIndex(store, items)
+  const nodes = Object.fromEntries(items.map((d) => [keyOf(d), nodeJson(d, items, now, links.get(keyOf(d)) ?? [])]))
+  return {
+    now: new Date(now).toISOString(),
+    lang: lang(),
+    rtl: isRtl(),
+    labels: { defaultMark: t('bench.detail.defaultMark') },
+    projects: store.layouts.map((l) => ({ project: store.projectName(l), letter: store.letterOf(l), root: l.projectRoot })),
+    views,
+    nodes,
+  }
+}
