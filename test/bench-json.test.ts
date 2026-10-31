@@ -66,6 +66,9 @@ test('decs bench --json: finished children sit under their fold row in All; atta
   const png = join(root, 'shot.png')
   writeFileSync(png, Buffer.from('89504e470d0a1a0a', 'hex'))
   decs(root, ['attach', '3', png])
+  decs(root, ['add', 'old work', '--task'])
+  decs(root, ['start', '4'])
+  decs(root, ['done', '4'])
 
   const j = benchJson(root)
   const all = view(j, 'all').rows
@@ -78,6 +81,13 @@ test('decs bench --json: finished children sit under their fold row in All; atta
   const kid = j.nodes[all.find((r) => r.ref === 'X3')!.node!]
   assert.equal(kid.images.length, 1)
   assert.ok(kid.images[0].path.startsWith('/'), kid.images[0].path)
+
+  assert.ok(all.some((r) => r.ref === 'X4'))
+  assert.equal(j.nodes[all.find((r) => r.ref === 'X4')!.node!], undefined, 'archived nodes are listed, not detailed')
+  const done = JSON.parse(decs(root, ['bench', '--json', '--node', '4', '--dir', root]))
+  assert.equal(done.ref, 'X4')
+  assert.equal(done.status, 'completed')
+  assert.ok(Array.isArray(done.body_rows))
 })
 
 test('decs monitor --updates: an agent writing progress is a line, which plain monitor never reports', async (t) => {

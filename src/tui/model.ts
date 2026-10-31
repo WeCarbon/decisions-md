@@ -148,15 +148,17 @@ export function bodyRows(d: Decision, width: number, condensed: boolean, images:
   const find = (alt: string, target: string) =>
     images.findIndex((im, i) => im.source === 'body' && !used.has(i) && im.alt === alt && im.target === target)
   let noteKind: string | undefined
+  // An infinite width is a window that wraps for itself.
+  const wrap = (text: string) => (Number.isFinite(width) ? wrapToWidth(text, width) : [text])
   const pushText = (raw: string) => {
     if (/^#{1,6}[ \t]/.test(raw)) {
       noteKind = parseNoteHeading(raw)?.kind
       const { text, ...style } = styleLine(markDefault(raw, d))
-      for (const piece of wrapToWidth(text, width)) out.push({ text: piece, style })
+      for (const piece of wrap(text)) out.push({ text: piece, style })
       return
     }
     const line = generatedNoteText(raw.trim(), noteKind) ?? raw
-    for (const text of line.trim() ? wrapToWidth(line, width) : ['']) out.push({ text })
+    for (const text of line.trim() ? wrap(line) : ['']) out.push({ text })
   }
   walkBody(condensed ? condense(d) : d.body, (raw, inCode) => {
     const parts = inCode ? [] : splitImageLinks(raw)

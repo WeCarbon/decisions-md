@@ -4,7 +4,7 @@ import { MOUSE_OFF, MOUSE_ON } from '../../tui/mouse.ts'
 import { settingValue } from '../../core/settings.ts'
 import { t } from '../../i18n/index.ts'
 import { bool, one, type Args } from '../args.ts'
-import { resolveStore } from '../context.ts'
+import { requireDecision, resolveStore } from '../context.ts'
 
 const ALT_ON = '\x1b[?1049h'
 const ALT_OFF = '\x1b[?1049l'
@@ -15,9 +15,10 @@ export async function run(args: Args): Promise<number> {
     return 0
   }
   if (bool(args, 'json')) {
-    const { benchJson } = await import('../../tui/json.ts')
-    const store = resolveStore(args, { allowRegistry: true, preferRegistry: true, positionalDirs: true })
-    console.log(JSON.stringify(benchJson(store, { project: one(args, 'project', 'p') })))
+    const { benchJson, nodeDetailJson } = await import('../../tui/json.ts')
+    const ref = one(args, 'node')
+    const store = resolveStore(args, { allowRegistry: true, preferRegistry: true, positionalDirs: !ref })
+    console.log(JSON.stringify(ref ? nodeDetailJson(store, requireDecision(store, ref, args)) : benchJson(store, { project: one(args, 'project', 'p') })))
     return 0
   }
   if (!process.stdout.isTTY) {

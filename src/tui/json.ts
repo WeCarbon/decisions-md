@@ -15,8 +15,8 @@ import {
   keyOf, progressOf, rowsFor, subtreeWaiting, suffixOf, viewCount, type Row, type View,
 } from './views.ts'
 
-/** Wide enough that nothing wraps: the window does its own wrapping. */
-const NO_WRAP = 100_000
+/** The window does its own wrapping. */
+const NO_WRAP = Infinity
 /** The meta block's progress bar is drawn at this many cells; a GUI redraws it as a bar. */
 const META_WIDTH = 60
 
@@ -145,7 +145,18 @@ function nodeJson(d: Item, items: Item[], now: number, backlinks: Item[]): Recor
   }
 }
 
-/** Everything the bench shows, for a window that draws it itself: each view's rows and every node's detail pane. */
+/** One node's detail pane — for an archived node, which `benchJson` lists but leaves out of `nodes`. */
+export function nodeDetailJson(store: Store, d: Item, now = Date.now()): Record<string, unknown> {
+  const items = store.all()
+  const self = items.find((i) => keyOf(i) === keyOf(d)) ?? d
+  return nodeJson(self, items, now, store.backlinks(self, items))
+}
+
+/**
+ * Everything the bench shows, for a window that draws it itself: each view's
+ * rows, and the detail pane of every node still in active/ (archived ones,
+ * often most of a long-lived project, come one at a time via `nodeDetailJson`).
+ */
 export function benchJson(store: Store, opts: { project?: string; now?: number } = {}): Record<string, unknown> {
   const now = opts.now ?? Date.now()
   const all = store.all()
@@ -163,7 +174,7 @@ export function benchJson(store: Store, opts: { project?: string; now?: number }
     }
   })
   const links = backlinkIndex(store, items)
-  const nodes = Object.fromEntries(items.map((d) => [keyOf(d), nodeJson(d, items, now, links.get(keyOf(d)) ?? [])]))
+  const nodes = Object.fromEntries(items.filter((d) => !d.archived).map((d) => [keyOf(d), nodeJson(d, items, now, links.get(keyOf(d)) ?? [])]))
   return {
     now: new Date(now).toISOString(),
     lang: lang(),
