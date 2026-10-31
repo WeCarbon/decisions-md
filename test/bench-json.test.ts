@@ -90,6 +90,25 @@ test('decs bench --json: finished children sit under their fold row in All; atta
   assert.ok(Array.isArray(done.body_rows))
 })
 
+test('decs monitor --with-parent: the monitor goes when the process that started it goes', async (t) => {
+  const root = project(t)
+  const home = scratch()
+  t.after(() => rmSync(home, { recursive: true, force: true }))
+  const parent = spawn(process.execPath, ['-e', 'setTimeout(() => {}, 60000)'])
+  t.after(() => parent.kill())
+  const child = spawn(process.execPath, [BIN, 'monitor', '--with-parent', String(parent.pid), '--interval', '200', '--idle-exit', '0'], {
+    cwd: root,
+    env: { ...process.env, NO_COLOR: '1', DECS_AUTHOR: 'cli-test · lane', CLAUDECODE: '1', DECS_HOME: home },
+  })
+  t.after(() => child.kill())
+  const exited = new Promise<number | null>((resolve) => child.once('exit', (code) => resolve(code)))
+  await new Promise((r) => setTimeout(r, 600))
+  assert.equal(child.exitCode, null, 'still running while the parent is')
+  parent.kill()
+  const code = await Promise.race([exited, new Promise<string>((r) => setTimeout(() => r('timeout'), 5000))])
+  assert.equal(code, 0)
+})
+
 test('decs monitor --updates: an agent writing progress is a line, which plain monitor never reports', async (t) => {
   const root = project(t)
   const home = scratch()

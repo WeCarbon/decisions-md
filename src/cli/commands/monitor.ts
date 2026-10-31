@@ -155,6 +155,15 @@ function nodeLine(e: ChangeEvent): string {
   return `${e.ref} ${t('cli.monitor.line', { what, title: e.title })}${text ? ` —— ${text}` : ''}  since=${e.at}`
 }
 
+function alive(pid: number): boolean {
+  try {
+    process.kill(pid, 0)
+    return true
+  } catch (e) {
+    return (e as NodeJS.ErrnoException).code === 'EPERM'
+  }
+}
+
 export async function run(args: Args): Promise<number> {
   if (bool(args, 'help', 'h')) {
     console.log(help())
@@ -286,7 +295,10 @@ export async function run(args: Args): Promise<number> {
     process.stdout.write(`DECS-ERROR ${flat((err as Error).message)}\n`)
   }
   pass(true)
+  const parent = Number(one(args, 'with-parent') ?? 0)
   setInterval(() => {
+    // A window that started this monitor and then died (or was killed) takes it along.
+    if (parent > 0 && !alive(parent)) process.exit(0)
     pass()
     if (idleExitMs > 0 && Date.now() - lastEventAt >= idleExitMs) {
       process.stdout.write(`DECS-IDLE ${t('cli.monitor.idle', { duration: durationText(idleExitMs) })}\n`)
