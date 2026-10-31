@@ -3,5 +3,5 @@
 // see plugin/resolve.mjs for why.
 import { moduleUrl } from './resolve.mjs'
 
-const { main } = await import(moduleUrl('bin', 'decs.ts'))
+const { main } = await import(moduleUrl('src', 'cli', 'index.ts'))
 process.exitCode = await main(process.argv.slice(2))
