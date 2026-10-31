@@ -3,6 +3,7 @@ import * as api from './backend.ts'
 import { Body } from './body.tsx'
 import { Bar, Glyph, Segs } from './segs.tsx'
 import { hiddenCount, isSelectable, nodeCollapsed, reveal, visibleRows, type Folds } from './rows.ts'
+import { Settings } from './settings.tsx'
 import { s } from './strings.ts'
 import type { Bench as BenchData, Node, Row, View, ViewName } from './types.ts'
 
@@ -60,6 +61,31 @@ export function Bench(props: {
   const [busy, setBusy] = useState(false)
   const [palette, setPalette] = useState(false)
   const [help, setHelp] = useState(false)
+  const [settingsOpen, setSettingsOpen] = useState(() => new URLSearchParams(location.search).has('settings'))
+  // Summoned by the hotkey: no transitions, so what you see is the decision, at once.
+  const instant = () => {
+    document.documentElement.classList.add('instant')
+    setTimeout(() => document.documentElement.classList.remove('instant'), 400)
+  }
+  const summonRef = useRef<(key: string) => void>(() => {})
+  summonRef.current = (key: string) => {
+    instant()
+    setPalette(false)
+    setHelp(false)
+    setLightbox(null)
+    if (key && bench.nodes[key]) {
+      const decide = bench.views.find((v) => v.view === 'decide')
+      const folds = decide ? reveal(bench, decide, key, prefs.folds) : null
+      if (folds) setPrefs({ view: 'decide', folds, selected: key })
+      else jump(key)
+    } else setPrefs({ view: 'decide' })
+
+    setTimeout(() => void api.summoned('window'), 0)
+  }
+  useEffect(() => {
+    void api.on<string>('summon', (key) => summonRef.current(key))
+    void api.on<null>('open-settings', () => setSettingsOpen(true))
+  }, [])
   const [lightbox, setLightbox] = useState<number | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [toast, showToast] = useToast()
@@ -201,6 +227,7 @@ export function Bench(props: {
         if (lightbox !== null) return setLightbox(null)
         if (palette) return setPalette(false)
         if (help) return setHelp(false)
+        if (settingsOpen) return setSettingsOpen(false)
         if (composer) {
           setComposer(null)
           ;(document.activeElement as HTMLElement | null)?.blur()
@@ -209,7 +236,7 @@ export function Bench(props: {
         setError(null)
         return
       }
-      if (palette || isTyping(e)) return
+      if (palette || settingsOpen || isTyping(e)) return
       if (lightbox !== null) {
         if (!node) return
         if (e.key === 'ArrowRight') setLightbox((i) => Math.min(node.images.length - 1, (i ?? 0) + 1))
@@ -225,6 +252,10 @@ export function Bench(props: {
       if (meta && e.key.toLowerCase() === 'r') {
         e.preventDefault()
         return void refresh()
+      }
+      if (meta && e.key === ',') {
+        e.preventDefault()
+        return setSettingsOpen(true)
       }
       if (meta && e.key.toLowerCase() === 'o') {
         e.preventDefault()
@@ -343,9 +374,16 @@ export function Bench(props: {
             <span class="pulse" />
             {props.refreshing ? s('refreshing') : s('live')}
           </span>
-          <button class="kbd-hint" onClick={() => setHelp(true)}>
-            <kbd>?</kbd> {s('shortcuts')}
-          </button>
+          <span class="foot-buttons">
+            <button class="kbd-hint" onClick={() => setSettingsOpen(true)} title={`${s('settingsTitle')} (⌘,)`}>
+              <svg viewBox="0 0 16 16" class="ico">
+                <path d="M6.9 1.5h2.2l.4 1.8 1.2.6 1.6-1 1.6 1.6-1 1.6.5 1.2 1.8.4v2.2l-1.8.4-.5 1.2 1 1.6-1.6 1.6-1.6-1-1.2.5-.4 1.8H6.9l-.4-1.8-1.2-.5-1.6 1-1.6-1.6 1-1.6-.5-1.2-1.8-.4V6.9l1.8-.4.5-1.2-1-1.6 1.6-1.6 1.6 1 1.2-.5zM8 5.6a2.4 2.4 0 1 0 0 4.8 2.4 2.4 0 0 0 0-4.8z" />
+              </svg>
+            </button>
+            <button class="kbd-hint" onClick={() => setHelp(true)}>
+              <kbd>?</kbd> {s('shortcuts')}
+            </button>
+          </span>
         </footer>
       </aside>
 
@@ -413,6 +451,7 @@ export function Bench(props: {
 
       {palette && <Palette rows={bench.views.find((v) => v.view === 'all')?.rows ?? []} onPick={(k) => (setPalette(false), jump(k))} onClose={() => setPalette(false)} />}
       {help && <Help onClose={() => setHelp(false)} />}
+      {settingsOpen && <Settings onClose={() => setSettingsOpen(false)} />}
       {lightbox !== null && node?.images[lightbox] && (
         <div class="lightbox" onClick={() => setLightbox(null)}>
           <img src={api.imageSrc(node.images[lightbox].path)} alt={node.images[lightbox].name} />
@@ -767,6 +806,7 @@ function Help({ onClose }: { onClose: () => void }) {
     ['W', s('keyNext')],
     ['J K', s('keyScroll')],
     ['⌘O', s('keyAdd')],
+    ['⌘,', s('keySettings')],
     ['Esc', s('keyClose')],
   ]
   return (

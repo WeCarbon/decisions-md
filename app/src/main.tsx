@@ -3,9 +3,11 @@ import { useCallback, useEffect, useRef, useState } from 'preact/hooks'
 import * as api from './backend.ts'
 import { Bench, type Prefs } from './bench.tsx'
 import { Onboarding, envReady } from './onboarding.tsx'
-import { setLanguage } from './strings.ts'
+import { Banner } from './banner.tsx'
+import { s, setLanguage, whenLanguageSet } from './strings.ts'
 import type { Bench as BenchData, ShellEnv } from './types.ts'
 import './style.css'
+import './panels.css'
 
 const params = new URLSearchParams(location.search)
 const forcedTheme = params.get('theme')
@@ -115,6 +117,17 @@ function App({ prefs0, snapshot }: { prefs0: Prefs; snapshot: BenchData | null }
 window.addEventListener('error', (e) => api.log(`error: ${e.message} at ${e.filename}:${e.lineno}`))
 window.addEventListener('unhandledrejection', (e) => api.log(`unhandled: ${String(e.reason)}`))
 
+whenLanguageSet(() =>
+  void api.setPhrases({ needsDecision: s('phraseNeedsDecision'), notCollected: s('phraseNotCollected'), open: s('trayOpen'), settings: s('traySettings'), quit: s('trayQuit') }),
+)
+
+async function bootBanner() {
+  document.documentElement.classList.add('banner-window')
+  const cached = await api.snapshotLoad()
+  if (cached) setLanguage(cached.lang, cached.rtl)
+  render(<Banner />, document.getElementById('app')!)
+}
+
 async function boot() {
   const [prefs, snapshot] = await Promise.all([api.prefsLoad(DEFAULT_PREFS), api.snapshotLoad()])
   if (params.get('view')) prefs.view = params.get('view') as Prefs['view']
@@ -124,4 +137,4 @@ async function boot() {
   setTimeout(() => void api.ready(snapshot ? 'first frame (cached bench)' : 'first frame'), 0)
 }
 
-void boot()
+void (params.has('banner') ? bootBanner() : boot())

@@ -105,9 +105,64 @@ function demoSetup(agents: Agent[], dryRun: boolean): SetupResult {
 
 export async function startMonitor(onChange: () => void): Promise<void> {
   if (!inDesktop) return
-  const { listen } = await import('@tauri-apps/api/event')
-  await listen<string>('decs-event', () => onChange())
+  await on<string>('decs-event', () => onChange())
   await invoke('monitor_start').catch(() => {})
+}
+
+/** Events the app side sends this window: `summon` (hotkey or tray, with a node key), `open-settings`, `banner-show`. */
+export async function on<T>(event: string, handler: (payload: T) => void): Promise<void> {
+  if (!inDesktop) return
+  const { getCurrentWebviewWindow } = await import('@tauri-apps/api/webviewWindow')
+  const { listen } = await import('@tauri-apps/api/event')
+  if (event === 'decs-event' || event === 'waiting') await listen<T>(event, (e) => handler(e.payload))
+  else await getCurrentWebviewWindow().listen<T>(event, (e) => handler(e.payload))
+}
+
+export type NotifyStyle = 'system' | 'banner' | 'off'
+
+export interface AppSettings {
+  notify: NotifyStyle
+  hotkey: string
+  keepInTray: boolean
+}
+
+export interface SettingsView {
+  settings: AppSettings
+  defaultHotkey: string
+  ctrlSpaceTaken: boolean
+  hotkeyError: string | null
+}
+
+export async function settingsGet(): Promise<SettingsView> {
+  if (!inDesktop) return { settings: { notify: 'system', hotkey: 'Ctrl+Alt+Space', keepInTray: true }, defaultHotkey: 'Ctrl+Alt+Space', ctrlSpaceTaken: true, hotkeyError: null }
+  return invoke<SettingsView>('settings_get')
+}
+
+export const settingsSet = (settings: AppSettings) => (inDesktop ? invoke<void>('settings_set', { settings }) : Promise.resolve())
+
+export const setPhrases = (phrases: { needsDecision: string; notCollected: string; open: string; settings: string; quit: string }) => (inDesktop ? invoke('set_phrases', { phrases }).catch(() => {}) : Promise.resolve())
+
+export const summoned = (what: string) => (inDesktop ? invoke('summoned', { what }).catch((e) => log(`summoned: ${e}`)) : Promise.resolve())
+
+export const bannerHide = () => (inDesktop ? invoke('banner_hide').catch(() => {}) : Promise.resolve())
+
+export const bannerOpenMain = (key: string) => (inDesktop ? invoke('banner_open_main', { key }).catch(() => {}) : Promise.resolve())
+
+export interface WaitingNode {
+  key: string
+  id: number
+  ref: string
+  project: string
+  title: string
+  root: string
+  options: { key: string; label: string }[]
+  default: string | null
+  urgent: boolean
+}
+
+export async function waitingGet(): Promise<WaitingNode[]> {
+  if (!inDesktop) return []
+  return invoke<WaitingNode[]>('waiting_get')
 }
 
 export async function snapshotLoad(): Promise<Bench | null> {

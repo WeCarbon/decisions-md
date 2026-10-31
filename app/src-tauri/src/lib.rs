@@ -1,31 +1,33 @@
+mod watch;
+
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 use std::process::Stdio;
+use std::sync::atomic::Ordering;
 use std::sync::Mutex;
 use std::time::Instant;
-use tauri::{AppHandle, Emitter, Manager, State};
-use tokio::io::{AsyncBufReadExt, BufReader};
+use tauri::{AppHandle, Manager, State, WindowEvent};
 use tokio::process::Command;
 
 const NPM_PACKAGE: &str = "@wecarbon/decisions-md";
 
-struct AppState {
+pub(crate) struct AppState {
     started: Instant,
     #[cfg(debug_assertions)]
     script_ran: std::sync::atomic::AtomicBool,
     env: Mutex<Option<ShellEnv>>,
-    monitor: Mutex<Option<u32>>,
+    pub(crate) monitor: Mutex<Option<u32>>,
 }
 
 /// What a login shell would find. A GUI app starts with launchd's bare PATH,
 /// so `node` and `decs` are looked up the way the owner's terminal does.
 #[derive(Clone, Serialize, Deserialize)]
-struct ShellEnv {
+pub(crate) struct ShellEnv {
     path: String,
     node: Option<String>,
     node_version: Option<String>,
     npm: Option<String>,
-    decs: Option<String>,
+    pub(crate) decs: Option<String>,
     decs_version: Option<String>,
 }
 
@@ -37,7 +39,7 @@ struct RunOutput {
 }
 
 /// `DECS_APP_DATA` points the app's own state (prefs, cached bench) elsewhere — a second profile, or a test run.
-fn data_dir(app: &AppHandle) -> PathBuf {
+pub(crate) fn data_dir(app: &AppHandle) -> PathBuf {
     let dir = std::env::var_os("DECS_APP_DATA")
         .map(PathBuf::from)
         .unwrap_or_else(|| app.path().app_data_dir().unwrap_or_else(|_| std::env::temp_dir().join("decs-app")));
@@ -121,6 +123,12 @@ fn refresh_env(app: &AppHandle, state: &AppState) -> ShellEnv {
     env
 }
 
+/// The environment decs runs in, probing the login shell only when nothing is cached.
+pub(crate) fn env_now(app: &AppHandle) -> Option<ShellEnv> {
+    let state = app.state::<AppState>();
+    cached_env(app, &state).or_else(|| Some(refresh_env(app, &state)))
+}
+
 #[tauri::command]
 async fn shell_env(app: AppHandle, state: State<'_, AppState>, refresh: bool) -> Result<ShellEnv, String> {
     if !refresh {
@@ -131,7 +139,7 @@ async fn shell_env(app: AppHandle, state: State<'_, AppState>, refresh: bool) ->
     Ok(refresh_env(&app, &state))
 }
 
-fn decs_command(env: &ShellEnv, args: &[String], cwd: Option<&str>) -> Result<Command, String> {
+pub(crate) fn decs_command(env: &ShellEnv, args: &[String], cwd: Option<&str>) -> Result<Command, String> {
     let bin = env.decs.clone().ok_or("decs is not installed")?;
     let mut cmd = Command::new(bin);
     cmd.args(args)
@@ -161,40 +169,10 @@ async fn decs(app: AppHandle, state: State<'_, AppState>, args: Vec<String>, cwd
     })
 }
 
-/// `decs monitor --updates --json`, one `decs-event` per line, restarted whenever it exits.
+/// Starts the watch if it is not running yet (after onboarding installed or found decs).
 #[tauri::command]
-async fn monitor_start(app: AppHandle, state: State<'_, AppState>) -> Result<(), String> {
-    if state.monitor.lock().unwrap().is_some() {
-        return Ok(());
-    }
-    let env = cached_env(&app, &state).unwrap_or_else(|| refresh_env(&app, &state));
-    if env.decs.is_none() {
-        return Err("decs is not installed".into());
-    }
-    *state.monitor.lock().unwrap() = Some(0);
-    let args: Vec<String> = ["monitor", "--updates", "--json", "--idle-exit", "0", "--interval", "800", "--all"]
-        .iter()
-        .map(|s| s.to_string())
-        .collect();
-    tauri::async_runtime::spawn(async move {
-        loop {
-            let Ok(mut cmd) = decs_command(&env, &args, None) else { break };
-            cmd.stdout(Stdio::piped()).stderr(Stdio::null()).kill_on_drop(true);
-            if let Ok(mut child) = cmd.spawn() {
-                if let Some(pid) = child.id() {
-                    *app.state::<AppState>().monitor.lock().unwrap() = Some(pid);
-                }
-                if let Some(stdout) = child.stdout.take() {
-                    let mut lines = BufReader::new(stdout).lines();
-                    while let Ok(Some(line)) = lines.next_line().await {
-                        let _ = app.emit("decs-event", line);
-                    }
-                }
-                let _ = child.wait().await;
-            }
-            tokio::time::sleep(std::time::Duration::from_secs(2)).await;
-        }
-    });
+async fn monitor_start(app: AppHandle) -> Result<(), String> {
+    watch::start_monitor(&app);
     Ok(())
 }
 
@@ -311,6 +289,9 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_notification::init())
+        .plugin(tauri_plugin_global_shortcut::Builder::new().with_handler(|app, _, event| watch::on_hotkey(app, event.state)).build())
+        .manage(watch::Watch::default())
         .manage(AppState {
             started,
             #[cfg(debug_assertions)]
@@ -330,9 +311,29 @@ pub fn run() {
             install_decs,
             log,
             pick_folder,
-            e2e_shot
+            e2e_shot,
+            watch::settings_get,
+            watch::settings_set,
+            watch::set_phrases,
+            watch::waiting_get,
+            watch::banner_hide,
+            watch::banner_open_main,
+            watch::summoned,
+            watch::press_hotkey
         ])
+        .on_window_event(|window, event| {
+            // Closing the window keeps decs in the menu bar / tray; Quit is in the tray menu.
+            if let WindowEvent::CloseRequested { api, .. } = event {
+                let app = window.app_handle();
+                let quitting = app.state::<watch::Watch>().quitting.load(Ordering::SeqCst);
+                if window.label() == "banner" || (!quitting && watch::settings(app).keep_in_tray) {
+                    api.prevent_close();
+                    let _ = window.hide();
+                }
+            }
+        })
         .setup(|app| {
+            watch::init(app.handle());
             // Shown by `ready` once the first frame is drawn; this is only the fallback if the page never says so.
             let handle = app.handle().clone();
             tauri::async_runtime::spawn(async move {
@@ -340,10 +341,16 @@ pub fn run() {
                 if let Some(w) = handle.get_webview_window("main") {
                     if !w.is_visible().unwrap_or(true) {
                         let _ = w.show();
-                    }                }
+                    }
+                }
             });
             Ok(())
         })
-        .run(tauri::generate_context!())
-        .expect("error while running decs");
+        .build(tauri::generate_context!())
+        .expect("error while building decs")
+        .run(|app, event| {
+            if let tauri::RunEvent::Exit = event {
+                watch::stop_monitor(app);
+            }
+        });
 }

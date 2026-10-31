@@ -135,6 +135,29 @@
     box.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }))
     await until('X1 selected', () => $('.row.sel')?.textContent.includes('X1'))
 
+    log('STEP hotkey-window')
+    // System-style notifications: the hotkey brings the main window up on the most urgent decision.
+    await invoke('settings_set', { settings: { notify: 'off', hotkey: '', keepInTray: true } })
+    $$('.nav-item').find((b) => b.textContent.includes('All')).click()
+    await sleep(300)
+    await invoke('press_hotkey', { hideFirst: true })
+    await until('decide view after hotkey', () => $('.nav-item.on')?.textContent.includes('Decide'))
+    await until('the waiting decision selected', () => $('.row.sel')?.textContent.includes('Rename the bucket'))
+
+    log('STEP hotkey-banner')
+    await invoke('settings_set', { settings: { notify: 'banner', hotkey: '', keepInTray: true } })
+    await invoke('press_hotkey', { hideFirst: true })
+    await sleep(1500)
+    await invoke('banner_open_main', { key: '' })
+    await sleep(300)
+
+    log('STEP settings')
+    key(',', { metaKey: true })
+    await until('settings', () => $('.settings'))
+    await shot('settings')
+    key('Escape')
+    await until('settings closed', () => !$('.settings'))
+
     log('STEP help')
     await sleep(300)
     key('?')

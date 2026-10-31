@@ -100,6 +100,7 @@ export interface Node {
   can_default: boolean
   can_pin: boolean
   pin: 'top' | 'bottom' | null
+  urgency: 'high' | 'normal' | 'low'
   status_line: Seg[]
   meta: Seg[][]
   body_rows: BodyRow[]

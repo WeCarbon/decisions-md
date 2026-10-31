@@ -10,9 +10,11 @@ shots=${1:-}
 work=$(mktemp -d "${TMPDIR:-/tmp}/decs-e2e.XXXXXX")
 trap '[ -n "$shots" ] && cp "$work/log" "$shots/app.log"; rm -rf "$work"' EXIT
 
-export DECS_HOME="$work/home" DECS_APP_DATA="$work/app" DECS_LANG=en
+export DECS_HOME="$work/home" DECS_APP_DATA="$work/app" DECS_LANG=en DECS_APP_TIMING=1
 export DECS_BIN="$repo/bin/decs" DECS_APP_PICK="$work/shop" DECS_APP_SCRIPT="$here/walkthrough.js"
-mkdir -p "$DECS_HOME" "$DECS_APP_PICK"
+mkdir -p "$DECS_HOME" "$DECS_APP_PICK" "$DECS_APP_DATA"
+# No real notifications and no global hotkey during the run: the walkthrough sets what it tests.
+printf '{"notify":"off","hotkey":"","keepInTray":true}' > "$DECS_APP_DATA/settings.json"
 decs() { (cd "$DECS_APP_PICK" && DECS_AUTHOR="lane-db · schema" CLAUDECODE=1 "$DECS_BIN" "$@" >/dev/null); }
 decs init --no-register
 decs add "Pick a database" -o 1=SQLite 2=Postgres --body "Both work for the first year."
@@ -44,7 +46,14 @@ for _ in $(seq 1 600); do
     esac
   done
   seen=$lines
-  if grep -q "decs-app: DONE" "$work/log"; then status=0; break; fi
+  if grep -q "decs-app: DONE" "$work/log"; then
+    # A decision filed while the app runs must reach the tray and be announced.
+    decs add "Pick a CDN" -o 1=Keep 2=Switch
+    for _ in $(seq 1 50); do grep -q "announce X8" "$work/log" && break; sleep 0.2; done
+    grep -q "announce X8" "$work/log" && status=0
+    grep -E "hotkey|announce|tray" "$work/log" || true
+    break
+  fi
   if grep -q "decs-app: FAIL" "$work/log"; then sleep 2; break; fi
 done
 kill "$pid" 2>/dev/null || true

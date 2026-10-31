@@ -18,6 +18,13 @@ export function setLanguage(lang: string, rtl = false): void {
   table = TABLES[lang] ?? en
   document.documentElement.lang = lang
   document.documentElement.dir = rtl ? 'rtl' : 'ltr'
+  onLanguage?.()
+}
+
+let onLanguage: (() => void) | undefined
+/** Runs after every language change — the app side words its notifications with it. */
+export function whenLanguageSet(fn: () => void): void {
+  onLanguage = fn
 }
 
 export function s(key: StringKey, vars: Record<string, string | number> = {}): string {
