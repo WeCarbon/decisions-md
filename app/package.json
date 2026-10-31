@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "tauri": "tauri",
-    "demo-data": "node scripts/demo-data.ts"
+    "demo-data": "node scripts/demo-data.ts",
+    "dmg": "sh scripts/dmg.sh"
   },
   "dependencies": {
     "@tauri-apps/api": "^2.12.4",
