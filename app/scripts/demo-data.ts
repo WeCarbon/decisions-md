@@ -13,6 +13,7 @@ const here = fileURLToPath(new URL('.', import.meta.url))
 const BIN = join(here, '../../bin/decs.ts')
 const OUT = join(here, '../public/demo')
 const SHOT = join(here, 'signin-preview.png')
+const OLD_SHOT = join(here, 'signin-old.png')
 const FAKE_HOME = '/Users/alice/Code'
 
 const scratch = mkdtempSync(join(tmpdir(), 'decs-demo-'))
@@ -66,7 +67,7 @@ Zero new infra. Revoking means rotating the signing key — everyone signs out.
 ### 2 · Move sessions to Redis
 About a day of work plus a small Redis instance. Per-device sign-out comes for free.
 `)
-decs(web, auth, ['attach', '2', SHOT, '--name', 'New sign-in screen'])
+decs(web, auth, ['attach', '2', '--label', 'Before', OLD_SHOT, '--label', 'After', SHOT])
 decs(web, auth, ['add', 'Rate-limit the login endpoint', '--task', '--parent', '1', '--after', 'W2'])
 decs(web, auth, ['add', 'Write the user-table migration', '--task', '--parent', '1'])
 decs(web, auth, ['start', '4'])
@@ -78,6 +79,7 @@ decs(web, build, ['progress', '30', '--node', '5', '--msg', 'build passes, tests
 decs(web, build, ['add', 'Drop the legacy browser build?', '--after', 'W5', '-o', 'default:1=Drop it', '2=Keep it one more release', '--body', '**What** The legacy build adds 40s to every CI run and 2% of visits use it.'])
 
 decs(web, docs, ['add', 'Pick a font for the docs site', '-o', '1=Inter', 'default:2=System font stack', '--body', 'Both read well; Inter costs 90 KB.'])
+decs(web, docs, ['pin', '6', 'top'])
 decs(web, docs, ['push', '7', '2', '--note', 'system stack, keep it light', '--human'])
 decs(web, docs, ['add', 'Publish the API reference', '--task'])
 decs(web, docs, ['start', '8'])
@@ -86,6 +88,8 @@ decs(web, docs, ['add', 'Clean up old feature flags', '--task'])
 decs(web, docs, ['defer', '9', '--human'])
 decs(web, docs, ['add', 'Release notes are ready', '--body', 'Drafted from the merged PRs; 6 items, nothing breaking.'])
 decs(web, auth, ['note', '1', 'Passkey screen merged behind a flag; cookies stay the default until W2 is answered.', '--agent'])
+decs(web, 'lane-auth-session-store-migration-and-rollout · long-running', ['note', '1', '会话存储迁移进行到一半：旧的签名 cookie 还在读，新会话已经双写到 Redis 测试实例。压测在 2000 并发下 p99 是 41 毫秒，比现在慢 6 毫秒，主要花在序列化上，换成 MessagePack 之后应该能追回来。回滚开关放在 SESSION_BACKEND 环境变量里，默认还是 cookie，W2 答复之前不会切。', '--agent'])
+decs(web, 'owner', ['note', '1', 'Redis 那边先别动，等 Carol 确认预算之后再说；如果周四之前没消息就按默认走。', '--human'], '')
 
 decs(api, orders, ['add', 'Pagination for /orders', '--task'])
 decs(api, orders, ['start', '1'])
@@ -104,5 +108,6 @@ const json = execFileSync(process.execPath, [BIN, 'bench', '--json', web, api], 
 mkdirSync(OUT, { recursive: true })
 writeFileSync(join(OUT, 'bench.json'), json.split(scratch).join(FAKE_HOME))
 copyFileSync(SHOT, join(OUT, 'signin-preview.png'))
+copyFileSync(OLD_SHOT, join(OUT, 'signin-old.png'))
 rmSync(scratch, { recursive: true, force: true })
 console.log(`wrote ${join(OUT, 'bench.json')}`)

@@ -11,6 +11,8 @@ const NPM_PACKAGE: &str = "@wecarbon/decisions-md";
 
 struct AppState {
     started: Instant,
+    #[cfg(debug_assertions)]
+    script_ran: std::sync::atomic::AtomicBool,
     env: Mutex<Option<ShellEnv>>,
     monitor: Mutex<Option<u32>>,
 }
@@ -34,8 +36,11 @@ struct RunOutput {
     stderr: String,
 }
 
+/// `DECS_APP_DATA` points the app's own state (prefs, cached bench) elsewhere — a second profile, or a test run.
 fn data_dir(app: &AppHandle) -> PathBuf {
-    let dir = app.path().app_data_dir().unwrap_or_else(|_| std::env::temp_dir().join("decs-app"));
+    let dir = std::env::var_os("DECS_APP_DATA")
+        .map(PathBuf::from)
+        .unwrap_or_else(|| app.path().app_data_dir().unwrap_or_else(|_| std::env::temp_dir().join("decs-app")));
     let _ = std::fs::create_dir_all(&dir);
     dir
 }
@@ -135,8 +140,12 @@ fn decs_command(env: &ShellEnv, args: &[String], cwd: Option<&str>) -> Result<Co
         .env_remove("CLAUDECODE")
         .env_remove("DECS_ROLE")
         .stdin(Stdio::null());
-    if let Some(dir) = cwd {
-        cmd.current_dir(dir);
+    // Never the app's own working directory: decs would fall back to whatever project that happens to be in.
+    match cwd.map(PathBuf::from).or_else(|| std::env::var_os("HOME").map(PathBuf::from)) {
+        Some(dir) => {
+            cmd.current_dir(dir);
+        }
+        None => {}
     }
     Ok(cmd)
 }
@@ -223,7 +232,53 @@ fn ready(app: AppHandle, state: State<'_, AppState>, what: String) -> u128 {
     if std::env::var("DECS_APP_TIMING").is_ok() {
         eprintln!("decs-app: {what} {ms} ms after launch");
     }
+    #[cfg(debug_assertions)]
+    run_script_once(&app, &state);
     ms
+}
+
+/// Debug builds only: `DECS_APP_SCRIPT=<file.js>` runs that file in the page once it is up — how the
+/// window is driven end to end without anyone clicking.
+#[cfg(debug_assertions)]
+fn run_script_once(app: &AppHandle, state: &AppState) {
+    use std::sync::atomic::Ordering;
+    if state.script_ran.swap(true, Ordering::SeqCst) {
+        return;
+    }
+    let Some(path) = std::env::var_os("DECS_APP_SCRIPT") else { return };
+    match (std::fs::read_to_string(&path), app.get_webview_window("main")) {
+        (Ok(js), Some(w)) => {
+            let _ = w.eval(&js);
+        }
+        (Err(e), _) => eprintln!("decs-app: DECS_APP_SCRIPT: {e}"),
+        _ => {}
+    }
+}
+
+/// A `SHOT <name> x y w h` line (window bounds in points) for the e2e runner to capture.
+#[tauri::command]
+fn e2e_shot(app: AppHandle, name: String) {
+    if let Some(w) = app.get_webview_window("main") {
+        let scale = w.scale_factor().unwrap_or(1.0);
+        if let (Ok(p), Ok(s)) = (w.outer_position(), w.outer_size()) {
+            let (p, s) = (p.to_logical::<f64>(scale), s.to_logical::<f64>(scale));
+            eprintln!("decs-app: SHOT {name} {} {} {} {}", p.x, p.y, s.width, s.height);
+        }
+    }
+}
+
+/// The folder picker. `DECS_APP_PICK` answers it without a dialog, for scripted runs.
+#[tauri::command]
+async fn pick_folder(app: AppHandle) -> Option<String> {
+    if let Ok(dir) = std::env::var("DECS_APP_PICK") {
+        return Some(dir);
+    }
+    use tauri_plugin_dialog::DialogExt;
+    let (tx, rx) = tokio::sync::oneshot::channel();
+    app.dialog().file().pick_folder(move |picked| {
+        let _ = tx.send(picked.and_then(|p| p.into_path().ok()).map(|p| p.to_string_lossy().into_owned()));
+    });
+    rx.await.ok().flatten()
 }
 
 /// Errors the page hits, on the app's stderr: the window has no console in a release build.
@@ -256,7 +311,13 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
-        .manage(AppState { started, env: Mutex::new(None), monitor: Mutex::new(None) })
+        .manage(AppState {
+            started,
+            #[cfg(debug_assertions)]
+            script_ran: Default::default(),
+            env: Mutex::new(None),
+            monitor: Mutex::new(None),
+        })
         .invoke_handler(tauri::generate_handler![
             shell_env,
             decs,
@@ -267,7 +328,9 @@ pub fn run() {
             prefs_save,
             ready,
             install_decs,
-            log
+            log,
+            pick_folder,
+            e2e_shot
         ])
         .setup(|app| {
             // Shown by `ready` once the first frame is drawn; this is only the fallback if the page never says so.

@@ -155,7 +155,12 @@ kbd {
 .shell {
   display: grid;
   grid-template-columns: 216px minmax(360px, 1fr) minmax(420px, 1.08fr);
+  grid-template-rows: 100%;
   height: 100%;
+}
+
+.shell > * {
+  min-height: 0;
 }
 
 .boot {
@@ -423,8 +428,8 @@ kbd {
 }
 
 .title {
-  flex: 1;
-  min-width: 0;
+  flex: 1 1 auto;
+  min-width: 7em;
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -447,14 +452,29 @@ kbd {
 }
 
 .badge {
-  flex: none;
+  flex: 0 1 auto;
+  min-width: 0;
   display: inline-flex;
   align-items: center;
   gap: 6px;
   font-size: 11.5px;
   color: var(--text-2);
-  max-width: 48%;
   overflow: hidden;
+  white-space: nowrap;
+}
+
+.badge.short {
+  display: none;
+}
+
+.list {
+  container-type: inline-size;
+}
+
+/* A narrow list shows each row's shortest badge, so titles keep their room. */
+@container (max-width: 560px) {
+  .badge.full { display: none; }
+  .badge.short { display: inline-flex; }
 }
 
 .bar {
@@ -490,6 +510,7 @@ kbd {
 /* ---------- detail ---------- */
 
 .detail-pane {
+  container-type: inline-size;
   background: var(--panel);
   display: flex;
   flex-direction: column;
@@ -826,6 +847,7 @@ kbd {
 }
 
 .note {
+  display: block;
   margin: 18px 0;
   padding: 12px 16px 2px;
   border-radius: var(--radius);
@@ -836,15 +858,37 @@ kbd {
   display: flex;
   align-items: center;
   gap: 8px;
+  width: 100%;
+  min-width: 0;
   font-size: 11.5px;
-  font-weight: 600;
+  white-space: nowrap;
   margin-bottom: 6px;
+}
+
+.note .who {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  flex: 0 1 auto;
+}
+
+.note .role,
+.note .when {
+  flex: none;
+  color: var(--text-3);
+  font-weight: 400;
 }
 
 .note .dot {
   width: 7px;
   height: 7px;
   border-radius: 50%;
+  flex: none;
+}
+
+.note > .note-body {
+  overflow-wrap: anywhere;
 }
 
 .note.human header { color: var(--magenta); }
@@ -1402,7 +1446,7 @@ kbd {
   margin-bottom: 22px;
 }
 
-.agent {
+.agent-pick {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -1416,11 +1460,11 @@ kbd {
   transition: box-shadow 140ms ease;
 }
 
-.agent input {
+.agent-pick input {
   display: none;
 }
 
-.agent .box {
+.agent-pick .box {
   width: 18px;
   height: 18px;
   border-radius: 5px;
@@ -1431,11 +1475,11 @@ kbd {
   color: var(--accent-text);
 }
 
-.agent.on {
+.agent-pick.on {
   box-shadow: 0 0 0 1.5px var(--accent);
 }
 
-.agent.on .box {
+.agent-pick.on .box {
   background: var(--accent);
   box-shadow: none;
 }
@@ -1496,7 +1540,7 @@ kbd {
   color: var(--text-3);
 }
 
-.agent.absent .agent-name {
+.agent-pick.absent .agent-name {
   color: var(--text-3);
 }
 
@@ -1524,3 +1568,116 @@ kbd {
 
 button:focus { outline: none; }
 button:focus-visible { outline: 2px solid var(--sel-ring); outline-offset: 2px; }
+
+.actions {
+  flex-wrap: wrap;
+}
+
+.actions .grow {
+  flex: 1;
+}
+
+.quiet {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 30px;
+  padding: 0 7px;
+  border-radius: 7px;
+  font-size: 12px;
+  color: var(--text-3);
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.quiet:hover {
+  background: var(--hover);
+  color: var(--text);
+}
+
+.quiet kbd {
+  border: 0;
+  background: none;
+  padding: 0;
+  font-size: 10.5px;
+}
+
+.quiet.danger:hover {
+  color: var(--red);
+}
+
+.actions {
+  align-items: center;
+  gap: 6px;
+}
+
+.chip.pin {
+  margin-inline-start: 8px;
+  color: var(--accent);
+  background: var(--sel);
+}
+
+.compare {
+  margin: 4px 0 18px;
+  outline: none;
+}
+
+.compare .seg {
+  display: inline-flex;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 8px;
+  background: var(--code-bg);
+  margin-bottom: 10px;
+}
+
+.compare .seg button {
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  color: var(--text-2);
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.compare .seg button.on {
+  background: var(--raised);
+  color: var(--text);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.compare .frames {
+  display: grid;
+  gap: 12px;
+}
+
+.compare.side .frames {
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+}
+
+.compare .frame {
+  cursor: zoom-in;
+  animation: fade 140ms ease;
+}
+
+.compare img {
+  display: block;
+  max-width: 100%;
+  max-height: 420px;
+  border-radius: 8px;
+  box-shadow: 0 0 0 1px var(--line), var(--shadow);
+}
+
+.compare figcaption {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 12px;
+  color: var(--text-3);
+  margin-top: 8px;
+}
+
+/* A narrow detail pane keeps the dock on one line: secondary actions drop their key hint. */
+@container (max-width: 640px) {
+  .quiet kbd { display: none; }
+  .quiet { padding: 0 5px; }
+}

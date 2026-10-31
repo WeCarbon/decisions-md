@@ -74,12 +74,15 @@ export function Onboarding(props: { env: ShellEnv | null; startAt?: Step; onEnv:
   }
 
   const choose = async () => {
+    if (busy) return
     setError(null)
     const dir = await api.pickFolder()
     if (!dir) return
     setBusy(true)
     try {
       await api.initProject(dir)
+      // init leaves temp and scratch folders unregistered; a folder picked here is meant to stay.
+      await api.addProject(dir)
       setFolder(dir)
       const all = AGENTS.map((a) => a.id)
       const probe = await api.setupAgents(dir, all, true).catch(() => null)
@@ -214,7 +217,7 @@ export function Onboarding(props: { env: ShellEnv | null; startAt?: Step; onEnv:
                 const result = setup?.[a.id]
                 return (
                   <div key={a.id} class="agent-wrap">
-                    <label class={`agent ${on ? 'on' : ''} ${probe && !probe.detected ? 'absent' : ''}`}>
+                    <label class={`agent-pick ${on ? 'on' : ''} ${probe && !probe.detected ? 'absent' : ''}`}>
                       <input type="checkbox" checked={on} disabled={Boolean(setup)} onChange={() => setAgents(on ? agents.filter((x) => x !== a.id) : [...agents, a.id])} />
                       <span class="box">{on ? '✓' : ''}</span>
                       <span class="agent-name">{a.name}</span>

@@ -1,4 +1,5 @@
 import type { ComponentChildren } from 'preact'
+import { useState } from 'preact/hooks'
 import { imageSrc } from './backend.ts'
 import { segClass } from './segs.tsx'
 import type { BodyRow, Image } from './types.ts'
@@ -29,11 +30,12 @@ type Block =
   | { kind: 'quote'; lines: string[] }
   | { kind: 'code'; lines: string[] }
   | { kind: 'image'; index: number }
+  | { kind: 'compare'; indices: number[] }
   | { kind: 'table'; rows: string[][] }
 
 const isNoteHeading = (r: BodyRow) => Boolean(r.style && (r.style.color === 'magenta' || r.style.color === 'blue'))
 
-function blocks(rows: BodyRow[]): Block[] {
+function blocks(rows: BodyRow[], images: Image[]): Block[] {
   const out: Block[] = []
   let target = out
   let para: string[] | null = null
@@ -57,7 +59,13 @@ function blocks(rows: BodyRow[]): Block[] {
     }
     if (r.image !== undefined) {
       flush()
-      target.push({ kind: 'image', index: r.image })
+      const prev = target.at(-1)
+      const grouped = (i: number) => Boolean(images[i]?.group)
+      // Attachments labelled with groups (before / after, option 1 / option 2) are one comparison.
+      if (grouped(r.image) && prev?.kind === 'compare') prev.indices.push(r.image)
+      else if (grouped(r.image) && prev?.kind === 'image' && grouped(prev.index) && images[prev.index].group !== images[r.image].group)
+        target[target.length - 1] = { kind: 'compare', indices: [prev.index, r.image] }
+      else target.push({ kind: 'image', index: r.image })
       continue
     }
     if (r.style) {
@@ -109,6 +117,22 @@ function blocks(rows: BodyRow[]): Block[] {
   return out
 }
 
+/** `AI | lane-a | 3 hours ago` / `User | 3 hours ago`, as decs words it, laid out on one line: name · when, role. */
+function NoteHead({ text }: { text: string }) {
+  const parts = text.split(' | ')
+  const role = parts[0]
+  const when = parts.length > 1 ? parts.at(-1)! : ''
+  const who = parts.length > 2 ? parts.slice(1, -1).join(' | ') : role
+  return (
+    <header title={text}>
+      <span class="dot" />
+      <span class="who">{who}</span>
+      {when && <span class="when">· {when}</span>}
+      {who !== role && <span class="role">{role}</span>}
+    </header>
+  )
+}
+
 function Blocks({ list, images, onImage }: { list: Block[]; images: Image[]; onImage: (i: number) => void }) {
   return (
     <>
@@ -119,11 +143,10 @@ function Blocks({ list, images, onImage }: { list: Block[]; images: Image[]; onI
           case 'note':
             return (
               <section key={i} class={`note ${b.human ? 'human' : 'agent'}`}>
-                <header>
-                  <span class="dot" />
-                  {b.row.text}
-                </header>
-                <Blocks list={b.rows} images={images} onImage={onImage} />
+                <NoteHead text={b.row.text} />
+                <div class="note-body">
+                  <Blocks list={b.rows} images={images} onImage={onImage} />
+                </div>
               </section>
             )
           case 'para':
@@ -175,6 +198,8 @@ function Blocks({ list, images, onImage }: { list: Block[]; images: Image[]; onI
                 </table>
               </div>
             )
+          case 'compare':
+            return <Compare key={i} indices={b.indices} images={images} onImage={onImage} />
           case 'image': {
             const im = images[b.index]
             if (!im) return null
@@ -194,10 +219,49 @@ function Blocks({ list, images, onImage }: { list: Block[]; images: Image[]; onI
   )
 }
 
+/** Grouped images shown one at a time, flipped by their group names — side by side when there is room. */
+function Compare({ indices, images, onImage }: { indices: number[]; images: Image[]; onImage: (i: number) => void }) {
+  const [at, setAt] = useState(0)
+  const [side, setSide] = useState(false)
+  const shown = side ? indices : [indices[at]]
+  return (
+    <figure
+      class={`compare ${side ? 'side' : ''}`}
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'ArrowRight') (e.stopPropagation(), setAt((at + 1) % indices.length))
+        if (e.key === 'ArrowLeft') (e.stopPropagation(), setAt((at - 1 + indices.length) % indices.length))
+      }}
+    >
+      <div class="seg">
+        {indices.map((ix, k) => (
+          <button key={ix} class={!side && k === at ? 'on' : ''} onClick={() => (setSide(false), setAt(k))}>
+            {images[ix].group}
+          </button>
+        ))}
+        <button class={side ? 'on' : ''} onClick={() => setSide(!side)} title="⇆">
+          ⇆
+        </button>
+      </div>
+      <div class="frames">
+        {shown.map((ix) => (
+          <div key={ix} class="frame" onClick={() => onImage(ix)}>
+            <img src={imageSrc(images[ix].path)} alt={images[ix].name} decoding="async" />
+            <figcaption>
+              {side && <span class="chip">{images[ix].group}</span>}
+              {images[ix].caption ?? images[ix].name}
+            </figcaption>
+          </div>
+        ))}
+      </div>
+    </figure>
+  )
+}
+
 export function Body({ rows, images, onImage }: { rows: BodyRow[]; images: Image[]; onImage: (i: number) => void }) {
   return (
     <div class="prose">
-      <Blocks list={blocks(rows)} images={images} onImage={onImage} />
+      <Blocks list={blocks(rows, images)} images={images} onImage={onImage} />
     </div>
   )
 }

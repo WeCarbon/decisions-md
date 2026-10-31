@@ -60,6 +60,12 @@ export const reply = (root: string, id: number, text: string) => ok(['note', Str
 
 export const defer = (root: string, id: number, off: boolean) => ok(['defer', String(id), ...(off ? ['--off'] : []), ...human, '--dir', root])
 
+export const pin = (root: string, id: number, where: 'top' | 'bottom' | 'off') => ok(['pin', String(id), where, '--dir', root])
+
+export const close = (root: string, id: number, reason: string) => ok(['close', String(id), '--reason', reason, '--dir', root])
+
+export const seen = (root: string, id: number) => ok(['archive', String(id), '--seen', '--dir', root])
+
 export const initProject = (dir: string) => ok(['init', dir])
 
 export const addProject = (dir: string) => ok(['projects', 'add', dir])
@@ -152,9 +158,7 @@ export function log(line: string): void {
 
 export async function pickFolder(): Promise<string | null> {
   if (!inDesktop) return '/Users/alice/Code/api'
-  const { open } = await import('@tauri-apps/plugin-dialog')
-  const picked = await open({ directory: true, multiple: false })
-  return typeof picked === 'string' ? picked : null
+  return invoke<string | null>('pick_folder')
 }
 
 export async function openPath(path: string): Promise<void> {

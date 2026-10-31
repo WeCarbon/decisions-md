@@ -99,6 +99,7 @@ export interface Node {
   children: number[]
   can_default: boolean
   can_pin: boolean
+  pin: 'top' | 'bottom' | null
   status_line: Seg[]
   meta: Seg[][]
   body_rows: BodyRow[]

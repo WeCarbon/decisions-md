@@ -17,6 +17,7 @@ type Composer =
   | { kind: 'answer'; key: string }
   | { kind: 'free' }
   | { kind: 'reply' }
+  | { kind: 'close' }
   | null
 
 const VIEW_ICON: Record<ViewName, string> = {
@@ -66,8 +67,12 @@ export function Bench(props: {
   const listRef = useRef<HTMLDivElement>(null)
 
   const selectable = rows.filter(isSelectable)
-  const index = Math.max(0, selectable.findIndex((r) => r.key === prefs.selected))
-  const current: Row | undefined = selectable.find((r) => r.key === prefs.selected) ?? selectable[0]
+  // The cursor follows the node; when the node leaves this view it stays at the same position.
+  const lastIndex = useRef(0)
+  const found = selectable.findIndex((r) => r.key === prefs.selected)
+  const index = found >= 0 ? found : Math.min(lastIndex.current, selectable.length - 1)
+  if (index >= 0) lastIndex.current = index
+  const current: Row | undefined = selectable[index]
   const [archived, setArchived] = useState<Record<string, Node>>({})
   const nodeKey = current?.kind === 'node' ? current.node! : undefined
   const node: Node | undefined = nodeKey ? (bench.nodes[nodeKey] ?? archived[nodeKey]) : undefined
@@ -97,7 +102,7 @@ export function Bench(props: {
   const select = (key: string) => setPrefs({ selected: key })
   const move = (delta: number) => {
     if (!selectable.length) return
-    const next = selectable[Math.max(0, Math.min(selectable.length - 1, index + delta))]
+    const next = selectable[Math.max(0, Math.min(selectable.length - 1, Math.max(0, index) + delta))]
     select(next.key)
   }
   const switchView = (v: ViewName) => setPrefs({ view: v })
@@ -138,12 +143,26 @@ export function Bench(props: {
     setComposer({ kind: 'answer', key })
     setDraft('')
   }
-  const send = () => {
+  /** `typed` is the box as it is now — Enter can land before the last keystroke has re-rendered. */
+  const send = (typed: string = draft) => {
     if (!node || !composer) return
+    const text = typed.trim()
     const root = rootOf(node)
-    if (composer.kind === 'answer') return act(() => api.answer(root, node.id, composer.key, draft.trim() || undefined), s('sent'))
-    if (composer.kind === 'free' && draft.trim()) return act(() => api.answerFreeText(root, node.id, draft.trim()), s('sent'))
-    if (composer.kind === 'reply' && draft.trim()) return act(() => api.reply(root, node.id, draft.trim()), s('replied'))
+    if (composer.kind === 'answer') return act(() => api.answer(root, node.id, composer.key, text || undefined), s('sent'))
+    if (composer.kind === 'free' && text) return act(() => api.answerFreeText(root, node.id, text), s('sent'))
+    if (composer.kind === 'reply' && text) return act(() => api.reply(root, node.id, text), s('replied'))
+    if (composer.kind === 'close') return act(() => api.close(root, node.id, text || 'obsolete'), s('closed'))
+  }
+  const pin = (where: 'top' | 'bottom' | 'off') => {
+    if (!node?.can_pin) return
+    act(() => api.pin(rootOf(node), node.id, where), where === 'off' ? s('unpinned') : s('pinned'))
+  }
+  const seen = () => {
+    if (!node || node.terminal) return
+    act(() => api.seen(rootOf(node), node.id), s('dismissed'))
+  }
+  const startClose = () => {
+    if (node && !node.terminal) setComposer({ kind: 'close' })
   }
   const toggleDefer = () => {
     if (!node || node.terminal) return
@@ -168,8 +187,16 @@ export function Bench(props: {
     }
   }
 
+  // The listener is attached once and calls whatever this render's handler is: a keypress
+  // must never act on the selection of a render whose effects have not run yet.
+  const onKeyRef = useRef<(e: KeyboardEvent) => void>(() => {})
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
+    const listener = (e: KeyboardEvent) => onKeyRef.current(e)
+    window.addEventListener('keydown', listener)
+    return () => window.removeEventListener('keydown', listener)
+  }, [])
+  {
+    onKeyRef.current = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         if (lightbox !== null) return setLightbox(null)
         if (palette) return setPalette(false)
@@ -242,6 +269,22 @@ export function Bench(props: {
           return detailRef.current?.scrollBy({ top: 80, behavior: 'smooth' })
         case 'k':
           return detailRef.current?.scrollBy({ top: -80, behavior: 'smooth' })
+        case 'T':
+        case 't':
+          return pin('top')
+        case 'B':
+        case 'b':
+          return pin('bottom')
+        case 'U':
+        case 'u':
+          return pin('off')
+        case 'X':
+        case 'x':
+          e.preventDefault()
+          return startClose()
+        case 'A':
+        case 'a':
+          return seen()
         case 'd':
           return toggleDefer()
         case 'g':
@@ -264,9 +307,7 @@ export function Bench(props: {
         startAnswer(e.key)
       }
     }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  })
+  }
 
   return (
     <div class="shell">
@@ -349,6 +390,9 @@ export function Bench(props: {
             onReply={() => setComposer({ kind: 'reply' })}
             onFree={() => setComposer({ kind: 'free' })}
             onDefer={toggleDefer}
+            onPin={pin}
+            onClose={startClose}
+            onSeen={seen}
             onJump={jump}
             onImage={setLightbox}
             onQuestions={(picks) => act(() => api.answerQuestions(rootOf(node), node.id, picks), s('sent'))}
@@ -417,8 +461,11 @@ function ListRow(p: { row: Row; selected: boolean; open: boolean; hidden: number
       <span class="ref">{r.ref}</span>
       <span class="title">{r.title}</span>
       {p.hidden > 0 && <span class="hidden-count">+{p.hidden}</span>}
-      <span class="badge">
+      <span class="badge full">
         <Segs segs={badge} trim />
+      </span>
+      <span class="badge short">
+        <Segs segs={r.badge_short ?? badge} trim />
       </span>
     </div>
   )
@@ -435,11 +482,14 @@ function Detail(p: {
   error: string | null
   canAnswer: boolean
   onAnswer: (key: string) => void
-  onSend: () => void
+  onSend: (typed?: string) => void
   onCancel: () => void
   onReply: () => void
   onFree: () => void
   onDefer: () => void
+  onPin: (where: 'top' | 'bottom' | 'off') => void
+  onClose: () => void
+  onSeen: () => void
   onJump: (key: string) => void
   onImage: (i: number) => void
   onQuestions: (picks: Record<string, string>) => void
@@ -455,6 +505,7 @@ function Detail(p: {
         <div class="status-line">
           <span class="ref-pill">{n.ref}</span>
           <Segs segs={n.status_line} trim />
+          {n.pin && <span class="chip pin">{n.pin === 'top' ? s('pinnedTop') : s('pinnedBottom')}</span>}
         </div>
         <h2 class="node-title">{n.title}</h2>
         <div class="meta">
@@ -557,6 +608,32 @@ function Detail(p: {
                 {n.deferred_at ? s('undefer') : s('defer')} <kbd>D</kbd>
               </button>
             )}
+            {n.can_pin &&
+              (n.pin ? (
+                <button class="quiet" onClick={() => p.onPin('off')} title={s('unpin')}>
+                  <span class="ql">{s('unpin')}</span> <kbd>U</kbd>
+                </button>
+              ) : (
+                <>
+                  <button class="quiet" onClick={() => p.onPin('top')} title={`${s('pinTop')} — ${s('pinTopHint')}`}>
+                    <span class="ql">{s('pinShort')}</span> <kbd>T</kbd>
+                  </button>
+                  <button class="quiet" onClick={() => p.onPin('bottom')} title={`${s('pinBottom')} — ${s('pinBottomHint')}`}>
+                    <span class="ql">{s('parkShort')}</span> <kbd>B</kbd>
+                  </button>
+                </>
+              ))}
+            <span class="grow" />
+            {!n.terminal && (
+              <>
+                <button class="quiet" onClick={p.onSeen} title={`${s('seen')} — ${s('seenHint')}`}>
+                  <span class="ql">{s('seenShort')}</span> <kbd>A</kbd>
+                </button>
+                <button class="quiet danger" onClick={p.onClose} title={s('closeNode')}>
+                  <span class="ql">{s('closeNode')}</span> <kbd>X</kbd>
+                </button>
+              </>
+            )}
           </div>
         )}
       </div>
@@ -564,14 +641,17 @@ function Detail(p: {
   )
 }
 
-function ComposerBox(p: { node: Node; composer: Composer; draft: string; setDraft: (s: string) => void; busy: boolean; onSend: () => void; onCancel: () => void }) {
+function ComposerBox(p: { node: Node; composer: Composer; draft: string; setDraft: (s: string) => void; busy: boolean; onSend: (typed?: string) => void; onCancel: () => void }) {
   const ref = useRef<HTMLTextAreaElement>(null)
   useEffect(() => ref.current?.focus(), [p.composer])
   const c = p.composer!
   const option = c.kind === 'answer' ? p.node.options.find((o) => o.key === c.key) : undefined
-  const title = c.kind === 'answer' ? `${s('answerWith', { key: c.key })} · ${option?.label ?? ''}` : c.kind === 'reply' ? s('reply') : s('answer')
-  const placeholder = c.kind === 'answer' ? s('addNote') : c.kind === 'reply' ? s('replyPlaceholder') : s('freeTextPlaceholder')
-  const canSend = c.kind === 'answer' || p.draft.trim().length > 0
+  const title =
+    c.kind === 'answer' ? `${s('answerWith', { key: c.key })} · ${option?.label ?? ''}` : c.kind === 'reply' ? s('reply') : c.kind === 'close' ? s('closeNode') : s('answer')
+  const placeholder =
+    c.kind === 'answer' ? s('addNote') : c.kind === 'reply' ? s('replyPlaceholder') : c.kind === 'close' ? s('closeReasonPlaceholder') : s('freeTextPlaceholder')
+  const blankIsFine = c.kind === 'answer' || c.kind === 'close'
+  const canSend = blankIsFine || p.draft.trim().length > 0
   return (
     <div class={`composer ${c.kind}`}>
       <div class="composer-title">{title}</div>
@@ -584,7 +664,8 @@ function ComposerBox(p: { node: Node; composer: Composer; draft: string; setDraf
         onKeyDown={(e) => {
           if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
             e.preventDefault()
-            if (canSend) p.onSend()
+            const typed = (e.currentTarget as HTMLTextAreaElement).value
+            if (blankIsFine || typed.trim()) p.onSend(typed)
           }
         }}
       />
@@ -593,7 +674,7 @@ function ComposerBox(p: { node: Node; composer: Composer; draft: string; setDraf
         <button class="ghost" onClick={p.onCancel}>
           {s('cancel')}
         </button>
-        <button class="primary" disabled={!canSend || p.busy} onClick={p.onSend}>
+        <button class="primary" disabled={!canSend || p.busy} onClick={() => p.onSend()}>
           {s('send')}
         </button>
       </div>
@@ -679,6 +760,9 @@ function Help({ onClose }: { onClose: () => void }) {
     ['⏎', s('keyDefault')],
     ['N', s('keyReply')],
     ['D', s('keyDefer')],
+    ['T B U', s('keyPin')],
+    ['A', s('keySeen')],
+    ['X', s('keyCloseNode')],
     ['G', s('keyGoto')],
     ['W', s('keyNext')],
     ['J K', s('keyScroll')],
