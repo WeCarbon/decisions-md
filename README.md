@@ -2,14 +2,28 @@
 
 # decisions-md
 
-Your AI agent asks "should I use A or B?" — and you miss it, because it's
-buried in a chat you weren't watching.
+You give an agent a two-hour job — or five agents, one each — and walk away.
+An hour later, three of them have been sitting on a question in chats you
+weren't watching, and you can't tell which one is still working.
 
-**decs puts every question your agents ask, and everything they're working on,
-on one screen. You answer with a single keypress. The agent picks it up and
-keeps going.**
+**decs gives your agents one place to put their work and their questions, and
+gives you one screen to watch it all. Agents ask; you answer with one keypress;
+the agent hears about it and carries on — while it's still running.**
 
 ![Demo: the decs bench opens on a tree of running work; read a pending decision, answer it with a keystroke, then an agent picks up the answer with decs read](https://raw.githubusercontent.com/WeCarbon/decisions-md/main/docs/demo.gif)
+
+## Why
+
+| Without decs | With decs |
+|---|---|
+| An agent asks "A or B?" in chat. You miss it; it waits for an hour. | Every open question is on one screen, the ones blocking an agent first. |
+| You answer, the answer scrolls away, the next session never sees it. | The question and your answer are a markdown file in git, for good. |
+| "What are you doing? How far along?" — you have to ask, and interrupt. | Each task shows its progress bar; one that goes quiet turns grey, then red. |
+| Five agents share one `TODO.md`, pick the same number, overwrite each other. | Every task is its own file with its own id; any number of agents write at once. |
+| You step away and everything stops. | Each question carries a default and says what happens if you don't answer; agents keep going on the rest. |
+
+It's not a board you plan work on. It's the line between a running agent and
+you: its question reaches you, your answer reaches it, and both are kept.
 
 ## What it looks like
 
@@ -56,20 +70,6 @@ the rules are plain CLI calls, so any agent with a shell can follow them.
 That's all you need to start. The rest of this page is how it works underneath.
 
 ---
-
-## The problem
-
-You hand an agent a two-hour job — or five agents, one each. Then:
-
-- **"Should I…?"** Agents stop and ask in the chat. If you're not looking, the
-  question sits there. If you answer, the answer scrolls away and the next
-  session never saw it.
-- **Progress vanishes.** A test run takes an hour. What's it doing? You can only
-  ask — and interrupt it to find out.
-- **Parallel agents collide.** Five lanes editing one `TODO.md` pick the same
-  number, overwrite each other's lines, archive the wrong entry.
-- **Nobody knows what's outstanding.** Is the issue tracker cleared? Did the
-  support inbox get handled? Which lane is stuck, which is waiting on a person?
 
 ## The idea
 
