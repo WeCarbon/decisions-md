@@ -180,7 +180,8 @@ export function imageSrc(path: string): string {
 
 async function demoRun(args: string[]): Promise<RunOutput> {
   if (args[0] === 'bench' && !args.includes('--node')) {
-    const res = await fetch('demo/bench.json')
+    const lang = new URLSearchParams(location.search).get('lang')
+    const res = await fetch(lang && lang !== 'en' ? `demo/bench.${lang}.json` : 'demo/bench.json')
     return { code: 0, stdout: await res.text(), stderr: '' }
   }
   if (args[0] === 'bench' && args.includes('--node')) return { code: 1, stdout: '', stderr: 'not in the demo' }

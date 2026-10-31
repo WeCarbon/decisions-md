@@ -44,7 +44,7 @@ function App({ prefs0, snapshot }: { prefs0: Prefs; snapshot: BenchData | null }
         again.current = false
         try {
           const next = await api.loadBench()
-          setLanguage(next.lang)
+          setLanguage(next.lang, next.rtl)
           setBench(next)
           void api.snapshotSave(JSON.stringify(next))
         } catch {
@@ -58,7 +58,7 @@ function App({ prefs0, snapshot }: { prefs0: Prefs; snapshot: BenchData | null }
   }, [])
 
   useEffect(() => {
-    if (bench) setLanguage(bench.lang)
+    if (bench) setLanguage(bench.lang, bench.rtl)
     void api.prepareImages()
     void (async () => {
       const e = await api.shellEnv(false)

@@ -101,12 +101,14 @@ decs(api, orders, [
   '--body', 'Clients today fetch everything; the largest account has 180k orders.',
 ])
 
-const json = execFileSync(process.execPath, [BIN, 'bench', '--json', web, api], {
-  encoding: 'utf8',
-  env: { ...process.env, DECS_HOME: home, DECS_LANG: 'en', NO_COLOR: '1' },
-})
 mkdirSync(OUT, { recursive: true })
-writeFileSync(join(OUT, 'bench.json'), json.split(scratch).join(FAKE_HOME))
+for (const lang of ['en', 'zh-Hans', 'zh-Hant', 'fr', 'ar']) {
+  const json = execFileSync(process.execPath, [BIN, 'bench', '--json', web, api], {
+    encoding: 'utf8',
+    env: { ...process.env, DECS_HOME: home, DECS_LANG: lang, NO_COLOR: '1' },
+  })
+  writeFileSync(join(OUT, lang === 'en' ? 'bench.json' : `bench.${lang}.json`), json.split(scratch).join(FAKE_HOME))
+}
 copyFileSync(SHOT, join(OUT, 'signin-preview.png'))
 copyFileSync(OLD_SHOT, join(OUT, 'signin-old.png'))
 rmSync(scratch, { recursive: true, force: true })

@@ -170,7 +170,7 @@ kbd {
 
 .sidebar {
   background: var(--sidebar);
-  border-right: 1px solid var(--line);
+  border-inline-end: 1px solid var(--line);
   display: flex;
   flex-direction: column;
   min-width: 0;
@@ -324,7 +324,7 @@ kbd {
   flex-direction: column;
   min-width: 0;
   background: var(--bg);
-  border-right: 1px solid var(--line);
+  border-inline-end: 1px solid var(--line);
 }
 
 .pane-head {
@@ -1253,7 +1253,7 @@ kbd {
 .onboarding .close {
   position: absolute;
   top: 14px;
-  right: 16px;
+  inset-inline-end: 16px;
   z-index: 2;
 }
 
@@ -1680,4 +1680,33 @@ button:focus-visible { outline: 2px solid var(--sel-ring); outline-offset: 2px; 
 @container (max-width: 640px) {
   .quiet kbd { display: none; }
   .quiet { padding: 0 5px; }
+}
+
+/* The caret glyph mirrors by itself in right-to-left text; only the open turn differs. */
+[dir='rtl'] .caret.open {
+  transform: rotate(-90deg);
+}
+
+/* Node text is in whatever language its author wrote: each line takes its own direction. */
+.title,
+.node-title,
+.fold-text,
+.opt-label,
+.q-label,
+.pick,
+.note header,
+.meta-line,
+.status-line,
+figcaption {
+  unicode-bidi: plaintext;
+}
+
+.row .title,
+.hit .title {
+  text-align: left;
+}
+
+[dir='rtl'] .row .title,
+[dir='rtl'] .hit .title {
+  text-align: right;
 }

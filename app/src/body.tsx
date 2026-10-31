@@ -139,7 +139,7 @@ function Blocks({ list, images, onImage }: { list: Block[]; images: Image[]; onI
       {list.map((b, i) => {
         switch (b.kind) {
           case 'heading':
-            return <h3 key={i} class={segClass({ ...b.row.style, color: undefined })}>{b.row.text}</h3>
+            return <h3 dir="auto" key={i} class={segClass({ ...b.row.style, color: undefined })}>{b.row.text}</h3>
           case 'note':
             return (
               <section key={i} class={`note ${b.human ? 'human' : 'agent'}`}>
@@ -151,7 +151,7 @@ function Blocks({ list, images, onImage }: { list: Block[]; images: Image[]; onI
             )
           case 'para':
             return (
-              <p key={i}>
+              <p dir="auto" key={i}>
                 {b.lines.map((l, j) => (
                   <>
                     {j > 0 && <br />}
@@ -163,9 +163,9 @@ function Blocks({ list, images, onImage }: { list: Block[]; images: Image[]; onI
           case 'list': {
             const L = b.ordered ? 'ol' : 'ul'
             return (
-              <L key={i}>
+              <L dir="auto" key={i}>
                 {b.items.map((it, j) => (
-                  <li key={j}>
+                  <li dir="auto" key={j}>
                     <Inline text={it} />
                   </li>
                 ))}
@@ -174,7 +174,7 @@ function Blocks({ list, images, onImage }: { list: Block[]; images: Image[]; onI
           }
           case 'quote':
             return (
-              <blockquote key={i}>
+              <blockquote dir="auto" key={i}>
                 {b.lines.map((l, j) => (
                   <div key={j}>
                     <Inline text={l} />
