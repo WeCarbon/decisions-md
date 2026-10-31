@@ -2,39 +2,84 @@
 
 # decisions-md
 
-**`decs` est un centre de tâches et de décisions pour les agents IA de longue durée.**
-Chaque action d’un agent — et chaque question qu’il doit vous poser — est un simple
-fichier markdown dans votre dépôt. Vous regardez tout cela sur un seul écran de
-terminal permanent, le **tableau**, et vous répondez d’une touche.
+Vous confiez à un agent une tâche de deux heures — ou à cinq agents, chacun
+la sienne — puis vous passez à autre chose. Une heure plus tard, trois
+d’entre eux attendent une réponse dans des conversations que vous ne
+surveilliez pas, et vous ne savez plus lequel travaille encore.
 
-Pas de base de données. Pas de démon. Pas de serveur. Juste un dossier
-`decisions/` dans git.
+**decs donne à vos agents un seul endroit où déposer leur travail et leurs
+questions, et vous donne un seul écran pour tout surveiller. Les agents
+demandent ; vous répondez d’une touche ; l’agent en est informé et
+reprend — pendant qu’il tourne encore.**
 
-![Démo : le tableau decs s’ouvre sur l’arbre du travail en cours ; on lit une décision en attente, on y répond d’une touche, puis un agent récupère la réponse avec decs read](docs/demo.gif)
+![Démo : le tableau decs s’ouvre sur l’arbre du travail en cours ; on lit une décision en attente, on y répond d’une touche, puis un agent récupère la réponse avec decs read](docs/demo.gif)
 
-![Le tableau de decs : un arbre de tâches en cours avec des barres de progression à gauche, une décision en attente avec ses options à droite](docs/screenshot.fr.png)
+## Pourquoi
 
-<sub>Données fictives, générées par le vrai code du tableau avec `node scripts/render-screenshot.ts`.</sub>
+| Sans decs | Avec decs |
+|---|---|
+| Un agent demande « A ou B ? » dans le chat. Vous ne le voyez pas ; il attend une heure. | Chaque question ouverte est sur un seul écran, celles qui bloquent un agent en premier. |
+| Vous répondez, la réponse disparaît dans le défilement, la session suivante ne la voit jamais. | La question et votre réponse sont un fichier markdown dans git, pour de bon. |
+| « Qu’est-ce que tu fais ? Où en es-tu ? » — vous devez demander, donc l’interrompre. | Chaque tâche affiche sa barre de progression ; une qui se tait devient grise, puis rouge. |
+| Cinq agents partagent un seul `TODO.md`, choisissent le même numéro, s’écrasent l’un l’autre. | Chaque tâche est son propre fichier avec son propre identifiant ; n’importe quel nombre d’agents peut écrire à la fois. |
+| Vous partez, et tout s’arrête. | Chaque question porte une valeur par défaut et dit ce qui se passe si vous ne répondez pas ; les agents continuent sur le reste. |
+
+Ce n’est pas un tableau de planification. C’est le lien entre un agent en
+cours d’exécution et vous : sa question vous arrive, votre réponse lui
+arrive, et les deux sont conservées.
+
+## À quoi ça ressemble
+
+1. Votre agent rencontre un choix. Plutôt que de le demander dans le chat,
+   il exécute :
+
+   ```sh
+   decs ask W4 -o 1="Keep current CDN" 2="Switch to Fastly" --default 1
+   ```
+
+2. Vous exécutez `decs` dans n’importe quel terminal. W4 est en haut, marqué
+   ◆ À décider, avec les deux options et ce que coûte chacune.
+
+3. Vous appuyez sur `2`.
+
+4. L’agent en est informé tout de suite, lit « Switch to Fastly » et
+   continue. La question et votre réponse restent dans
+   `decisions/active/4-pick-cdn.md`, dans git.
+
+## Démarrage rapide (Claude Code)
+
+```sh
+npm i -g @wecarbon/decisions-md
+cd your-project && decs init
+```
+
+Ensuite, dans Claude Code :
+
+```
+/plugin marketplace add wecarbon/decisions-md
+/plugin install decs@decisions-md
+```
+
+C’est tout. Donnez une tâche à votre agent comme d’habitude. Il consigne
+son travail et pose ses questions via decs de lui-même. Exécutez `decs`
+dans un autre terminal pour observer.
+
+Vous utilisez un autre agent ? Collez [`AGENTS.md`](AGENTS.md) dans ses
+instructions — les règles ne sont que des appels CLI, n’importe quel agent
+avec un terminal peut les suivre.
+
+## Trois mots
+
+- **Nœud** — une chose que fait un agent. Un fichier markdown.
+- **À décider** — un nœud qui attend votre réponse. Il arrive avec des
+  options ; appuyez sur un chiffre.
+- **Tableau** — l’écran que vous obtenez en exécutant `decs`. Tout, en
+  direct.
+
+C’est tout ce qu’il faut pour commencer. Le reste de cette page explique
+comment ça marche en dessous.
 
 ---
-
-## Le problème
-
-Vous confiez à un agent une tâche de deux heures — ou cinq agents, chacun la
-sienne. Et ensuite :
-
-- **« Dois-je… ? »** Les agents s’arrêtent et demandent dans le chat. Si vous
-  n’êtes pas en train de regarder, la question reste en suspens ; si vous
-  répondez, la réponse disparaît dans le défilement et la session suivante
-  ne l’a jamais vue.
-- **La progression s’efface.** Un test prend une heure. Que fait-il ? Vous ne
-  pouvez que demander — et l’interrompre pour le savoir.
-- **Des agents en parallèle se télescopent.** Cinq voies qui modifient le
-  même `TODO.md` tombent sur le même numéro, écrasent les lignes des autres,
-  archivent la mauvaise entrée.
-- **Personne ne sait ce qui reste à faire.** Le suivi des tickets est-il à
-  jour ? La boîte de support a-t-elle été traitée ? Quelle voie est bloquée,
-  laquelle attend une personne ?
 
 ## L’idée
 
@@ -138,7 +183,7 @@ Cela retire l’élément des vues de travail sans changer son état, et
 l’agent qui le traite apprend que le responsable l’a reporté et s’arrête jusqu’à ce que vous
 le leviez.
 
-## Démarrage rapide
+## Installation
 
 Nécessite Node 22.18+ (TypeScript s’exécute directement ; pas d’étape de
 build).
