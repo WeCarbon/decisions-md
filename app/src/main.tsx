@@ -64,10 +64,11 @@ function App({ prefs0, snapshot }: { prefs0: Prefs; snapshot: BenchData | null }
       const e = await api.shellEnv(false)
       setEnv(e)
       if (!envReady(e)) return setPhase({ kind: 'onboarding', startAt: prefs0.onboarded ? 'check' : 'welcome' })
-      const projects = await api.listProjects().catch(() => [])
-      if (!projects.length) return setPhase({ kind: 'onboarding', startAt: 'welcome' })
+      const known = snapshot?.projects.length ? snapshot.projects : await api.listProjects().catch(() => [])
+      if (!known.length) return setPhase({ kind: 'onboarding', startAt: 'welcome' })
       await refresh()
       setPhase({ kind: 'bench' })
+      setTimeout(() => void api.ready('live bench'), 0)
       if (!prefs0.onboarded) setPrefs({ onboarded: true })
       let timer = 0
       await api.startMonitor(() => {
@@ -111,13 +112,16 @@ function App({ prefs0, snapshot }: { prefs0: Prefs; snapshot: BenchData | null }
   return <div class="boot" data-tauri-drag-region />
 }
 
+window.addEventListener('error', (e) => api.log(`error: ${e.message} at ${e.filename}:${e.lineno}`))
+window.addEventListener('unhandledrejection', (e) => api.log(`unhandled: ${String(e.reason)}`))
+
 async function boot() {
   const [prefs, snapshot] = await Promise.all([api.prefsLoad(DEFAULT_PREFS), api.snapshotLoad()])
   if (params.get('view')) prefs.view = params.get('view') as Prefs['view']
   if (params.get('sel')) prefs.selected = params.get('sel')
   if (params.get('screen') === 'onboarding') prefs.onboarded = false
   render(<App prefs0={prefs} snapshot={snapshot} />, document.getElementById('app')!)
-  requestAnimationFrame(() => requestAnimationFrame(() => void api.ready()))
+  setTimeout(() => void api.ready(snapshot ? 'first frame (cached bench)' : 'first frame'), 0)
 }
 
 void boot()

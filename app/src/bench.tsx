@@ -68,8 +68,17 @@ export function Bench(props: {
   const selectable = rows.filter(isSelectable)
   const index = Math.max(0, selectable.findIndex((r) => r.key === prefs.selected))
   const current: Row | undefined = selectable.find((r) => r.key === prefs.selected) ?? selectable[0]
-  const node: Node | undefined = current?.kind === 'node' ? bench.nodes[current.node!] : undefined
-  const rootOf = (n: Node) => bench.projects.find((p) => p.project === n.project)?.root ?? ''
+  const [archived, setArchived] = useState<Record<string, Node>>({})
+  const nodeKey = current?.kind === 'node' ? current.node! : undefined
+  const node: Node | undefined = nodeKey ? (bench.nodes[nodeKey] ?? archived[nodeKey]) : undefined
+  const rootOf = (n: Pick<Node, 'project'>) => bench.projects.find((p) => p.project === n.project)?.root ?? ''
+
+  useEffect(() => setArchived({}), [bench])
+  useEffect(() => {
+    if (!nodeKey || bench.nodes[nodeKey] || archived[nodeKey]) return
+    const [project, id] = [nodeKey.slice(0, nodeKey.lastIndexOf('#')), Number(nodeKey.slice(nodeKey.lastIndexOf('#') + 1))]
+    api.loadNode(rootOf({ project }), id).then((n) => setArchived((a) => ({ ...a, [nodeKey]: n })), () => {})
+  }, [nodeKey, bench, archived])
 
   useEffect(() => {
     if (current && current.key !== prefs.selected) setPrefs({ selected: current.key })
@@ -358,7 +367,7 @@ export function Bench(props: {
         )}
       </section>
 
-      {palette && <Palette bench={bench} onPick={(k) => (setPalette(false), jump(k))} onClose={() => setPalette(false)} />}
+      {palette && <Palette rows={bench.views.find((v) => v.view === 'all')?.rows ?? []} onPick={(k) => (setPalette(false), jump(k))} onClose={() => setPalette(false)} />}
       {help && <Help onClose={() => setHelp(false)} />}
       {lightbox !== null && node?.images[lightbox] && (
         <div class="lightbox" onClick={() => setLightbox(null)}>
@@ -624,16 +633,12 @@ function Questions({ node, busy, onSubmit }: { node: Node; busy: boolean; onSubm
   )
 }
 
-function Palette({ bench, onPick, onClose }: { bench: BenchData; onPick: (key: string) => void; onClose: () => void }) {
+function Palette({ rows, onPick, onClose }: { rows: Row[]; onPick: (key: string) => void; onClose: () => void }) {
   const [q, setQ] = useState('')
   const [at, setAt] = useState(0)
-  const all = useMemo(() => Object.values(bench.nodes).sort((a, b) => Number(a.terminal) - Number(b.terminal) || b.id - a.id), [bench])
+  const all = useMemo(() => rows.filter((r) => r.kind === 'node'), [rows])
   const term = q.trim().toLowerCase()
-  const hits = (term
-    ? all.filter((n) => n.ref.toLowerCase() === term || String(n.id) === term.replace(/^[a-z]/, '') || `${n.ref} ${n.title}`.toLowerCase().includes(term))
-    : all
-  ).slice(0, 50)
-  const glyphOf = (n: Node) => n.status_line[0]
+  const hits = (term ? all.filter((r) => r.ref!.toLowerCase() === term || `${r.ref} ${r.title}`.toLowerCase().includes(term)) : all).slice(0, 50)
   return (
     <div class="overlay" onClick={onClose}>
       <div class="palette" onClick={(e) => e.stopPropagation()}>
@@ -645,18 +650,18 @@ function Palette({ bench, onPick, onClose }: { bench: BenchData; onPick: (key: s
           onKeyDown={(e) => {
             if (e.key === 'ArrowDown') (e.preventDefault(), setAt(Math.min(hits.length - 1, at + 1)))
             if (e.key === 'ArrowUp') (e.preventDefault(), setAt(Math.max(0, at - 1)))
-            if (e.key === 'Enter' && hits[at]) onPick(hits[at].key)
+            if (e.key === 'Enter' && hits[at]) onPick(hits[at].node!)
             if (e.key === 'Escape') onClose()
           }}
         />
         <div class="hits">
           {!hits.length && <div class="empty small">{s('noMatch')}</div>}
-          {hits.map((n, i) => (
-            <div key={n.key} class={`hit ${i === at ? 'on' : ''}`} onMouseEnter={() => setAt(i)} onClick={() => onPick(n.key)}>
-              <Glyph g={glyphOf(n)} />
-              <span class="ref">{n.ref}</span>
-              <span class="title">{n.title}</span>
-              <span class="d small">{n.project}</span>
+          {hits.map((r, i) => (
+            <div key={r.key} class={`hit ${i === at ? 'on' : ''}`} onMouseEnter={() => setAt(i)} onClick={() => onPick(r.node!)}>
+              <Glyph g={r.glyph} />
+              <span class="ref">{r.ref}</span>
+              <span class="title">{r.title}</span>
+              <span class="d small">{r.node!.slice(0, r.node!.lastIndexOf('#'))}</span>
             </div>
           ))}
         </div>

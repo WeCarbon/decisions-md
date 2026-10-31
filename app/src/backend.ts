@@ -1,4 +1,4 @@
-import type { Bench, Project, RunOutput, ShellEnv } from './types.ts'
+import type { Bench, Node, Project, RunOutput, ShellEnv } from './types.ts'
 
 /**
  * Everything the window knows comes from the `decs` CLI: reads are
@@ -38,6 +38,8 @@ export async function installDecs(): Promise<RunOutput> {
 }
 
 export const loadBench = async (): Promise<Bench> => JSON.parse(await ok(['bench', '--json']))
+
+export const loadNode = async (root: string, id: number): Promise<Node> => JSON.parse(await ok(['bench', '--json', '--node', String(id), '--dir', root]))
 
 export const listProjects = async (): Promise<Project[]> =>
   (JSON.parse(await ok(['projects', '--json'])) as { name: string; root: string }[]).map((p) => ({ project: p.name, root: p.root, letter: '' }))
@@ -137,9 +139,15 @@ export function prefsSave(prefs: unknown): void {
   invoke('prefs_save', { json: text }).catch(() => {})
 }
 
-export async function ready(): Promise<number> {
+/** Shows the window on the first call; each call logs how long after launch `what` happened (DECS_APP_TIMING=1). */
+export async function ready(what: string): Promise<number> {
   if (!inDesktop) return performance.now()
-  return invoke<number>('ready')
+  return invoke<number>('ready', { what })
+}
+
+export function log(line: string): void {
+  if (inDesktop) invoke('log', { line }).catch(() => {})
+  else console.error(line)
 }
 
 export async function pickFolder(): Promise<string | null> {
@@ -167,10 +175,11 @@ export function imageSrc(path: string): string {
 }
 
 async function demoRun(args: string[]): Promise<RunOutput> {
-  if (args[0] === 'bench') {
+  if (args[0] === 'bench' && !args.includes('--node')) {
     const res = await fetch('demo/bench.json')
     return { code: 0, stdout: await res.text(), stderr: '' }
   }
+  if (args[0] === 'bench' && args.includes('--node')) return { code: 1, stdout: '', stderr: 'not in the demo' }
   if (args[0] === 'projects') return { code: 0, stdout: JSON.stringify(demoProjects()), stderr: '' }
   return { code: 0, stdout: '', stderr: '' }
 }

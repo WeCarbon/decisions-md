@@ -214,16 +214,22 @@ fn prefs_save(app: AppHandle, json: String) -> Result<(), String> {
 
 /// The window stays hidden until the first frame is drawn, so it never flashes blank.
 #[tauri::command]
-fn ready(app: AppHandle, state: State<'_, AppState>) -> u128 {
+fn ready(app: AppHandle, state: State<'_, AppState>, what: String) -> u128 {
     if let Some(w) = app.get_webview_window("main") {
         let _ = w.show();
         let _ = w.set_focus();
     }
     let ms = state.started.elapsed().as_millis();
     if std::env::var("DECS_APP_TIMING").is_ok() {
-        eprintln!("decs-app: first frame {ms} ms after launch");
+        eprintln!("decs-app: {what} {ms} ms after launch");
     }
     ms
+}
+
+/// Errors the page hits, on the app's stderr: the window has no console in a release build.
+#[tauri::command]
+fn log(line: String) {
+    eprintln!("decs-app: {line}");
 }
 
 #[tauri::command]
@@ -260,8 +266,21 @@ pub fn run() {
             prefs_load,
             prefs_save,
             ready,
-            install_decs
+            install_decs,
+            log
         ])
+        .setup(|app| {
+            // Shown by `ready` once the first frame is drawn; this is only the fallback if the page never says so.
+            let handle = app.handle().clone();
+            tauri::async_runtime::spawn(async move {
+                tokio::time::sleep(std::time::Duration::from_millis(1500)).await;
+                if let Some(w) = handle.get_webview_window("main") {
+                    if !w.is_visible().unwrap_or(true) {
+                        let _ = w.show();
+                    }                }
+            });
+            Ok(())
+        })
         .run(tauri::generate_context!())
         .expect("error while running decs");
 }
