@@ -189,9 +189,9 @@ nod                                  # the bench (same as nod bench); q to quit
 `nod` 按下面的顺序选界面语言：
 
 1. 任何命令上的 `--lang <code>`，比如 `nod bench --lang fr`
-2. `DECS_LANG` 环境变量
+2. `NODDIT_LANG` 环境变量（老名字 `DECS_LANG` 也还认）
 3. `nod config lang <code>`——按用户存在 `~/.decs/config.json`（即
-   `$DECS_HOME/config.json`）。单独跑 `nod config lang` 会显示当前语言和它
+   `$NODDIT_HOME/config.json`）。单独跑 `nod config lang` 会显示当前语言和它
    从哪来；`nod config lang --off` 会删掉这项设置。
 4. 系统语言设置（`LC_ALL` / `LC_MESSAGES` / `LANG`，忽略 `C` / `POSIX`）：
    `zh_CN` → `zh-Hans`，`zh_TW` / `zh_HK` → `zh-Hant`，`fr_*` → `fr`，
@@ -205,8 +205,8 @@ nod                                  # the bench (same as nod bench); q to quit
 可用代码：`en`、`zh-Hans`、`zh-Hant`、`fr`、`ar`。插件的会话开头
 规则和提示提醒遵循同一套解析逻辑（`plugin/rules.<code>.md`）。
 
-阿拉伯语是从右往左排的。`DECS_BIDI=visual|terminal`（或者
-`nod config bidi visual|terminal`，`--off` 取消）决定怎么排：`visual`
+阿拉伯语是从右往左排的。`NODDIT_BIDI=visual|terminal`（老名字 `DECS_BIDI`
+也还认，或者 `nod config bidi visual|terminal`，`--off` 取消）决定怎么排：`visual`
 （默认）是 nod 自己用 Unicode 双向算法重排每一行，给那些只会严格从左往右画的
 终端用（比如 macOS 自带的 Terminal）；`terminal` 是 nod 按逻辑顺序写，把嵌在
 里面的从左到右片段（W12 这样的引用、数字、命令、英文标题）包进 Unicode
@@ -345,8 +345,8 @@ Measured again: 1.9 s p95 from Singapore.
 **这只是给 Claude Code 用的吗？**
 不是。CLI 跟智能体无关——任何能跑终端的东西都能调用它。Claude Code 插件
 加了会话开头的规则，并用 `CLAUDECODE` / `CLAUDE_SESSION_ID` 来区分智能体
-的终端和你自己的，顺便标记是谁写的。其他地方，自己设 `DECS_ROLE=agent` 和
-`DECS_SESSION`。
+的终端和你自己的，顺便标记是谁写的。其他地方，自己设 `NODDIT_ROLE=agent` 和
+`NODDIT_SESSION`（老名字 `DECS_ROLE` / `DECS_SESSION` 也还认）。
 
 **能用 git worktree 吗？**
 能。`nod` 总是解析到主工作区的 `decisions/`，所以各条工作线的 worktree

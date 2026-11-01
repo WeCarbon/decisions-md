@@ -3,6 +3,7 @@ import { createHash } from 'node:crypto'
 import { mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { DECS_HOME } from '../../core/config.ts'
+import { nodditEnv } from '../../core/env.ts'
 import { bool, one, type Args } from '../args.ts'
 import { resolveAuthor, resolveStore } from '../context.ts'
 import { parseDuration, parseSince } from '../../core/duration.ts'
@@ -96,7 +97,8 @@ export function teammateName(command: string): string | undefined {
 }
 
 function sessionCommand(): string {
-  if (process.env.DECS_TEAMMATE !== undefined) return process.env.DECS_TEAMMATE ? `--agent-name ${process.env.DECS_TEAMMATE}` : ''
+  const teammate = nodditEnv('TEAMMATE')
+  if (teammate !== undefined) return teammate ? `--agent-name ${teammate}` : ''
   const { pid, info } = locateSession()
   // Windows's CommandLine from the walk above is already the full command;
   // `ps`'s `comm=` is only the image name, so POSIX needs one more call.
@@ -356,7 +358,7 @@ export async function run(args: Args): Promise<number> {
     writeHeartbeat(listenerKey, {
       pid: process.pid,
       roots: store.layouts.map((l) => l.projectRoot),
-      author: author ?? process.env.DECS_AUTHOR ?? null,
+      author: author ?? nodditEnv('AUTHOR') ?? null,
       harness: harnessOf(),
       role: author ? 'teammate' : 'lead',
       started_at: startedListening,

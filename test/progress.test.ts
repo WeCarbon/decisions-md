@@ -139,6 +139,19 @@ test('decs progress: DECS_TASK still works as the old alias', (t) => {
   assert.equal(JSON.parse(decs(root, ['get', '1', '--json'])).progress, 10)
 })
 
+test('decs progress: NODDIT_NODE works like DECS_NODE, and wins when both are set', (t) => {
+  const root = scratch()
+  t.after(() => rmSync(root, { recursive: true, force: true }))
+  decs(root, ['init', '--no-register'])
+  decs(root, ['add', 'a', '--task'])
+  decs(root, ['add', 'b', '--task'])
+  decs(root, ['progress', '20'], { NODDIT_NODE: '2' })
+  assert.equal(JSON.parse(decs(root, ['get', '2', '--json'])).progress, 20, 'NODDIT_NODE alone binds the id')
+  decs(root, ['progress', '77'], { NODDIT_NODE: '2', DECS_NODE: '1' })
+  assert.equal(JSON.parse(decs(root, ['get', '2', '--json'])).progress, 77, 'NODDIT_NODE wins over DECS_NODE')
+  assert.equal(JSON.parse(decs(root, ['get', '1', '--json'])).progress, null, 'node 1 (named only by DECS_NODE) was not touched')
+})
+
 test('decs progress: no DECS_NODE/DECS_TASK and no --node is a clear, non-zero-exit error', (t) => {
   const root = scratch()
   t.after(() => rmSync(root, { recursive: true, force: true }))

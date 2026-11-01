@@ -1,6 +1,7 @@
 import { mkdirSync, readdirSync, readFileSync, realpathSync, renameSync, rmSync, writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { DECS_HOME } from './config.ts'
+import { nodditEnv } from './env.ts'
 import type { Store } from './store.ts'
 
 /**
@@ -14,7 +15,7 @@ export interface Listener {
   roots: string[]
   /** `--mine` / teammate monitors watch one author's nodes; a lead's (null) watches everything. */
   author: string | null
-  /** The agent CLI it runs under, when it can tell: `claude-code`, `codex`, or `DECS_HARNESS`. */
+  /** The agent CLI it runs under, when it can tell: `claude-code`, `codex`, or `NODDIT_HARNESS`/`DECS_HARNESS`. */
   harness: string | null
   role: 'lead' | 'teammate'
   started_at: string
@@ -37,7 +38,8 @@ function alive(pid: number): boolean {
 }
 
 export function harnessOf(env: NodeJS.ProcessEnv = process.env): string | null {
-  if (env.DECS_HARNESS) return env.DECS_HARNESS
+  const harness = nodditEnv('HARNESS', env)
+  if (harness) return harness
   if (env.CLAUDECODE) return 'claude-code'
   if (Object.keys(env).some((k) => k.startsWith('CODEX_'))) return 'codex'
   return null

@@ -232,13 +232,13 @@ test('a brief filed with nobody listening runs $DECS_BRIEF_CMD with the brief in
 test('nod session start: refuses while a main session listens; otherwise hands its plan to the launcher', (t) => {
   const p = project(t)
   const record = join(p.root, 'launch.jsonl')
-  const dry = p.json(['session', 'start', '--dry-run', '--agent', 'codex'], { DECS_LAUNCH_RECORD: record })
+  const dry = p.json(['session', 'start', '--dry-run', '--agent', 'codex'], { NODDIT_LAUNCH_RECORD: record })
   assert.equal(dry.ok, true)
   assert.equal(dry.started, false)
   assert.equal(dry.plan.agent, 'codex')
   assert.ok(!existsSync(record), '--dry-run opens nothing')
 
-  const real = p.json(['session', 'start'], { DECS_LAUNCH_RECORD: record })
+  const real = p.json(['session', 'start'], { NODDIT_LAUNCH_RECORD: record })
   if (real.plan.exec) {
     const plans = readFileSync(record, 'utf8').trim().split('\n').map((l) => JSON.parse(l))
     assert.equal(plans.length, 1)
@@ -250,7 +250,7 @@ test('nod session start: refuses while a main session listens; otherwise hands i
   mkdirSync(join(p.home, 'sessions'), { recursive: true })
   const now = new Date().toISOString()
   writeFileSync(join(p.home, 'sessions', 'fake.json'), JSON.stringify({ pid: process.pid, roots: [p.root], author: 'lead-x · main', harness: 'claude-code', role: 'lead', started_at: now, last_seen: now }))
-  const r = p.result(['session', 'start'], { DECS_LAUNCH_RECORD: record })
+  const r = p.result(['session', 'start'], { NODDIT_LAUNCH_RECORD: record })
   assert.equal(r.code, 1)
   assert.match(r.stderr, /already has a session listening: lead-x · main/)
   assert.match(p.run(['sessions']), /lead-x · main/)

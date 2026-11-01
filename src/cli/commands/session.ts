@@ -1,5 +1,6 @@
 import { bool, one, type Args } from '../args.ts'
 import { resolveStore } from '../context.ts'
+import { nodditEnv } from '../../core/env.ts'
 import { AGENTS, hostEnv, launchPlan, realRoot, runPlan, type AgentCli, type LaunchPlan } from '../../core/launch.ts'
 import { leadFor, projectSessions, type Listener } from '../../core/listeners.ts'
 import { bold, dim } from '../../core/render.ts'
@@ -14,7 +15,7 @@ export type StartResult =
 const who = (l: Pick<Listener, 'author' | 'harness' | 'pid'>) => l.author ?? l.harness ?? `pid ${l.pid}`
 
 export function agentArg(raw: string | undefined): AgentCli {
-  const a = (raw ?? process.env.DECS_AGENT ?? 'claude').toLowerCase()
+  const a = (raw ?? nodditEnv('AGENT') ?? 'claude').toLowerCase()
   if (!(AGENTS as readonly string[]).includes(a)) throw new Error(t('cli.session.badAgent', { agent: a, agents: AGENTS.join(' | ') }))
   return a as AgentCli
 }

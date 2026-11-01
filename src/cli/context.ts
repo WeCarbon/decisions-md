@@ -2,6 +2,7 @@ import { execFileSync } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { readProjects } from '../core/config.ts'
+import { nodditEnv } from '../core/env.ts'
 import { findLayout, layoutFor, type Layout } from '../core/paths.ts'
 import { Store, sameAgent } from '../core/store.ts'
 import type { Decision, NoteRole } from '../core/types.ts'
@@ -77,11 +78,12 @@ export { parseRef } from '../core/ref.ts'
 
 /**
  * Who is at the keyboard when no flag says: Claude Code sets `CLAUDECODE`;
- * `DECS_ROLE=agent|human` covers other harnesses. Anything else is the
- * owner's own terminal.
+ * `NODDIT_ROLE=agent|human` (or the older `DECS_ROLE`) covers other
+ * harnesses. Anything else is the owner's own terminal.
  */
 export function shellRole(env: NodeJS.ProcessEnv = process.env): NoteRole {
-  if (env.DECS_ROLE === 'agent' || env.DECS_ROLE === 'human') return env.DECS_ROLE
+  const role = nodditEnv('ROLE', env)
+  if (role === 'agent' || role === 'human') return role
   return env.CLAUDECODE ? 'agent' : 'human'
 }
 
@@ -96,7 +98,8 @@ export function requireDecision(store: Store, raw: string, args: Args) {
 export function resolveAuthor(args: Args, cwd = process.cwd()): string {
   const explicit = one(args, 'author', 'a')
   if (explicit) return explicit
-  if (process.env.DECS_AUTHOR) return process.env.DECS_AUTHOR
+  const author = nodditEnv('AUTHOR')
+  if (author) return author
   try {
     const branch = execFileSync('git', ['rev-parse', '--abbrev-ref', 'HEAD'], {
       cwd,
@@ -142,7 +145,7 @@ export function readStdin(firstChunkTimeoutMs = 1500): Promise<string> {
  * `decs monitor --mine`; say so once, on stderr.
  */
 export function warnOtherAuthor(nodeAuthor: string, ref: string, claimedBy?: string): void {
-  const me = process.env.DECS_AUTHOR
+  const me = nodditEnv('AUTHOR')
   if (!me || sameAgent(nodeAuthor, me) || sameAgent(me, nodeAuthor)) return
   // A brief this agent claimed reaches its --mine monitor (see `ownedBy`).
   if (claimedBy && (sameAgent(claimedBy, me) || sameAgent(me, claimedBy))) return
@@ -157,7 +160,7 @@ export function warnOtherAuthor(nodeAuthor: string, ref: string, claimedBy?: str
  * The owner's own terminal is never stopped.
  */
 export function guardOtherAuthor(store: Store, d: Decision, args: Args, env: NodeJS.ProcessEnv = process.env): void {
-  const me = one(args, 'author') ?? env.DECS_AUTHOR
+  const me = one(args, 'author') ?? nodditEnv('AUTHOR', env)
   if (bool(args, 'force') || !me || shellRole(env) !== 'agent') return
   const mine = (author: string | undefined) => sameAgent(author, me) || (author !== undefined && sameAgent(me, author))
   // A claimed brief is the claimer's.

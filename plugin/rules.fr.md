@@ -16,7 +16,7 @@ suite — tout est dans `nod bench`. Hors nod, invisible. Détails :
   qui manque, sans contourner.
 - **Ouvrez un nœud avant de commencer** : `nod add --task "<titre, ≤16
   car.>" --author "<agent> · <ce qu'il fait>"`, `nod start <id>`,
-  `export DECS_NODE=<id>`. Le nœud d'une voie va sous celui de la session
+  `export NODDIT_NODE=<id>`. Le nœud d'une voie va sous celui de la session
   principale (`--parent`).
 - **Les plans sont des nœuds enfants** : étapes pas encore faites →
   nœuds enfants (`--parent`), ordonnés par `--after`, estimés par

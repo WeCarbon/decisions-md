@@ -1,3 +1,4 @@
+mod noddit_env;
 mod watch;
 
 use serde::{Deserialize, Serialize};
@@ -38,16 +39,18 @@ struct RunOutput {
     stderr: String,
 }
 
-/// `DECS_APP_DATA` points the app's own state (prefs, cached bench) elsewhere — a second profile, or a test run.
-/// `DECS_APP_BACKGROUND=1` — for scripted runs on a machine someone is using: the app never comes
-/// to the front, never shows or focuses a window, has no Dock icon, menu-bar icon, global hotkey or
-/// real notifications. Everything else — the CLI calls, the monitor, the page — runs as usual.
+/// `NODDIT_APP_DATA` (or the older `DECS_APP_DATA`) points the app's own state (prefs, cached
+/// bench) elsewhere — a second profile, or a test run.
+/// `NODDIT_APP_BACKGROUND=1` (or `DECS_APP_BACKGROUND`) — for scripted runs on a machine someone
+/// is using: the app never comes to the front, never shows or focuses a window, has no Dock icon,
+/// menu-bar icon, global hotkey or real notifications. Everything else — the CLI calls, the
+/// monitor, the page — runs as usual.
 pub(crate) fn background() -> bool {
-    std::env::var("DECS_APP_BACKGROUND").map(|v| !v.is_empty() && v != "0").unwrap_or(false)
+    noddit_env::var("APP_BACKGROUND").map(|v| !v.is_empty() && v != "0").unwrap_or(false)
 }
 
 pub(crate) fn data_dir(app: &AppHandle) -> PathBuf {
-    let dir = std::env::var_os("DECS_APP_DATA")
+    let dir = noddit_env::var_os("APP_DATA")
         .map(PathBuf::from)
         .unwrap_or_else(|| app.path().app_data_dir().unwrap_or_else(|_| std::env::temp_dir().join("decs-app")));
     let _ = std::fs::create_dir_all(&dir);
@@ -60,7 +63,7 @@ const FORMER_IDENTIFIER: &str = "com.wecarbon.decs";
 /// First launch under the new identifier: bring prefs, settings and the cached bench over from the old
 /// data directory, so a rename does not reset anyone's setup. Never overwrites, never deletes the old one.
 fn migrate_former_data(app: &AppHandle) {
-    if std::env::var_os("DECS_APP_DATA").is_some() {
+    if noddit_env::is_set("APP_DATA") {
         return;
     }
     let Ok(dir) = app.path().app_data_dir() else { return };
@@ -117,8 +120,7 @@ fn probe() -> ShellEnv {
     let path = login_path();
     // Prefer `nod` (the current name); fall back to `decs` for older installs
     // that only have the alias on PATH.
-    let decs = std::env::var("DECS_BIN")
-        .ok()
+    let decs = noddit_env::var("BIN")
         .filter(|p| !p.is_empty())
         .or_else(|| which("nod", &path))
         .or_else(|| which("decs", &path));
@@ -179,12 +181,9 @@ async fn shell_env(app: AppHandle, state: State<'_, AppState>, refresh: bool) ->
 pub(crate) fn decs_command(env: &ShellEnv, args: &[String], cwd: Option<&str>) -> Result<Command, String> {
     let bin = env.decs.clone().ok_or("nod is not installed")?;
     let mut cmd = Command::new(bin);
-    cmd.args(args)
-        .env("PATH", &env.path)
-        .env("NO_COLOR", "1")
-        .env_remove("CLAUDECODE")
-        .env_remove("DECS_ROLE")
-        .stdin(Stdio::null());
+    cmd.args(args).env("PATH", &env.path).env("NO_COLOR", "1").env_remove("CLAUDECODE");
+    noddit_env::remove(&mut cmd, "ROLE");
+    cmd.stdin(Stdio::null());
     // Never the app's own working directory: decs would fall back to whatever project that happens to be in.
     match cwd.map(PathBuf::from).or_else(|| std::env::var_os("HOME").map(PathBuf::from)) {
         Some(dir) => {
@@ -263,7 +262,7 @@ fn ready(app: AppHandle, state: State<'_, AppState>, what: String) -> u128 {
         }
     }
     let ms = state.started.elapsed().as_millis();
-    if std::env::var("DECS_APP_TIMING").is_ok() {
+    if noddit_env::is_set("APP_TIMING") {
         eprintln!("decs-app: {what} {ms} ms after launch");
     }
     #[cfg(debug_assertions)]
@@ -271,20 +270,20 @@ fn ready(app: AppHandle, state: State<'_, AppState>, what: String) -> u128 {
     ms
 }
 
-/// Debug builds only: `DECS_APP_SCRIPT=<file.js>` runs that file in the page once it is up — how the
-/// window is driven end to end without anyone clicking.
+/// Debug builds only: `NODDIT_APP_SCRIPT=<file.js>` (or the older `DECS_APP_SCRIPT`) runs that file
+/// in the page once it is up — how the window is driven end to end without anyone clicking.
 #[cfg(debug_assertions)]
 fn run_script_once(app: &AppHandle, state: &AppState) {
     use std::sync::atomic::Ordering;
     if state.script_ran.swap(true, Ordering::SeqCst) {
         return;
     }
-    let Some(path) = std::env::var_os("DECS_APP_SCRIPT") else { return };
+    let Some(path) = noddit_env::var_os("APP_SCRIPT") else { return };
     match (std::fs::read_to_string(&path), app.get_webview_window("main")) {
         (Ok(js), Some(w)) => {
             let _ = w.eval(&js);
         }
-        (Err(e), _) => eprintln!("decs-app: DECS_APP_SCRIPT: {e}"),
+        (Err(e), _) => eprintln!("decs-app: APP_SCRIPT: {e}"),
         _ => {}
     }
 }
@@ -301,10 +300,10 @@ fn e2e_shot(app: AppHandle, name: String) {
     }
 }
 
-/// The folder picker. `DECS_APP_PICK` answers it without a dialog, for scripted runs.
+/// The folder picker. `NODDIT_APP_PICK` (or the older `DECS_APP_PICK`) answers it without a dialog, for scripted runs.
 #[tauri::command]
 async fn pick_folder(app: AppHandle) -> Option<String> {
-    if let Ok(dir) = std::env::var("DECS_APP_PICK") {
+    if let Some(dir) = noddit_env::var("APP_PICK") {
         return Some(dir);
     }
     use tauri_plugin_dialog::DialogExt;

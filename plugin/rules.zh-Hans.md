@@ -11,7 +11,7 @@
   不要用编辑器、sed 或重定向直接改，也不要手动挪文件、改文件头、删 `.ids/`。
   命令做不到的事，记一个节点说清楚缺什么，别绕过去。
 - **开工先建节点**：接到一件事，第一步 `nod add --task "<≤16 字标题>" --author "<智能体> · <在做什么>"`，
-  `nod start <id>`，然后 `export DECS_NODE=<id>`。主控会话派工作线时，工作线的节点建在主控会话节点下面（`--parent`）。
+  `nod start <id>`，然后 `export NODDIT_NODE=<id>`。主控会话派工作线时，工作线的节点建在主控会话节点下面（`--parent`）。
 - **计划就是子节点**：拆步骤时把还没做的写成子节点（`--parent`），有先后的写 `--after`，能估的写 `--est 30m`。
   中途发现新事项，加子节点，不要只在对话里说。
 - **进度要能自己走**：长跑的命令接到 `nod progress`（`pytest … | nod progress --parse pytest`），

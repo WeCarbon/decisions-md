@@ -309,7 +309,7 @@ export function prefsSave(prefs: unknown): void {
   invoke('prefs_save', { json: text }).catch(() => {})
 }
 
-/** Shows the window on the first call; each call logs how long after launch `what` happened (DECS_APP_TIMING=1). */
+/** Shows the window on the first call; each call logs how long after launch `what` happened (NODDIT_APP_TIMING=1, or the older DECS_APP_TIMING). */
 export async function ready(what: string): Promise<number> {
   if (!inDesktop) return performance.now()
   return invoke<number>('ready', { what })

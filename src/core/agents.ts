@@ -139,8 +139,11 @@ export function setupViaAgentsMd(dir: string, lng: Lang, opts: { dryRun?: boolea
 // ---------------------------------------------------------------------------
 
 export const CLAUDE_MARKETPLACE = 'wecarbon/noddit'
-export const CLAUDE_PLUGIN = 'decs@decisions-md'
+export const CLAUDE_PLUGIN = 'nod@noddit'
+/** The marketplace was "decisions-md" and the plugin "decs" before the Noddit rename; still installed on older machines. */
+export const OLD_CLAUDE_PLUGIN = 'decs@decisions-md'
 export const CLAUDE_MANUAL_LINES = [`/plugin marketplace add ${CLAUDE_MARKETPLACE}`, `/plugin install ${CLAUDE_PLUGIN}`] as const
+export const OLD_CLAUDE_MANUAL_LINES = [`/plugin uninstall ${OLD_CLAUDE_PLUGIN}`, ...CLAUDE_MANUAL_LINES] as const
 
 interface Exec {
   (args: string[]): { status: number | null; stdout: string; stderr: string }
@@ -154,6 +157,18 @@ function execIn(dir: string): Exec {
   }
 }
 
+/** The scope `OLD_CLAUDE_PLUGIN` is installed under, or undefined if it isn't installed (or `plugin list` can't be read). */
+function detectOldPlugin(exec: Exec): string | undefined {
+  try {
+    const r = exec(['plugin', 'list', '--json'])
+    if (r.status !== 0) return undefined
+    const found = (JSON.parse(r.stdout) as Array<{ id?: string; scope?: string }>).find((p) => p.id === OLD_CLAUDE_PLUGIN)
+    return found ? found.scope ?? 'user' : undefined
+  } catch {
+    return undefined
+  }
+}
+
 /** `exec` is only ever overridden by tests — production always shells out to the real `claude` binary on PATH, run from `dir`. */
 export function setupClaudePlugin(dir: string, opts: { dryRun?: boolean; exec?: Exec } = {}): AgentOutcome {
   if (opts.dryRun) {
@@ -161,6 +176,19 @@ export function setupClaudePlugin(dir: string, opts: { dryRun?: boolean; exec?: 
   }
   const exec = opts.exec ?? execIn(dir)
   const alreadyMarketplace = /already/i
+
+  // An older install under the pre-rename name: remove it non-interactively
+  // before installing the new one, so a stale `decs@decisions-md` doesn't
+  // sit alongside `nod@noddit`.
+  const oldScope = detectOldPlugin(exec)
+  if (oldScope !== undefined) {
+    const uninstall = exec(['plugin', 'uninstall', OLD_CLAUDE_PLUGIN, '--scope', oldScope, '-y'])
+    const gone = uninstall.status === 0 || /not (installed|found)/i.test(uninstall.stderr) || /not (installed|found)/i.test(uninstall.stdout)
+    if (!gone) {
+      return { detected: true, action: 'manual', detail: OLD_CLAUDE_MANUAL_LINES.join('\n') }
+    }
+  }
+
   const add = exec(['plugin', 'marketplace', 'add', CLAUDE_MARKETPLACE, '--scope', 'project'])
   const marketplaceOk = add.status === 0 || alreadyMarketplace.test(add.stderr) || alreadyMarketplace.test(add.stdout)
   if (!marketplaceOk) {
@@ -171,7 +199,10 @@ export function setupClaudePlugin(dir: string, opts: { dryRun?: boolean; exec?: 
     return { detected: true, action: 'manual', detail: CLAUDE_MANUAL_LINES.join('\n') }
   }
   const already = /already/i.test(install.stdout) || /already/i.test(install.stderr)
-  return { detected: true, action: already ? 'unchanged' : 'created', detail: `plugin ${CLAUDE_PLUGIN} installed from ${CLAUDE_MARKETPLACE}` }
+  const detail = oldScope !== undefined
+    ? `plugin ${CLAUDE_PLUGIN} installed from ${CLAUDE_MARKETPLACE} (removed old ${OLD_CLAUDE_PLUGIN})`
+    : `plugin ${CLAUDE_PLUGIN} installed from ${CLAUDE_MARKETPLACE}`
+  return { detected: true, action: already ? 'unchanged' : oldScope !== undefined ? 'updated' : 'created', detail }
 }
 
 // ---------------------------------------------------------------------------

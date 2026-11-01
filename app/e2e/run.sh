@@ -19,16 +19,16 @@ cleanup() {
 }
 trap cleanup EXIT
 
-export DECS_HOME="$work/home" DECS_APP_DATA="$work/app" DECS_LANG=en DECS_APP_TIMING=1
+export NODDIT_HOME="$work/home" NODDIT_APP_DATA="$work/app" NODDIT_LANG=en NODDIT_APP_TIMING=1
 # Never in front of whoever is using this Mac: no window, Dock icon, menu-bar icon, hotkey or notification.
-export DECS_APP_BACKGROUND=${DECS_APP_BACKGROUND:-1}
+export NODDIT_APP_BACKGROUND=${NODDIT_APP_BACKGROUND:-1}
 front() { osascript -e 'tell application "System Events" to get name of first process whose frontmost is true' 2>/dev/null; }
 front_before=$(front)
-export DECS_BIN="${E2E_NOD:-$repo/bin/nod}" DECS_APP_PICK="$work/shop" DECS_APP_SCRIPT="$here/walkthrough.js"
-mkdir -p "$DECS_HOME" "$DECS_APP_PICK" "$DECS_APP_DATA"
+export NODDIT_BIN="${E2E_NOD:-$repo/bin/nod}" NODDIT_APP_PICK="$work/shop" NODDIT_APP_SCRIPT="$here/walkthrough.js"
+mkdir -p "$NODDIT_HOME" "$NODDIT_APP_PICK" "$NODDIT_APP_DATA"
 # No real notifications and no global hotkey during the run: the walkthrough sets what it tests.
-printf '{"notify":"off","hotkey":"","keepInTray":true}' > "$DECS_APP_DATA/settings.json"
-decs() { (cd "$DECS_APP_PICK" && DECS_AUTHOR="lane-db · schema" CLAUDECODE=1 "$DECS_BIN" "$@" >/dev/null); }
+printf '{"notify":"off","hotkey":"","keepInTray":true}' > "$NODDIT_APP_DATA/settings.json"
+decs() { (cd "$NODDIT_APP_PICK" && NODDIT_AUTHOR="lane-db · schema" CLAUDECODE=1 "$NODDIT_BIN" "$@" >/dev/null); }
 decs init --no-register
 decs add "Pick a database" -o 1=SQLite 2=Postgres --body "Both work for the first year."
 decs add "Write the schema" --task
@@ -59,7 +59,7 @@ for _ in $(seq 1 1500); do
     esac
   done
   seen=$lines
-  [ "$DECS_APP_BACKGROUND" = 1 ] && echo "decs-app: frontmost $(front)" >> "$work/front"
+  [ "$NODDIT_APP_BACKGROUND" = 1 ] && echo "decs-app: frontmost $(front)" >> "$work/front"
   if [ -z "${filed:-}" ] && grep -q "decs-app: STEP announce" "$work/log"; then
     # A decision filed while the app runs must reach the bench and be announced.
     decs add "Pick a CDN" -o 1=Keep 2=Switch
@@ -74,14 +74,14 @@ done
 kill "$pid" 2>/dev/null || true
 wait "$pid" 2>/dev/null || true
 # Whoever is at the keyboard may switch apps meanwhile; what must never happen is this app in front.
-if [ "$DECS_APP_BACKGROUND" = 1 ] && grep -q "frontmost decs-app\|frontmost Noddit" "$work/front" 2>/dev/null; then
+if [ "$NODDIT_APP_BACKGROUND" = 1 ] && grep -q "frontmost decs-app\|frontmost Noddit" "$work/front" 2>/dev/null; then
   echo "e2e: the app came to the front during the run" >&2
   status=1
 fi
 
 if [ "$status" -eq 0 ]; then
-  cd "$DECS_APP_PICK"
-  check() { "$DECS_BIN" get "$1" --json | CHECK="$2" node -e 'const d = JSON.parse(require("fs").readFileSync(0)); if (!eval(process.env.CHECK)) { console.error("check failed on " + process.argv[1] + ": " + process.env.CHECK + " — " + JSON.stringify({ title: d.title, status: d.status, pin: d.pin, notes: d.notes.map((n) => n.kind) })); process.exit(1) }' "$1"; }
+  cd "$NODDIT_APP_PICK"
+  check() { "$NODDIT_BIN" get "$1" --json | CHECK="$2" node -e 'const d = JSON.parse(require("fs").readFileSync(0)); if (!eval(process.env.CHECK)) { console.error("check failed on " + process.argv[1] + ": " + process.env.CHECK + " — " + JSON.stringify({ title: d.title, status: d.status, pin: d.pin, notes: d.notes.map((n) => n.kind) })); process.exit(1) }' "$1"; }
   check 1 "d.answer.choice==='2' && /JSON columns/.test(d.answer.note) && d.answer.by==='owner'"
   check 3 "d.answer.choice==='1'"
   check 2 "d.notes.some(n=>n.role==='human' && /索引/.test(n.text))"
@@ -95,8 +95,8 @@ if [ "$status" -eq 0 ]; then
     check 9 "d.intake === true && d.brief === 'unclaimed' && d.original === 'Add rate limits to the export endpoint'"
   fi
   # Unlinked: out of the registry, folder and files untouched.
-  ! grep -q '"root"' "$DECS_HOME/config.json"
-  [ -f "$DECS_APP_PICK/decisions/decs.json" ]
+  ! grep -q '"root"' "$NODDIT_HOME/config.json"
+  [ -f "$NODDIT_APP_PICK/decisions/decs.json" ]
   echo "e2e: all checks passed"
 fi
 exit "$status"

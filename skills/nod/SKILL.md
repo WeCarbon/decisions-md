@@ -1,5 +1,5 @@
 ---
-name: decs
+name: nod
 description: nod 的完整用法（`decs` 仍是别名）——建节点/子节点、依赖与时序、nod progress/steps 汇报进度、nod ask 请 owner 拍板、子问题、发出去之前的内容批准（--approval-content/--approve-on/approved --check）、外部来源（nod source）、附件、迁移。要写 nod 节点、要 owner 决定或验收、要汇报进度、要接外部通知时加载。
 ---
 

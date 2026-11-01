@@ -16,7 +16,7 @@ load the decs skill.
   it? Record a node saying what's missing; don't work around it.
 - **Open a node before starting**: `nod add --task "<title, ≤16 chars>"
   --author "<agent> · <what it's doing>"`, `nod start <id>`,
-  `export DECS_NODE=<id>`. A lane's node goes under its lead's
+  `export NODDIT_NODE=<id>`. A lane's node goes under its lead's
   (`--parent`).
 - **Plans are child nodes**: unstarted steps become child nodes
   (`--parent`), ordered with `--after`, estimated with `--est 30m`. New

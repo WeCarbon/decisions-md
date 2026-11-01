@@ -1,13 +1,14 @@
 import { readUserConfig, writeUserConfig } from './config.ts'
 import { parseDuration } from './duration.ts'
+import { nodditEnvHit } from './env.ts'
 import { LANGUAGES, LANGUAGE_NAMES, normalizeLang, resolveLang, setLang, t } from '../i18n/index.ts'
 import { BIDI_MODES } from '../i18n/bidi.ts'
 
 /**
  * Every per-user setting, in the order the bench's settings dialog lists them.
  * `decs config` and the dialog both read this list, so a new setting is one
- * entry here. Values live in `$DECS_HOME/config.json`; an environment variable,
- * where a setting has one, overrides the stored value.
+ * entry here. Values live in `$NODDIT_HOME/config.json`; an environment
+ * variable, where a setting has one, overrides the stored value.
  */
 export interface Setting {
   /** The key in config.json and the word after `decs config`. */
@@ -16,6 +17,7 @@ export interface Setting {
   /** The choices the dialog cycles through; a duration also accepts any `parseDuration` value. */
   values: readonly string[]
   default: string
+  /** The suffix after `NODDIT_`/`DECS_` for this setting's env var, when it has one (e.g. `'LANG'` for `NODDIT_LANG`/`DECS_LANG`). */
   env?: string
   /** A value as the user reads it; defaults to the value itself. */
   show?: (value: string) => string
@@ -33,7 +35,7 @@ export const SETTINGS: readonly Setting[] = [
     type: 'enum',
     values: ['auto', ...LANGUAGES],
     default: 'auto',
-    env: 'DECS_LANG',
+    env: 'LANG',
     show: (v) => (v === 'auto' ? t('settings.value.auto') : (LANGUAGE_NAMES as Record<string, string>)[v] ?? v),
     parse: (raw) => (raw === 'auto' ? 'auto' : normalizeLang(raw)),
     apply: () => setLang(resolveLang()),
@@ -43,7 +45,7 @@ export const SETTINGS: readonly Setting[] = [
     type: 'enum',
     values: BIDI_MODES,
     default: 'visual',
-    env: 'DECS_BIDI',
+    env: 'BIDI',
   },
   {
     key: 'view',
@@ -57,7 +59,7 @@ export const SETTINGS: readonly Setting[] = [
     type: 'enum',
     values: ['auto', 'iterm', 'kitty', 'off'],
     default: 'auto',
-    env: 'DECS_IMAGES',
+    env: 'IMAGES',
     show: (v) => (v === 'auto' || v === 'off' ? t(`settings.value.${v}`) : v),
   },
   {
@@ -104,11 +106,12 @@ function valid(s: Setting, raw: unknown): string | undefined {
 }
 
 /** The value in force and where it comes from. An unusable env or stored value is skipped. */
-export function settingValue(key: string, env: NodeJS.ProcessEnv = process.env): { value: string; source: SettingSource } {
+export function settingValue(key: string, env: NodeJS.ProcessEnv = process.env): { value: string; source: SettingSource; envName?: string } {
   const s = settingFor(key)
   if (!s) throw new Error(t('settings.unknown', { key, keys: SETTINGS.map((x) => x.key).join(' ') }))
-  const fromEnv = s.env ? valid(s, env[s.env]) : undefined
-  if (fromEnv) return { value: fromEnv, source: 'env' }
+  const hit = s.env ? nodditEnvHit(s.env, env) : undefined
+  const fromEnv = hit ? valid(s, hit.value) : undefined
+  if (fromEnv) return { value: fromEnv, source: 'env', envName: hit!.name }
   const stored = valid(s, readUserConfig()[s.key])
   if (stored) return { value: stored, source: 'config' }
   return { value: s.default, source: 'default' }

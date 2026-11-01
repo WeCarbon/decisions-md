@@ -218,9 +218,9 @@ CLI calls, so any agent with a shell can follow them.
 `nod` picks the UI language in this order:
 
 1. `--lang <code>` on any command, e.g. `nod bench --lang fr`
-2. the `DECS_LANG` environment variable
+2. the `NODDIT_LANG` environment variable (`DECS_LANG` still works)
 3. `nod config lang <code>` — stored per user in `~/.decs/config.json`
-   (`$DECS_HOME/config.json`). `nod config lang` alone shows the current
+   (`$NODDIT_HOME/config.json`). `nod config lang` alone shows the current
    language and where it comes from; `nod config lang --off` removes it.
 4. the system locale (`LC_ALL` / `LC_MESSAGES` / `LANG`, `C` / `POSIX`
    ignored): `zh_CN` → `zh-Hans`, `zh_TW` / `zh_HK` → `zh-Hant`, `fr_*` →
@@ -235,8 +235,8 @@ Codes: `en`, `zh-Hans`, `zh-Hant`, `fr`, `ar`. The plugin's
 session-start rules and prompt reminder follow the same resolution
 (`plugin/rules.<code>.md`).
 
-Arabic is laid out right to left. `DECS_BIDI=visual|terminal` (or
-`nod config bidi visual|terminal`, `--off` to remove) picks how: `visual`
+Arabic is laid out right to left. `NODDIT_BIDI=visual|terminal` (`DECS_BIDI`
+still works, or `nod config bidi visual|terminal`, `--off` to remove) picks how: `visual`
 (the default) has nod reorder each line itself with the Unicode
 Bidirectional Algorithm, for terminals that draw strictly left to right
 (e.g. macOS Terminal); `terminal` has nod write logical order and wrap
@@ -378,7 +378,7 @@ reference still holds.
 No. The CLI is agent-agnostic — anything with a shell can call it. The Claude
 Code plugin adds session-start rules and uses `CLAUDECODE` /
 `CLAUDE_SESSION_ID` to tell agent shells from yours and tag who wrote what.
-Elsewhere, set `DECS_ROLE=agent` and `DECS_SESSION`.
+Elsewhere, set `NODDIT_ROLE=agent` and `NODDIT_SESSION` (`DECS_ROLE` / `DECS_SESSION` still work).
 
 **Does it work with git worktrees?**
 Yes. `nod` always resolves to the main checkout's `decisions/`, so lanes in

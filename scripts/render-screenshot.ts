@@ -24,17 +24,17 @@ if (!LANG) throw new Error(`--lang: unknown language "${flag('lang', '')}"`)
 const OUT = resolve(repo, flag('out', `docs/screenshot.${LANG}`))
 
 const tmp = mkdtempSync(join(tmpdir(), 'decs-shot-'))
-// Must be set before the dynamic imports below: config reads DECS_HOME at load time.
-process.env.DECS_HOME = join(tmp, 'home')
-process.env.DECS_LANG = LANG
+// Must be set before the dynamic imports below: config reads NODDIT_HOME at load time.
+process.env.NODDIT_HOME = join(tmp, 'home')
+process.env.NODDIT_LANG = LANG
 // The frame is what a strictly left-to-right terminal gets: Arabic already in visual order.
-process.env.DECS_BIDI = 'visual'
+process.env.NODDIT_BIDI = 'visual'
 
 function decs(cwd: string, args: string[], opts: { input?: string; human?: boolean; author?: string } = {}): string {
-  const env: NodeJS.ProcessEnv = { ...process.env, NO_COLOR: '1', DECS_AUTHOR: opts.author ?? 'lead · release', DECS_HOME: process.env.DECS_HOME, DECS_LANG: LANG }
+  const env: NodeJS.ProcessEnv = { ...process.env, NO_COLOR: '1', NODDIT_AUTHOR: opts.author ?? 'lead · release', NODDIT_HOME: process.env.NODDIT_HOME, NODDIT_LANG: LANG }
   delete env.CLAUDECODE
   delete env.CLAUDE_SESSION_ID
-  env.DECS_ROLE = opts.human ? 'human' : 'agent'
+  env.NODDIT_ROLE = opts.human ? 'human' : 'agent'
   const r = spawnSync(process.execPath, [BIN, ...args], { cwd, input: opts.input ?? '', encoding: 'utf8', env })
   if (r.status !== 0) throw new Error(`decs ${args.join(' ')}\n${r.stdout}${r.stderr}`)
   return r.stdout

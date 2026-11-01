@@ -183,7 +183,7 @@ export function App({ store, view: initialView, openDeferred, project }: Props) 
   const [snap, setSnap] = useState<Snapshot>(() => snapshot(store, project))
   const { items, sources, sessions, now } = snap
   const [view, setView] = useState<View>(initialView)
-  // Folds persist per viewer across sessions (`$DECS_HOME/bench-state.json`).
+  // Folds persist per viewer across sessions (`$NODDIT_HOME/bench-state.json`).
   const [folds, setFolds] = useState<FoldMap>(() => ({ ...loadFolds(), ...(openDeferred ? { [DEFERRED_FOLD_KEY]: 'expanded' as const } : {}) }))
   const [cursorKey, setCursorKey] = useState<string | null>(null)
   const [offset, setOffset] = useState(0)
@@ -1344,12 +1344,12 @@ export function buildSettingsModal(frameWidth: number, frameHeight: number, sele
 
   for (const [i, setting] of SETTINGS.entries()) {
     if (i >= maxRows) break
-    const { value, source } = settingValue(setting.key)
+    const { value, source, envName } = settingValue(setting.key)
     const selectedRow = i === selected
     const label = t(`settings.label.${setting.key}`)
     const valueSeg: Segment =
       source === 'env'
-        ? { text: `${showValue(setting, value)}  ${t('settings.setBy', { env: setting.env! })}`, dim: true, key: setting.key }
+        ? { text: `${showValue(setting, value)}  ${t('settings.setBy', { env: envName ?? setting.env! })}`, dim: true, key: setting.key }
         : { text: `‹ ${showValue(setting, value)} ›`, color: selectedRow ? 'cyan' : undefined, bold: selectedRow, key: setting.key }
     const gap = Math.max(1, inner - stringWidth(label) - stringWidth(valueSeg.text))
     const logical: Line = [{ text: label, bold: selectedRow && source !== 'env' }, { text: ' '.repeat(gap) }, valueSeg]

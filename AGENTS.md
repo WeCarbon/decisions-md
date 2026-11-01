@@ -77,20 +77,20 @@ nod add "5 条回复草稿" --review-item R1 "回复 Alice" --review-item R2 "�
 
 规矩：
 
-- `--author` 必填（退到 `$DECS_AUTHOR`，再退到 git 分支名）。session id 从
-  `CLAUDE_SESSION_ID` / `DECS_SESSION` 自动记下。
+- `--author` 必填（退到 `$NODDIT_AUTHOR`，再退到 git 分支名；`DECS_AUTHOR` 这个老名字也还认）。
+  session id 从 `CLAUDE_SESSION_ID` / `NODDIT_SESSION`（或老名字 `DECS_SESSION`）自动记下。
 - 要 owner 权衡的事，选项和各自的代价都写出来。只有一个选项的是验收（不给 `-o`
   就自动带一个 `1 · 验收通过`）：写清在哪看、该看到什么、已经自动测过什么。
   截图用 `nod attach <id> <path>`。
 - 只是告诉一声、不用回的，用 `--fyi`：直接记成已完成，不进「等你决定」的列表。
 - `--urgency high|low`、`--due 4h`、`--if-no-answer`、`--reversible yes|no` 都是字段，
-  bench 直接显示，high 排在最前。`--notify` 只在设了 `DECS_NOTIFY_CMD` 时推送。
+  bench 直接显示，high 排在最前。`--notify` 只在设了 `NODDIT_NOTIFY_CMD`（老名字 `DECS_NOTIFY_CMD` 也认）时推送。
 
 ### 你替 owner 记答复（`nod push`）
 
 owner 在对话里说了「发吧」「选 2」，你可以用 `nod push <id> 2` 记下来：答复照样落盘、
 照样进队列、照样能 `nod read`。但在 agent 的 shell 里（设了 `CLAUDECODE` 或
-`DECS_ROLE=agent`），push 默认记成 **agent** 的答复，**不批准任何 `--approval-content`
+`NODDIT_ROLE=agent`，老名字 `DECS_ROLE=agent` 也认），push 默认记成 **agent** 的答复，**不批准任何 `--approval-content`
 内容**。
 
 ⚠️ **绝不要为了让内容通过批准去加 `--human`。** 要发出去的东西必须由 owner 自己在
@@ -266,13 +266,13 @@ owner 看不到你在干什么，只能看 `decisions/` 里写了什么——一
 
 ```sh
 nod add "跑全量测试" --task --author "<lane> · 在做什么"   # 打印它的 <id>，记下来
-export DECS_NODE=<上面打印的 id>                              # 后面的 nod progress 不用再写 id
+export NODDIT_NODE=<上面打印的 id>                            # 后面的 nod progress 不用再写 id
 ```
 
 一个节点一次只代表一件正在做的事——不要把整条 lane 的所有工作塞进一个节点的
 `progress`，一个阶段性任务换一个节点，用 `--after <上一个 id>` 接上，bench 才能
-按顺序显示「接下来是什么」。`DECS_TASK` 是这个变量的老名字，`nod progress` 仍然
-认它。
+按顺序显示「接下来是什么」。`DECS_NODE` 是这个变量的老名字，`nod progress` 仍然
+认它；`DECS_TASK` 是更老的别名，也一样认。
 
 **跑测试这种有输出的，直接管道进去——不要自己解析进度再手动调用：**
 
@@ -285,7 +285,7 @@ nod progress --count-lines run.log --total 23              # 逐节重算：读�
 
 内置解析器：`pytest`（`[ NN%]`）、`percent`（任意 `NN%`）、`fraction`（任意
 `N/M`）；不给 `--parse`/`--regex` 时三个都试一遍。节流到最多每 5 秒写一次文件，
-但管道结束/文件读完时最后一次值一定落地。**没设 `DECS_NODE` 也没给 `--node`，
+但管道结束/文件读完时最后一次值一定落地。**没设 `NODDIT_NODE`/`DECS_NODE` 也没给 `--node`，
 这条命令直接报错退出，不会静默地什么都不做。**
 
 **多步骤的活（lead 的工作大多是这种），用 steps 而不是自己心算百分比：**
@@ -339,12 +339,12 @@ nod ask X120 -o 1="按计划开始" 2="要改（回复里写怎么改）"   # �
 - owner 答 1 → `nod read`，照常执行；答 2 → 按意见再 expand、调整子节点，再 `nod ask`。
 - 转述 owner 在对话里说的新活：`nod add --brief --author owner "<原话>"`。
 
-谁在线：每个 `nod monitor` 在 `$DECS_HOME/sessions/` 下维持心跳（pid、署名、终端程序、lead/teammate、
+谁在线：每个 `nod monitor` 在 `$NODDIT_HOME/sessions/`（老名字 `DECS_HOME` 也认）下维持心跳（pid、署名、终端程序、lead/teammate、
 开始时间、最后心跳；30 秒一次，90 秒没更新或 pid 不在就不算）。`nod sessions [--json]` 列出来，
 `nod bench --json` 每个项目有 `listening`，bench 标签下面一行 ● / ○。没人在线时 owner 派活，
 终端里的 `nod add` 和 bench 会问要不要开一个会话：`nod session start [--agent claude|codex|kimi]`
 开一个新的前台终端窗口（iTerm2 / Terminal / Windows Terminal / cmd / Linux 终端），在项目真实根目录里启动
 agent，第一句话让它去接派活。已经有 lead 在线就不开。agent 自己不要 `nod session start`。
 
-`$DECS_BRIEF_CMD`：没人在线时派活，会在后台跑这条命令（环境里有 `DECS_REF` / `DECS_TITLE` /
-`DECS_PROJECT_ROOT` …），由 owner 决定它做什么（通知、或者自己起一个 agent）。没设就什么都不做。
+`$NODDIT_BRIEF_CMD`（老名字 `DECS_BRIEF_CMD` 也认）：没人在线时派活，会在后台跑这条命令（环境里有 `NODDIT_REF` / `NODDIT_TITLE` /
+`NODDIT_PROJECT_ROOT` 等，老名字 `DECS_REF` / `DECS_TITLE` / `DECS_PROJECT_ROOT` 也设），由 owner 决定它做什么（通知、或者自己起一个 agent）。没设就什么都不做。

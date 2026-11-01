@@ -1,14 +1,14 @@
 {
-  "name": "decisions-md",
-  "description": "decs: a task & decision hub for long-running AI agents",
+  "name": "noddit",
+  "description": "nod (Noddit): a task & decision hub for long-running AI agents",
   "owner": {
     "name": "WeCarbon"
   },
   "plugins": [
     {
-      "name": "decs",
+      "name": "nod",
       "source": "./",
-      "description": "Injects the decs usage rules into every Claude Code session and reminds the agent to record replies about node ids"
+      "description": "Injects the nod usage rules into every Claude Code session and reminds the agent to record replies about node ids"
     }
   ]
 }

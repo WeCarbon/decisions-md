@@ -14,4 +14,4 @@ process.env.CONTINUOUS_INTEGRATION = 'false'
 // Note headings carry local wall-clock time; fixtures are written in +08:00.
 process.env.TZ = 'Asia/Shanghai'
 // No test may open a terminal window: `nod session start` records its plan here instead.
-process.env.DECS_LAUNCH_RECORD ||= join(tmpdir(), `nod-launch-${process.pid}.jsonl`)
+process.env.NODDIT_LAUNCH_RECORD ||= join(tmpdir(), `nod-launch-${process.pid}.jsonl`)

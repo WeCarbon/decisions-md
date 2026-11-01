@@ -6,6 +6,8 @@ import {
   CLAUDE_MANUAL_LINES,
   CLAUDE_MARKETPLACE,
   CLAUDE_PLUGIN,
+  OLD_CLAUDE_MANUAL_LINES,
+  OLD_CLAUDE_PLUGIN,
   agentsMdPath,
   commandExists,
   detectAgents,
@@ -192,8 +194,9 @@ test('setupClaudePlugin reports created once marketplace add and install both su
   assert.equal(r.action, 'created')
   assert.ok(r.detail.includes(CLAUDE_PLUGIN))
   assert.ok(r.detail.includes(CLAUDE_MARKETPLACE))
-  assert.deepEqual(calls[0], ['plugin', 'marketplace', 'add', CLAUDE_MARKETPLACE, '--scope', 'project'])
-  assert.deepEqual(calls[1], ['plugin', 'install', CLAUDE_PLUGIN, '--scope', 'project', '--json', '-y'])
+  assert.deepEqual(calls[0], ['plugin', 'list', '--json'], 'checks for an old decs@decisions-md install first')
+  assert.deepEqual(calls[1], ['plugin', 'marketplace', 'add', CLAUDE_MARKETPLACE, '--scope', 'project'])
+  assert.deepEqual(calls[2], ['plugin', 'install', CLAUDE_PLUGIN, '--scope', 'project', '--json', '-y'])
 })
 
 test('setupClaudePlugin reports unchanged when the plugin is already installed', (t) => {
@@ -230,6 +233,71 @@ test('setupClaudePlugin treats "marketplace already exists" as success, not a fa
   t.after(() => rmSync(dir, { recursive: true, force: true }))
   const r = setupClaudePlugin(dir, {
     exec: (args) => (args[1] === 'marketplace' ? { status: 1, stdout: '', stderr: 'marketplace already added' } : { status: 0, stdout: '', stderr: '' }),
+  })
+  assert.equal(r.action, 'created')
+})
+
+// ---------------------------------------------------------------------------
+// An older decs@decisions-md install: remove it non-interactively, then
+// install nod@noddit in its place.
+// ---------------------------------------------------------------------------
+
+test('setupClaudePlugin finds an old decs@decisions-md install, removes it, and installs nod@noddit', (t) => {
+  const dir = scratch()
+  t.after(() => rmSync(dir, { recursive: true, force: true }))
+  const calls: string[][] = []
+  const r = setupClaudePlugin(dir, {
+    exec: (args) => {
+      calls.push(args)
+      if (args[1] === 'list') return { status: 0, stdout: JSON.stringify([{ id: OLD_CLAUDE_PLUGIN, scope: 'user' }]), stderr: '' }
+      return { status: 0, stdout: '', stderr: '' }
+    },
+  })
+  assert.equal(r.action, 'updated', 'migrating an existing install is reported as updated, not created')
+  assert.ok(r.detail.includes(CLAUDE_PLUGIN))
+  assert.ok(r.detail.includes(OLD_CLAUDE_PLUGIN), 'detail says the old plugin was removed')
+  assert.deepEqual(calls[0], ['plugin', 'list', '--json'])
+  assert.deepEqual(calls[1], ['plugin', 'uninstall', OLD_CLAUDE_PLUGIN, '--scope', 'user', '-y'], 'uninstalls from the scope it was actually found in')
+  assert.deepEqual(calls[2], ['plugin', 'marketplace', 'add', CLAUDE_MARKETPLACE, '--scope', 'project'])
+  assert.deepEqual(calls[3], ['plugin', 'install', CLAUDE_PLUGIN, '--scope', 'project', '--json', '-y'])
+})
+
+test('setupClaudePlugin falls back to manual (uninstall then install lines) when the old plugin cannot be removed non-interactively', (t) => {
+  const dir = scratch()
+  t.after(() => rmSync(dir, { recursive: true, force: true }))
+  const r = setupClaudePlugin(dir, {
+    exec: (args) => {
+      if (args[1] === 'list') return { status: 0, stdout: JSON.stringify([{ id: OLD_CLAUDE_PLUGIN, scope: 'user' }]), stderr: '' }
+      if (args[1] === 'uninstall') return { status: 1, stdout: '', stderr: 'permission denied' }
+      return { status: 0, stdout: '', stderr: '' }
+    },
+  })
+  assert.equal(r.action, 'manual')
+  assert.equal(r.detail, OLD_CLAUDE_MANUAL_LINES.join('\n'))
+  assert.ok(r.detail.includes(`uninstall ${OLD_CLAUDE_PLUGIN}`))
+  assert.ok(r.detail.includes(CLAUDE_PLUGIN))
+})
+
+test('setupClaudePlugin proceeds normally when no old plugin is installed', (t) => {
+  const dir = scratch()
+  t.after(() => rmSync(dir, { recursive: true, force: true }))
+  const calls: string[][] = []
+  const r = setupClaudePlugin(dir, {
+    exec: (args) => {
+      calls.push(args)
+      if (args[1] === 'list') return { status: 0, stdout: JSON.stringify([{ id: 'frontend-design@claude-plugins-official', scope: 'user' }]), stderr: '' }
+      return { status: 0, stdout: '', stderr: '' }
+    },
+  })
+  assert.equal(r.action, 'created')
+  assert.ok(calls.every((c) => c[0] !== 'plugin' || c[1] !== 'uninstall'), 'never uninstalls anything when the old plugin is not present')
+})
+
+test('setupClaudePlugin treats an unreadable `plugin list` as no old install, rather than failing', (t) => {
+  const dir = scratch()
+  t.after(() => rmSync(dir, { recursive: true, force: true }))
+  const r = setupClaudePlugin(dir, {
+    exec: (args) => (args[1] === 'list' ? { status: 1, stdout: '', stderr: 'boom' } : { status: 0, stdout: '', stderr: '' }),
   })
   assert.equal(r.action, 'created')
 })

@@ -226,9 +226,10 @@ avec un terminal peut les suivre.
 `nod` choisit la langue de l’interface dans cet ordre :
 
 1. `--lang <code>` sur n’importe quelle commande, par ex. `nod bench --lang fr`
-2. la variable d’environnement `DECS_LANG`
+2. la variable d’environnement `NODDIT_LANG` (l’ancien nom `DECS_LANG`
+   marche toujours)
 3. `nod config lang <code>` — stockée par utilisateur dans
-   `~/.decs/config.json` (`$DECS_HOME/config.json`). `nod config lang`
+   `~/.decs/config.json` (`$NODDIT_HOME/config.json`). `nod config lang`
    seule affiche la langue actuelle et son origine ; `nod config lang --off`
    la retire.
 4. la locale système (`LC_ALL` / `LC_MESSAGES` / `LANG`, `C` / `POSIX`
@@ -244,7 +245,8 @@ Codes : `en`, `zh-Hans`, `zh-Hant`, `fr`, `ar`. Les règles de début de
 session et le rappel d’invite du plugin suivent la même
 résolution (`plugin/rules.<code>.md`).
 
-L’arabe s’écrit de droite à gauche. `DECS_BIDI=visual|terminal` (ou
+L’arabe s’écrit de droite à gauche. `NODDIT_BIDI=visual|terminal`
+(l’ancien nom `DECS_BIDI` marche toujours, ou
 `nod config bidi visual|terminal`, `--off` pour retirer) choisit
 comment : `visual` (par défaut) fait réordonner chaque ligne par nod
 lui-même avec l’algorithme bidirectionnel Unicode, pour les terminaux qui
@@ -409,7 +411,8 @@ Non. La CLI est agnostique côté agent — tout ce qui a un terminal peut
 l’appeler. Le plugin Claude Code ajoute des règles de début de session et
 utilise `CLAUDECODE` / `CLAUDE_SESSION_ID` pour distinguer les terminaux
 d’agent des vôtres, et marquer qui a écrit quoi. Ailleurs, réglez
-`DECS_ROLE=agent` et `DECS_SESSION`.
+`NODDIT_ROLE=agent` et `NODDIT_SESSION` (`DECS_ROLE` / `DECS_SESSION`
+marchent toujours).
 
 **Ça marche avec les git worktrees ?**
 Oui. `nod` résout toujours vers le `decisions/` du clone principal, donc

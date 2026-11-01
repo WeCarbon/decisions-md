@@ -2,6 +2,7 @@ import { createReadStream, existsSync, readFileSync, statSync } from 'node:fs'
 import { createInterface } from 'node:readline'
 import { bool, one, type Args } from '../args.ts'
 import { resolveStore } from '../context.ts'
+import { nodditNodeEnv } from '../../core/env.ts'
 import { refOf } from '../../core/ref.ts'
 import { toJSON } from '../../core/render.ts'
 import {
@@ -20,7 +21,7 @@ const help = () => t('cli.help.progress', { parsers: Object.keys(PROGRESS_PARSER
 
 function resolveNodeRef(args: Args): string {
   const flag = one(args, 'node', 'task', 'id')
-  const raw = flag ?? process.env.DECS_NODE ?? process.env.DECS_TASK
+  const raw = flag ?? nodditNodeEnv()
   if (!raw) throw new Error(t('cli.progress.noNode'))
   return String(raw)
 }
@@ -129,7 +130,7 @@ async function runFromFile(args: Args): Promise<number> {
 
 /** `pytest ... | decs progress --parse pytest` — tees stdin to stdout so the pipe stays useful for its own sake. */
 async function runStdin(args: Args): Promise<number> {
-  resolveNodeRef(args) // fail fast on a missing DECS_NODE before touching stdin at all
+  resolveNodeRef(args) // fail fast on a missing NODDIT_NODE before touching stdin at all
   if (process.stdin.isTTY) {
     throw new Error(t('cli.progress.noInput'))
   }

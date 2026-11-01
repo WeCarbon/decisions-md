@@ -164,7 +164,7 @@ export interface Decision {
   /** Whether that default action can be undone. */
   reversible?: boolean
   kind: DecisionKind
-  /** The agent session (CLAUDE_SESSION_ID or DECS_SESSION) that filed it. */
+  /** The agent session (CLAUDE_SESSION_ID or NODDIT_SESSION/DECS_SESSION) that filed it. */
   session?: string
   // Execution fields. Stored and parsed here; what they mean is the
   // progress/sequence layer's business.

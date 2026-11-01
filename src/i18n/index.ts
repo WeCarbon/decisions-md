@@ -3,6 +3,7 @@ import { basename, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import i18next, { type i18n, type TOptions } from 'i18next'
 import { readUserConfig, writeUserConfig } from '../core/config.ts'
+import { nodditEnv, nodditEnvHit } from '../core/env.ts'
 
 export const LANGUAGES = ['en', 'zh-Hans', 'zh-Hant', 'fr', 'ar'] as const
 export type Lang = (typeof LANGUAGES)[number]
@@ -72,20 +73,22 @@ export function writeConfiguredLang(lang: Lang | undefined): void {
 
 export type LangSource = 'flag' | 'env' | 'config' | 'system' | 'default'
 
-/** `--lang`, then `DECS_LANG`, then `decs config lang`, then the system locale, then English. */
+/** `--lang`, then `NODDIT_LANG` (or the older `DECS_LANG`), then `decs config lang`, then the system locale, then English. */
 export function resolveLangSource(
   opts: { flag?: string; env?: NodeJS.ProcessEnv; config?: () => Lang | undefined; osLocale?: () => string | undefined } = {},
-): { lang: Lang; source: LangSource } {
+): { lang: Lang; source: LangSource; envName?: string } {
   const env = opts.env ?? process.env
+  const envHit = nodditEnvHit('LANG', env)
   const steps: [LangSource, () => Lang | undefined][] = [
     ['flag', () => normalizeLang(opts.flag)],
-    ['env', () => normalizeLang(env.DECS_LANG)],
+    ['env', () => normalizeLang(envHit?.value)],
     ['config', opts.config ?? configuredLang],
     ['system', () => systemLang(env, opts.osLocale)],
   ]
   for (const [source, get] of steps) {
     const lang = get()
-    if (lang) return { lang, source }
+    if (!lang) continue
+    return source === 'env' ? { lang, source, envName: envHit!.name } : { lang, source }
   }
   return { lang: DEFAULT_LANG, source: 'default' }
 }
@@ -156,7 +159,7 @@ export function setLang(lng: Lang): void {
     interpolation: { escapeValue: false },
     // A placeholder nobody filled in prints as {{name}}; the test suite makes that an error.
     missingInterpolationHandler: (_text: string, match: RegExpMatchArray) => {
-      if (process.env.DECS_STRICT_I18N) throw new Error(`missing value for ${match[0]}`)
+      if (nodditEnv('STRICT_I18N')) throw new Error(`missing value for ${match[0]}`)
       return ''
     },
     returnNull: false,

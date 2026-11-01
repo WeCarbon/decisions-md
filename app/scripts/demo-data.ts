@@ -25,7 +25,7 @@ function decs(dir: string, author: string, args: string[], input = ''): string {
     cwd: dir,
     input,
     encoding: 'utf8',
-    env: { ...process.env, DECS_HOME: home, DECS_AUTHOR: author, DECS_LANG: 'en', NO_COLOR: '1', CLAUDECODE: '1' },
+    env: { ...process.env, NODDIT_HOME: home, NODDIT_AUTHOR: author, NODDIT_LANG: 'en', NO_COLOR: '1', CLAUDECODE: '1' },
   })
 }
 
@@ -106,7 +106,7 @@ mkdirSync(OUT, { recursive: true })
 for (const lang of ['en', 'zh-Hans', 'zh-Hant', 'fr', 'ar']) {
   const json = execFileSync(process.execPath, [BIN, 'bench', '--json', web, api], {
     encoding: 'utf8',
-    env: { ...process.env, DECS_HOME: home, DECS_LANG: lang, NO_COLOR: '1' },
+    env: { ...process.env, NODDIT_HOME: home, NODDIT_LANG: lang, NO_COLOR: '1' },
   })
   writeFileSync(join(OUT, lang === 'en' ? 'bench.json' : `bench.${lang}.json`), json.split(realpathSync(scratch)).join(FAKE_HOME).split(scratch).join(FAKE_HOME))
 }

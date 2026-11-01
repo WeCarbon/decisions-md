@@ -1,5 +1,6 @@
 import bidiModule, { type Bidi } from 'bidi-js'
 import { readUserConfig } from '../core/config.ts'
+import { nodditEnv } from '../core/env.ts'
 
 /**
  * How right-to-left text reaches the terminal.
@@ -26,9 +27,9 @@ export function parseBidiMode(raw: unknown): BidiMode | undefined {
   return typeof raw === 'string' && (BIDI_MODES as readonly string[]).includes(raw) ? (raw as BidiMode) : undefined
 }
 
-/** `DECS_BIDI`, then `decs config bidi`, then `visual`. */
+/** `NODDIT_BIDI` (or the older `DECS_BIDI`), then `decs config bidi`, then `visual`. */
 export function bidiMode(env: NodeJS.ProcessEnv = process.env): BidiMode {
-  return parseBidiMode(env.DECS_BIDI) ?? parseBidiMode(readUserConfig().bidi) ?? 'visual'
+  return parseBidiMode(nodditEnv('BIDI', env)) ?? parseBidiMode(readUserConfig().bidi) ?? 'visual'
 }
 
 export function hasRtl(s: string): boolean {

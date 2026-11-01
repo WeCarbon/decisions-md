@@ -5,7 +5,7 @@
 //! Everything comes from the CLI: `decs monitor --updates` says something changed,
 //! `decs show --json` says what is waiting now.
 
-use crate::{background, data_dir, decs_command, env_now, AppState};
+use crate::{background, data_dir, decs_command, env_now, noddit_env, AppState};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::HashSet;
@@ -212,7 +212,7 @@ fn apply(app: &AppHandle, now: Vec<Waiting>) {
 
 fn announce(app: &AppHandle, w: &Waiting, how_many: usize) {
     let style = settings(app).notify;
-    if std::env::var("DECS_APP_TIMING").is_ok() {
+    if noddit_env::is_set("APP_TIMING") {
         eprintln!("decs-app: announce {} ({how_many} new) as {style}", w.reference);
     }
     match style.as_str() {
@@ -328,7 +328,7 @@ fn on_menu(app: &AppHandle, id: &str) {
 fn update_tray(app: &AppHandle, waiting: &[Waiting]) {
     let watch = app.state::<Watch>();
     let count = waiting.len();
-    if std::env::var("DECS_APP_TIMING").is_ok() {
+    if noddit_env::is_set("APP_TIMING") {
         eprintln!("decs-app: tray {count} waiting");
     }
     let tray = watch.tray.lock().unwrap();
@@ -521,7 +521,7 @@ pub fn banner_open_main(app: AppHandle, key: String) {
 #[tauri::command]
 pub fn summoned(app: AppHandle, what: String) -> Option<u128> {
     let ms = app.state::<Watch>().summoned_at.lock().unwrap().take()?.elapsed().as_millis();
-    if std::env::var("DECS_APP_TIMING").is_ok() {
+    if noddit_env::is_set("APP_TIMING") {
         eprintln!("decs-app: hotkey → {what} visible in {ms} ms");
     }
     Some(ms)

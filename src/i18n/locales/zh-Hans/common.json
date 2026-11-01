@@ -30,7 +30,7 @@
     "current": "{{name}}（{{code}}），来自 {{source}}",
     "source": {
       "flag": "--lang",
-      "env": "DECS_LANG",
+      "env": "NODDIT_LANG",
       "config": "nod config lang",
       "system": "系统语言设置",
       "default": "默认值"

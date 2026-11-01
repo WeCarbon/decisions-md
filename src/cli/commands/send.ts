@@ -5,6 +5,7 @@ import { readStdin, resolveAuthor, resolveStore, shellRole, warnOtherAuthor } fr
 import { briefTitle } from '../../core/intake.ts'
 import { isListening } from '../../core/listeners.ts'
 import { parseDuration } from '../../core/duration.ts'
+import { nodditEnv, setNodditEnv } from '../../core/env.ts'
 import { URGENCIES } from '../../core/order.ts'
 import { parseOptions, splitFrontMatter } from '../../core/parse.ts'
 import { refOf } from '../../core/ref.ts'
@@ -76,7 +77,7 @@ export async function run(args: Args): Promise<number> {
     when: one(args, 'when'),
     staleAfter: one(args, 'stale-after'),
     // Which session wrote this, so a bad entry can be traced back to its transcript.
-    session: process.env.CLAUDE_SESSION_ID || process.env.DECS_SESSION || undefined,
+    session: process.env.CLAUDE_SESSION_ID || nodditEnv('SESSION') || undefined,
   }
 
   const store = resolveStore(args)
@@ -119,19 +120,27 @@ function isBrief(args: Args, given: { options: boolean; questions: boolean; meta
 
 /**
  * N111's hook point: nobody is listening in this project, so run
- * `$DECS_BRIEF_CMD` (detached — `nod add` returns at once) with the brief in
- * its environment. Unset, nothing runs; what it does (notify, start an agent) is the owner's call.
+ * `$NODDIT_BRIEF_CMD` (or the older `$DECS_BRIEF_CMD`, detached — `nod add`
+ * returns at once) with the brief in its environment. Unset, nothing runs;
+ * what it does (notify, start an agent) is the owner's call.
  */
 function runBriefHook(d: Decision, root: string): 'ran' | 'unset' | 'failed' {
-  const cmd = process.env.DECS_BRIEF_CMD
+  const cmd = nodditEnv('BRIEF_CMD')
   if (!cmd) return 'unset'
   try {
+    const env = { ...process.env }
+    setNodditEnv(env, 'ID', String(d.id))
+    setNodditEnv(env, 'REF', refOf(d))
+    setNodditEnv(env, 'TITLE', d.title)
+    setNodditEnv(env, 'PROJECT', d.project)
+    setNodditEnv(env, 'PROJECT_ROOT', root)
+    setNodditEnv(env, 'FILE', d.file)
     const child = spawn(cmd, {
       shell: true,
       cwd: root,
       detached: true,
       stdio: 'ignore',
-      env: { ...process.env, DECS_ID: String(d.id), DECS_REF: refOf(d), DECS_TITLE: d.title, DECS_PROJECT: d.project, DECS_PROJECT_ROOT: root, DECS_FILE: d.file },
+      env,
     })
     child.on('error', () => {})
     child.unref()
@@ -172,28 +181,27 @@ function dueOf(raw: string | undefined): string | undefined {
   return nowStamp(new Date(Date.now() + parseDuration(raw)))
 }
 
-/** Runs `$DECS_NOTIFY_CMD` if set — no built-in channel, since pinging by default gets muted. */
+/** Runs `$NODDIT_NOTIFY_CMD` (or the older `$DECS_NOTIFY_CMD`) if set — no built-in channel, since pinging by default gets muted. */
 function notify(d: Decision): void {
-  const cmd = process.env.DECS_NOTIFY_CMD
+  const cmd = nodditEnv('NOTIFY_CMD')
   if (!cmd) {
     console.error(dim(t('cli.send.notifyUnset')))
     return
   }
   try {
+    const env = { ...process.env }
+    setNodditEnv(env, 'ID', String(d.id))
+    setNodditEnv(env, 'REF', refOf(d))
+    setNodditEnv(env, 'TITLE', d.title)
+    setNodditEnv(env, 'URGENCY', d.urgency ?? 'normal')
+    setNodditEnv(env, 'AUTHOR', d.author)
+    setNodditEnv(env, 'PROJECT', d.project)
+    setNodditEnv(env, 'FILE', d.file)
+    setNodditEnv(env, 'DUE', d.due ?? '')
     execSync(cmd, {
       stdio: ['ignore', 'ignore', 'inherit'],
       timeout: 15_000,
-      env: {
-        ...process.env,
-        DECS_ID: String(d.id),
-        DECS_REF: refOf(d),
-        DECS_TITLE: d.title,
-        DECS_URGENCY: d.urgency ?? 'normal',
-        DECS_AUTHOR: d.author,
-        DECS_PROJECT: d.project,
-        DECS_FILE: d.file,
-        DECS_DUE: d.due ?? '',
-      },
+      env,
     })
   } catch (e) {
     // The entry is already written; a failed ping must not make the lane think it was not.

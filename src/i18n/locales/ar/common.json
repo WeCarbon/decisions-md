@@ -30,7 +30,7 @@
     "current": "{{name}} ({{code}})، من {{source}}",
     "source": {
       "flag": "--lang",
-      "env": "DECS_LANG",
+      "env": "NODDIT_LANG",
       "config": "nod config lang",
       "system": "لغة النظام",
       "default": "القيمة الافتراضية"

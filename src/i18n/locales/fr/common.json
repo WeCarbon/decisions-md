@@ -30,7 +30,7 @@
     "current": "{{name}} ({{code}}), d’après {{source}}",
     "source": {
       "flag": "--lang",
-      "env": "DECS_LANG",
+      "env": "NODDIT_LANG",
       "config": "nod config lang",
       "system": "la langue du système",
       "default": "la valeur par défaut"

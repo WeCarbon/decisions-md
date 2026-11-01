@@ -1,6 +1,7 @@
 import { mkdirSync, readFileSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { dirname, join } from 'node:path'
+import { nodditEnv } from '../core/env.ts'
 import { writeFileAtomic } from '../core/lock.ts'
 import { isTerminal } from '../core/status.ts'
 import type { Decision } from '../core/types.ts'
@@ -8,8 +9,8 @@ import { DEFERRED_GROUP, doneGroupKey, keyOf } from './views.ts'
 
 /**
  * Which tree nodes the owner folded, remembered across bench sessions in
- * `$DECS_HOME/bench-state.json` (not `decisions/`, which is shared via git),
- * keyed by project root + node id.
+ * `$NODDIT_HOME/bench-state.json` (not `decisions/`, which is shared via
+ * git), keyed by project root + node id.
  *
  * Only departures from the default are stored: open unfolded, finished
  * folded, unless the map says otherwise. Group rows (「✓ 已完成 N」 /
@@ -18,9 +19,9 @@ import { DEFERRED_GROUP, doneGroupKey, keyOf } from './views.ts'
 export type Fold = 'collapsed' | 'expanded'
 export type FoldMap = Record<string, Fold>
 
-/** Read at call time, not import time, so tests can point DECS_HOME at a temp dir. */
+/** Read at call time, not import time, so tests can point NODDIT_HOME/DECS_HOME at a temp dir. */
 export function benchStatePath(env: NodeJS.ProcessEnv = process.env): string {
-  return join(env.DECS_HOME || join(homedir(), '.decs'), 'bench-state.json')
+  return join(nodditEnv('HOME', env) || join(homedir(), '.decs'), 'bench-state.json')
 }
 
 export function foldKey(root: string, id: number): string {

@@ -203,9 +203,9 @@ nod                                  # the bench (same as nod bench); q to quit
 يختار `nod` لغة الواجهة بهذا الترتيب:
 
 1. `--lang <code>` على أي أمر، مثل `nod bench --lang fr`
-2. متغيّر البيئة `DECS_LANG`
+2. متغيّر البيئة `NODDIT_LANG` (الاسم القديم `DECS_LANG` لا يزال يعمل)
 3. `nod config lang <code>` — يُخزَّن لكل مستخدم في `~/.decs/config.json`
-   (أي `$DECS_HOME/config.json`). يعرض `nod config lang` وحدها اللغة
+   (أي `$NODDIT_HOME/config.json`). يعرض `nod config lang` وحدها اللغة
    الحالية ومصدرها؛ و`nod config lang --off` يحذف هذا الإعداد.
 4. لغة النظام (`LC_ALL` / `LC_MESSAGES` / `LANG`، مع تجاهل `C` / `POSIX`):
    `zh_CN` → `zh-Hans`، و`zh_TW` / `zh_HK` → `zh-Hant`، و`fr_*` → `fr`،
@@ -220,8 +220,9 @@ nod                                  # the bench (same as nod bench); q to quit
 وتذكير الموجّه في الإضافة نفس هذا الترتيب
 (`plugin/rules.<code>.md`).
 
-العربية تُكتب من اليمين إلى اليسار. يحدّد `DECS_BIDI=visual|terminal` (أو
-`nod config bidi visual|terminal`، و`--off` للإزالة) الطريقة: `visual`
+العربية تُكتب من اليمين إلى اليسار. يحدّد `NODDIT_BIDI=visual|terminal`
+(الاسم القديم `DECS_BIDI` لا يزال يعمل، أو `nod config bidi visual|terminal`،
+و`--off` للإزالة) الطريقة: `visual`
 (الافتراضي) يجعل nod يعيد ترتيب كل سطر بنفسه بخوارزمية Unicode ثنائية
 الاتجاه، للطرفيات التي ترسم بصرامة من اليسار إلى اليمين (مثل Terminal في
 macOS)؛ و`terminal` يجعل nod يكتب بالترتيب المنطقي ويُحيط المقاطع
@@ -369,7 +370,8 @@ Measured again: 1.9 s p95 from Singapore.
 لا. CLI لا يتقيّد بوكيل معيّن — أي شيء له طرفية يمكنه استدعاءه. تضيف
 إضافة Claude Code قواعد بداية الجلسة وتستخدم `CLAUDECODE` /
 `CLAUDE_SESSION_ID` لتمييز طرفيات الوكلاء عن طرفيتك، ولتوسيم من كتب
-ماذا. في غير ذلك، اضبط `DECS_ROLE=agent` و`DECS_SESSION`.
+ماذا. في غير ذلك، اضبط `NODDIT_ROLE=agent` و`NODDIT_SESSION`
+(الاسمان القديمان `DECS_ROLE` و`DECS_SESSION` لا يزالان يعملان).
 
 **هل يعمل مع git worktrees؟**
 نعم. يُحلّل `nod` دائمًا إلى `decisions/` في النسخة الأصلية، فتتشارك

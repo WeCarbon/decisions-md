@@ -1,6 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { homedir, tmpdir } from 'node:os'
 import { basename, dirname, join, resolve, sep } from 'node:path'
+import { nodditEnv } from './env.ts'
 
 export interface ProjectEntry {
   name: string
@@ -10,10 +11,10 @@ export interface ProjectEntry {
 /**
  * `~/.decs/config.json` — the folders `decs bench` opens from anywhere.
  *
- * `DECS_HOME` moves it, which is what tests use so they never touch the
- * owner's real registry.
+ * `NODDIT_HOME` (or the older `DECS_HOME`) moves it, which is what tests use
+ * so they never touch the owner's real registry.
  */
-export const DECS_HOME = process.env.DECS_HOME || join(homedir(), '.decs')
+export const DECS_HOME = nodditEnv('HOME') || join(homedir(), '.decs')
 export const CONFIG_PATH = join(DECS_HOME, 'config.json')
 
 /** Where the registry lived before `~/.decs`. Read as a fallback, never written. */
@@ -28,7 +29,7 @@ function readFrom(path: string): ProjectEntry[] | null {
 /** Never throws: a corrupt registry must not stop `decs bench` from opening. */
 export function readProjects(): ProjectEntry[] {
   try {
-    return readFrom(CONFIG_PATH) ?? (process.env.DECS_HOME ? [] : readFrom(LEGACY_PATH)) ?? []
+    return readFrom(CONFIG_PATH) ?? (nodditEnv('HOME') !== undefined ? [] : readFrom(LEGACY_PATH)) ?? []
   } catch {
     return []
   }

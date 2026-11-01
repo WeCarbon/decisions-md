@@ -13,7 +13,7 @@ const help = () =>
   t('cli.config.help', {
     defaultLetter: DEFAULT_LETTER,
     languages: LANGUAGES.map((l) => `${l} (${LANGUAGE_NAMES[l]})`).join(', '),
-    settings: SETTINGS.map((s) => `  ${s.key.padEnd(17)}${s.values.join(' | ')}${s.env ? `   (${s.env})` : ''}`).join('\n'),
+    settings: SETTINGS.map((s) => `  ${s.key.padEnd(17)}${s.values.join(' | ')}${s.env ? `   (NODDIT_${s.env})` : ''}`).join('\n'),
   })
 
 export function run(args: Args): number {
@@ -48,11 +48,12 @@ export function run(args: Args): number {
 /** One setting's value and where it comes from: `Français (fr), from nod config lang`. */
 function current(s: Setting): string {
   if (s.key === 'lang') {
-    const { lang, source } = resolveLangSource({ flag: langFlag() })
-    return t('common.lang.current', { name: LANGUAGE_NAMES[lang], code: lang, source: t(`common.lang.source.${source}`) })
+    const { lang, source, envName } = resolveLangSource({ flag: langFlag() })
+    const label = source === 'env' ? envName! : t(`common.lang.source.${source}`)
+    return t('common.lang.current', { name: LANGUAGE_NAMES[lang], code: lang, source: label })
   }
-  const { value, source } = settingValue(s.key)
-  const from = source === 'env' ? s.env! : source === 'config' ? `nod config ${s.key}` : t('common.lang.source.default')
+  const { value, source, envName } = settingValue(s.key)
+  const from = source === 'env' ? envName! : source === 'config' ? `nod config ${s.key}` : t('common.lang.source.default')
   return t('cli.config.current', { value: showValue(s, value), source: from })
 }
 

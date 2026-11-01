@@ -1,4 +1,4 @@
-// Runs inside the real window (debug build, DECS_APP_SCRIPT): first-run onboarding, then
+// Runs inside the real window (debug build, NODDIT_APP_SCRIPT): first-run onboarding, then
 // answering, replying, deferring and jumping on the bench. Every step logs to the app's
 // stderr; `SHOT <name>` lines are where the runner takes a screenshot.
 ;(async () => {

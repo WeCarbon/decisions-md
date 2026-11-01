@@ -115,11 +115,11 @@ export function launchPlan(agent: AgentCli, root: string, env: LaunchEnv, prompt
 }
 
 /**
- * Opens the window. `DECS_LAUNCH_RECORD=<file>` appends the plan as one JSON
- * line instead — the seam tests use, so no suite ever opens a real window.
+ * Opens the window. `NODDIT_LAUNCH_RECORD=<file>` appends the plan as one
+ * JSON line instead — the seam tests use, so no suite ever opens a real window.
  */
 export function runPlan(plan: LaunchPlan): void {
-  const record = process.env.DECS_LAUNCH_RECORD
+  const record = process.env.NODDIT_LAUNCH_RECORD
   if (record) {
     appendFileSync(record, `${JSON.stringify(plan)}\n`)
     return

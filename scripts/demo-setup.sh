@@ -3,19 +3,19 @@
 # ready-made tree so the bench opens on something worth looking at: a task
 # in progress, one already done, a pending decision, and a node waiting on
 # someone outside the team.
-# Source this, don't run it — it exports DECS_HOME and a `nod` function,
+# Source this, don't run it — it exports NODDIT_HOME and a `nod` function,
 # and cd's into the mock project, all of which need to land in the caller's
 # shell: `source scripts/demo-setup.sh`.
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-ROOT="${DECS_DEMO_ROOT:-/tmp/nod-demo}"
+ROOT="${NODDIT_DEMO_ROOT:-/tmp/nod-demo}"
 
 rm -rf "$ROOT"
 mkdir -p "$ROOT/web"
 
-export DECS_HOME="$ROOT/home"
-export DECS_LANG=en
-export DECS_AUTHOR="demo-setup · mock data"
+export NODDIT_HOME="$ROOT/home"
+export NODDIT_LANG=en
+export NODDIT_AUTHOR="demo-setup · mock data"
 
 nod() { node "$REPO_ROOT/bin/nod.ts" "$@"; }
 export -f nod
