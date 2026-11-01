@@ -54,6 +54,30 @@ pub(crate) fn data_dir(app: &AppHandle) -> PathBuf {
     dir
 }
 
+/// The identifier the app had before it was renamed: its data directory sat next to this one.
+const FORMER_IDENTIFIER: &str = "com.wecarbon.decs";
+
+/// First launch under the new identifier: bring prefs, settings and the cached bench over from the old
+/// data directory, so a rename does not reset anyone's setup. Never overwrites, never deletes the old one.
+fn migrate_former_data(app: &AppHandle) {
+    if std::env::var_os("DECS_APP_DATA").is_some() {
+        return;
+    }
+    let Ok(dir) = app.path().app_data_dir() else { return };
+    let Some(old) = dir.parent().map(|p| p.join(FORMER_IDENTIFIER)) else { return };
+    if old == dir || !old.is_dir() {
+        return;
+    }
+    let _ = std::fs::create_dir_all(&dir);
+    // Not env.json: where node and decs live is probed again rather than trusted from before.
+    for name in ["settings.json", "prefs.json", "bench.json"] {
+        let (from, to) = (old.join(name), dir.join(name));
+        if from.is_file() && !to.exists() {
+            let _ = std::fs::copy(from, to);
+        }
+    }
+}
+
 fn login_path() -> String {
     let shell = std::env::var("SHELL").unwrap_or_else(|_| "/bin/zsh".into());
     let out = std::process::Command::new(shell)
@@ -355,6 +379,7 @@ pub fn run() {
             }
         })
         .setup(|app| {
+            migrate_former_data(app.handle());
             #[cfg(target_os = "macos")]
             if background() {
                 app.set_activation_policy(tauri::ActivationPolicy::Accessory);
