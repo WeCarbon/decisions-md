@@ -110,9 +110,19 @@ function App({ prefs0, snapshot }: { prefs0: Prefs; snapshot: BenchData | null }
       />
     )
   if (phase.kind === 'bench' && bench)
-    return <Bench bench={bench} prefs={prefs} setPrefs={setPrefs} refresh={refresh} refreshing={refreshing} onAddProject={() => setAdding(true)} />
+    return <Bench bench={bench} prefs={prefs} setPrefs={setPrefs} refresh={refresh} refreshing={refreshing} onAddProject={() => setAdding(true)} onNoProjects={() => setPhase({ kind: 'onboarding', startAt: 'add' })} />
   return <div class="boot" data-tauri-drag-region />
 }
+
+// The web view's own menu offers Reload and, in a debug build, Inspect Element: never in a release build,
+// and only on ⌥-right-click in a debug one. Text fields keep their Cut/Copy/Paste.
+let debugBuild = false
+void api.isDebugBuild().then((v) => (debugBuild = v))
+window.addEventListener('contextmenu', (e) => {
+  if ((e.target as HTMLElement).closest('input, textarea, [contenteditable="true"]')) return
+  if (debugBuild && e.altKey) return
+  e.preventDefault()
+})
 
 window.addEventListener('error', (e) => api.log(`error: ${e.message} at ${e.filename}:${e.lineno}`))
 window.addEventListener('unhandledrejection', (e) => api.log(`unhandled: ${String(e.reason)}`))

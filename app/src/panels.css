@@ -340,3 +340,221 @@
   color: var(--accent);
   font-size: 11.5px;
 }
+
+/* ---------- context menu ---------- */
+
+.ctx-menu {
+  position: fixed;
+  z-index: 50;
+  min-width: 220px;
+  max-width: 360px;
+  padding: 5px;
+  border-radius: 10px;
+  background: var(--raised);
+  box-shadow: var(--shadow-pop), 0 0 0 1px var(--line);
+  outline: none;
+  font-size: 13px;
+  animation: pop 90ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.ctx-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px 0 4px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.ctx-item.on {
+  background: var(--accent);
+  color: var(--accent-text);
+}
+
+.ctx-item.on .ctx-key,
+.ctx-item.on .ctx-arrow {
+  color: inherit;
+  opacity: 0.8;
+}
+
+.ctx-item.danger:not(.on) {
+  color: var(--red);
+}
+
+.ctx-item.disabled {
+  opacity: 0.4;
+}
+
+.ctx-check {
+  width: 14px;
+  text-align: center;
+  font-size: 11px;
+  flex: none;
+}
+
+.ctx-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ctx-key {
+  font: 11px var(--mono);
+  color: var(--text-3);
+  margin-inline-start: 16px;
+}
+
+.ctx-arrow {
+  color: var(--text-3);
+}
+
+.ctx-sep {
+  height: 1px;
+  margin: 4px 8px;
+  background: var(--line);
+}
+
+.ctx-header {
+  padding: 6px 10px 2px 24px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-3);
+}
+
+/* the "…" button on rows and projects */
+
+.row .more,
+.project .more {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  color: var(--text-3);
+  display: none;
+  place-items: center;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.row.node:hover .more,
+.row.node.sel .more,
+.project:hover .more {
+  display: grid;
+}
+
+.row .more:hover,
+.project .more:hover {
+  background: var(--hover);
+  color: var(--text);
+}
+
+.project {
+  position: relative;
+}
+
+.project input.rename {
+  flex: 1;
+  min-width: 0;
+  height: 24px;
+  font: inherit;
+  color: var(--text);
+  background: var(--panel);
+  border: 0;
+  border-radius: 6px;
+  box-shadow: 0 0 0 1.5px var(--accent);
+  padding: 0 6px;
+  outline: none;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+.project.editing .more {
+  display: none;
+}
+
+/* ---------- letter picker, unlink ---------- */
+
+.letter-picker,
+.confirm {
+  width: min(420px, 92vw);
+  background: var(--raised);
+  border-radius: 14px;
+  box-shadow: var(--shadow-pop);
+  padding: 18px 20px 18px;
+  outline: none;
+  animation: pop 140ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.letter-picker h3,
+.confirm h3 {
+  margin: 0 0 6px;
+  font-size: 15px;
+}
+
+.letters {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  margin: 14px 0 10px;
+}
+
+.lp {
+  height: 36px;
+  border-radius: 8px;
+  font: 600 14px var(--mono);
+  box-shadow: inset 0 0 0 1px var(--line-strong);
+  transition: background 100ms ease;
+}
+
+.lp.focus {
+  box-shadow: inset 0 0 0 1.5px var(--accent);
+}
+
+.lp.current {
+  background: var(--accent);
+  color: var(--accent-text);
+  box-shadow: none;
+}
+
+.lp.taken {
+  color: var(--text-3);
+  background: var(--code-bg);
+  box-shadow: none;
+  text-decoration: line-through;
+}
+
+.lp-note {
+  font-size: 12px;
+  color: var(--text-2);
+  margin: 0;
+  min-height: 18px;
+}
+
+.confirm p {
+  color: var(--text-2);
+  line-height: 1.55;
+  margin: 0 0 10px;
+}
+
+.confirm .path {
+  display: block;
+  font: 12px var(--mono);
+  background: var(--code-bg);
+  border-radius: 6px;
+  padding: 6px 8px;
+  margin-bottom: 16px;
+  word-break: break-all;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+.row-actions.end {
+  justify-content: flex-end;
+}
+
+.primary.danger {
+  background: var(--red);
+  color: white;
+}

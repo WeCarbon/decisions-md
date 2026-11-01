@@ -142,7 +142,7 @@ function Blocks({ list, images, onImage }: { list: Block[]; images: Image[]; onI
             return <h3 dir="auto" key={i} class={segClass({ ...b.row.style, color: undefined })}>{b.row.text}</h3>
           case 'note':
             return (
-              <section key={i} class={`note ${b.human ? 'human' : 'agent'}`}>
+              <section key={i} class={`note ${b.human ? 'human' : 'agent'}`} data-ctx="note">
                 <NoteHead text={b.row.text} />
                 <div class="note-body">
                   <Blocks list={b.rows} images={images} onImage={onImage} />
@@ -204,7 +204,7 @@ function Blocks({ list, images, onImage }: { list: Block[]; images: Image[]; onI
             const im = images[b.index]
             if (!im) return null
             return (
-              <figure key={i} class="shot" onClick={() => onImage(b.index)}>
+              <figure key={i} class="shot" data-ctx="image" data-index={b.index} onClick={() => onImage(b.index)}>
                 <img src={imageSrc(im.path)} alt={im.name} loading="lazy" decoding="async" />
                 <figcaption>
                   {im.group && <span class="chip">{im.group}</span>}
@@ -245,7 +245,7 @@ function Compare({ indices, images, onImage }: { indices: number[]; images: Imag
       </div>
       <div class="frames">
         {shown.map((ix) => (
-          <div key={ix} class="frame" onClick={() => onImage(ix)}>
+          <div key={ix} class="frame" data-ctx="image" data-index={ix} onClick={() => onImage(ix)}>
             <img src={imageSrc(images[ix].path)} alt={images[ix].name} decoding="async" />
             <figcaption>
               {side && <span class="chip">{images[ix].group}</span>}

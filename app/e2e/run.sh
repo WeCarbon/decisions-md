@@ -8,9 +8,22 @@ repo=$(cd "$here/../.." && pwd)
 app="$here/../src-tauri/target/debug/bundle/macos/Noddit.app/Contents/MacOS/decs-app"
 shots=${1:-}
 work=$(mktemp -d "${TMPDIR:-/tmp}/decs-e2e.XXXXXX")
-trap '[ -n "$shots" ] && cp "$work/log" "$shots/app.log"; rm -rf "$work"' EXIT
+cleanup() {
+  set +e
+  [ -n "${pid:-}" ] && kill "$pid" 2>/dev/null
+  # The app's monitor exits with it (--with-parent); make sure, in case the app was killed hard.
+  pkill -f "monitor --updates.*--with-parent ${pid:-none}" 2>/dev/null
+  [ -n "$shots" ] && cp "$work/log" "$shots/app.log" 2>/dev/null
+  rm -rf "$work"
+  return 0
+}
+trap cleanup EXIT
 
 export DECS_HOME="$work/home" DECS_APP_DATA="$work/app" DECS_LANG=en DECS_APP_TIMING=1
+# Never in front of whoever is using this Mac: no window, Dock icon, menu-bar icon, hotkey or notification.
+export DECS_APP_BACKGROUND=${DECS_APP_BACKGROUND:-1}
+front() { osascript -e 'tell application "System Events" to get name of first process whose frontmost is true' 2>/dev/null; }
+front_before=$(front)
 export DECS_BIN="$repo/bin/nod" DECS_APP_PICK="$work/shop" DECS_APP_SCRIPT="$here/walkthrough.js"
 mkdir -p "$DECS_HOME" "$DECS_APP_PICK" "$DECS_APP_DATA"
 # No real notifications and no global hotkey during the run: the walkthrough sets what it tests.
@@ -30,7 +43,7 @@ decs add "Weekly report is ready" --body "Nothing unusual this week."
 pid=$!
 seen=0
 status=1
-for _ in $(seq 1 600); do
+for _ in $(seq 1 1500); do
   sleep 0.2
   lines=$(grep -c . "$work/log" || true)
   [ "$lines" -gt "$seen" ] || continue
@@ -46,17 +59,25 @@ for _ in $(seq 1 600); do
     esac
   done
   seen=$lines
-  if grep -q "decs-app: DONE" "$work/log"; then
-    # A decision filed while the app runs must reach the tray and be announced.
+  [ "$DECS_APP_BACKGROUND" = 1 ] && echo "decs-app: frontmost $(front)" >> "$work/front"
+  if [ -z "${filed:-}" ] && grep -q "decs-app: STEP announce" "$work/log"; then
+    # A decision filed while the app runs must reach the bench and be announced.
     decs add "Pick a CDN" -o 1=Keep 2=Switch
-    for _ in $(seq 1 50); do grep -q "announce X8" "$work/log" && break; sleep 0.2; done
+    filed=1
+  fi
+  if grep -q "decs-app: DONE" "$work/log"; then
     grep -q "announce X8" "$work/log" && status=0
-    grep -E "hotkey|announce|tray" "$work/log" || true
     break
   fi
   if grep -q "decs-app: FAIL" "$work/log"; then sleep 2; break; fi
 done
 kill "$pid" 2>/dev/null || true
+wait "$pid" 2>/dev/null || true
+# Whoever is at the keyboard may switch apps meanwhile; what must never happen is this app in front.
+if [ "$DECS_APP_BACKGROUND" = 1 ] && grep -q "frontmost decs-app\|frontmost Noddit" "$work/front" 2>/dev/null; then
+  echo "e2e: the app came to the front during the run" >&2
+  status=1
+fi
 
 if [ "$status" -eq 0 ]; then
   cd "$DECS_APP_PICK"
@@ -68,7 +89,11 @@ if [ "$status" -eq 0 ]; then
   check 5 "d.pin === 'top'"
   check 6 "d.status === 'closed' && d.close_reason === 'merged into X5'"
   check 7 "d.status === 'completed'"
-  [ -f "$DECS_HOME/config.json" ] && grep -q shop "$DECS_HOME/config.json"
+  check 1 "d.project_name === 'Shop front' && d.ref === 'Q1'"
+  check X1 "d.ref === 'Q1'"
+  # Unlinked: out of the registry, folder and files untouched.
+  ! grep -q '"root"' "$DECS_HOME/config.json"
+  [ -f "$DECS_APP_PICK/decisions/decs.json" ]
   echo "e2e: all checks passed"
 fi
 exit "$status"

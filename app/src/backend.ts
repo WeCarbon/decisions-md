@@ -42,7 +42,7 @@ export const loadBench = async (): Promise<Bench> => JSON.parse(await ok(['bench
 export const loadNode = async (root: string, id: number): Promise<Node> => JSON.parse(await ok(['bench', '--json', '--node', String(id), '--dir', root]))
 
 export const listProjects = async (): Promise<Project[]> =>
-  (JSON.parse(await ok(['projects', '--json'])) as { name: string; root: string }[]).map((p) => ({ project: p.name, root: p.root, letter: '' }))
+  (JSON.parse(await ok(['projects', '--json'])) as { name: string; display_name?: string; root: string; letter?: string }[]).map((p) => ({ project: p.name, name: p.display_name ?? p.name, root: p.root, letter: p.letter ?? '' }))
 
 const human = ['--human']
 
@@ -65,6 +65,39 @@ export const pin = (root: string, id: number, where: 'top' | 'bottom' | 'off') =
 export const close = (root: string, id: number, reason: string) => ok(['close', String(id), '--reason', reason, '--dir', root])
 
 export const seen = (root: string, id: number) => ok(['archive', String(id), '--seen', '--dir', root])
+
+export const start = (root: string, id: number) => ok(['start', String(id), '--dir', root])
+
+export const done = (root: string, id: number) => ok(['done', String(id), '--dir', root])
+
+/** Empty goes back to the folder name. */
+export const renameProject = (root: string, name: string) => ok(['config', 'name', ...(name ? [name] : ['--off']), '--dir', root])
+
+export const setLetter = (root: string, letter: string) => ok(['config', 'letter', letter, '--dir', root])
+
+/** Forgets the project in the registry; its folder and decisions/ are left alone. */
+export const unlinkProject = (root: string) => ok(['projects', 'remove', root, '--json'])
+
+export async function reveal(path: string): Promise<void> {
+  if (!inDesktop) return
+  const { revealItemInDir } = await import('@tauri-apps/plugin-opener')
+  await revealItemInDir(path)
+}
+
+export async function copyText(text: string): Promise<void> {
+  try {
+    await navigator.clipboard.writeText(text)
+  } catch {
+    const t = document.createElement('textarea')
+    t.value = text
+    document.body.append(t)
+    t.select()
+    document.execCommand('copy')
+    t.remove()
+  }
+}
+
+export const isDebugBuild = async (): Promise<boolean> => (inDesktop ? invoke<boolean>('is_debug').catch(() => false) : true)
 
 export const initProject = (dir: string) => ok(['init', dir])
 
@@ -240,7 +273,7 @@ async function demoRun(args: string[]): Promise<RunOutput> {
     return { code: 0, stdout: await res.text(), stderr: '' }
   }
   if (args[0] === 'bench' && args.includes('--node')) return { code: 1, stdout: '', stderr: 'not in the demo' }
-  if (args[0] === 'projects') return { code: 0, stdout: JSON.stringify(demoProjects()), stderr: '' }
+  if (args[0] === 'projects' && args[1] !== 'remove') return { code: 0, stdout: JSON.stringify(demoProjects()), stderr: '' }
   return { code: 0, stdout: '', stderr: '' }
 }
 

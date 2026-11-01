@@ -5,7 +5,7 @@
 //! Everything comes from the CLI: `decs monitor --updates` says something changed,
 //! `decs show --json` says what is waiting now.
 
-use crate::{data_dir, decs_command, env_now, AppState};
+use crate::{background, data_dir, decs_command, env_now, AppState};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::HashSet;
@@ -221,7 +221,9 @@ fn announce(app: &AppHandle, w: &Waiting, how_many: usize) {
             let phrases = app.state::<Watch>().phrases.lock().unwrap().clone();
             let more = if how_many > 1 { format!("  +{}", how_many - 1) } else { String::new() };
             let head = if phrases.needs_decision.is_empty() { w.reference.clone() } else { format!("{} · {}", w.reference, phrases.needs_decision) };
-            let _ = app.notification().builder().title(format!("{head}{more}")).body(&w.title).show();
+            if !background() {
+                let _ = app.notification().builder().title(format!("{head}{more}")).body(&w.title).show();
+            }
         }
         _ => {}
     }
@@ -236,7 +238,9 @@ fn announce_unclaimed(app: &AppHandle, line: &Value) {
     let reference = line["ref"].as_str().unwrap_or_default();
     let title = line["title"].as_str().unwrap_or_default();
     let head = if phrases.not_collected.is_empty() { reference.to_string() } else { format!("{reference} · {}", phrases.not_collected) };
-    let _ = app.notification().builder().title(head).body(title).show();
+    if !background() {
+        let _ = app.notification().builder().title(head).body(title).show();
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -323,12 +327,12 @@ fn on_menu(app: &AppHandle, id: &str) {
 
 fn update_tray(app: &AppHandle, waiting: &[Waiting]) {
     let watch = app.state::<Watch>();
-    let tray = watch.tray.lock().unwrap();
-    let Some(tray) = tray.as_ref() else { return };
     let count = waiting.len();
     if std::env::var("DECS_APP_TIMING").is_ok() {
         eprintln!("decs-app: tray {count} waiting");
     }
+    let tray = watch.tray.lock().unwrap();
+    let Some(tray) = tray.as_ref() else { return };
     #[cfg(target_os = "macos")]
     let _ = tray.set_title(if count > 0 { Some(count.to_string()) } else { None });
     let _ = tray.set_tooltip(Some(if count > 0 { format!("Noddit · {count}") } else { "Noddit".into() }));
@@ -362,9 +366,11 @@ fn update_tray(app: &AppHandle, waiting: &[Waiting]) {
 
 pub fn show_main(app: &AppHandle, focus_key: Option<String>) {
     if let Some(w) = app.get_webview_window("main") {
-        let _ = w.unminimize();
-        let _ = w.show();
-        let _ = w.set_focus();
+        if !background() {
+            let _ = w.unminimize();
+            let _ = w.show();
+            let _ = w.set_focus();
+        }
         if let Some(key) = focus_key {
             let _ = app.emit_to("main", "summon", key);
         }
@@ -412,9 +418,11 @@ pub fn show_banner(app: &AppHandle, node: Option<Waiting>, focus: bool) {
     };
     place_banner(app, &w);
     let _ = app.emit_to("banner", "banner-show", serde_json::json!({ "node": node, "count": waiting.len(), "focus": focus }));
-    let _ = w.show();
-    if focus {
-        let _ = w.set_focus();
+    if !background() {
+        let _ = w.show();
+        if focus {
+            let _ = w.set_focus();
+        }
     }
 }
 
@@ -473,7 +481,7 @@ pub fn settings_get(app: AppHandle) -> SettingsView {
 #[tauri::command]
 pub fn settings_set(app: AppHandle, settings: Settings) -> Result<(), String> {
     let previous = self::settings(&app);
-    if settings.hotkey != previous.hotkey {
+    if settings.hotkey != previous.hotkey && !background() {
         if let Err(e) = register_hotkey(&app, &settings.hotkey) {
             let _ = register_hotkey(&app, &previous.hotkey);
             return Err(e);
@@ -533,13 +541,15 @@ pub async fn press_hotkey(app: AppHandle, hide_first: bool) {
 
 pub fn init(app: &AppHandle) {
     *app.state::<Watch>().settings.lock().unwrap() = load_settings(app);
-    if let Err(e) = create_tray(app) {
-        eprintln!("decs-app: tray: {e}");
+    if !background() {
+        if let Err(e) = create_tray(app) {
+            eprintln!("decs-app: tray: {e}");
+        }
     }
     if let Err(e) = create_banner(app) {
         eprintln!("decs-app: banner: {e}");
     }
-    let hotkey = settings(app).hotkey;
+    let hotkey = if background() { String::new() } else { settings(app).hotkey };
     if let Err(e) = register_hotkey(app, &hotkey) {
         eprintln!("decs-app: hotkey {hotkey}: {e}");
     }

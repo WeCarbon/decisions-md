@@ -39,6 +39,13 @@ struct RunOutput {
 }
 
 /// `DECS_APP_DATA` points the app's own state (prefs, cached bench) elsewhere — a second profile, or a test run.
+/// `DECS_APP_BACKGROUND=1` — for scripted runs on a machine someone is using: the app never comes
+/// to the front, never shows or focuses a window, has no Dock icon, menu-bar icon, global hotkey or
+/// real notifications. Everything else — the CLI calls, the monitor, the page — runs as usual.
+pub(crate) fn background() -> bool {
+    std::env::var("DECS_APP_BACKGROUND").map(|v| !v.is_empty() && v != "0").unwrap_or(false)
+}
+
 pub(crate) fn data_dir(app: &AppHandle) -> PathBuf {
     let dir = std::env::var_os("DECS_APP_DATA")
         .map(PathBuf::from)
@@ -209,8 +216,10 @@ fn prefs_save(app: AppHandle, json: String) -> Result<(), String> {
 #[tauri::command]
 fn ready(app: AppHandle, state: State<'_, AppState>, what: String) -> u128 {
     if let Some(w) = app.get_webview_window("main") {
-        let _ = w.show();
-        let _ = w.set_focus();
+        if !background() {
+            let _ = w.show();
+            let _ = w.set_focus();
+        }
     }
     let ms = state.started.elapsed().as_millis();
     if std::env::var("DECS_APP_TIMING").is_ok() {
@@ -265,6 +274,12 @@ async fn pick_folder(app: AppHandle) -> Option<String> {
     rx.await.ok().flatten()
 }
 
+/// Debug builds keep the web view's own menu (Inspect Element) on ⌥-right-click; release builds never show it.
+#[tauri::command]
+fn is_debug() -> bool {
+    cfg!(debug_assertions)
+}
+
 /// Errors the page hits, on the app's stderr: the window has no console in a release build.
 #[tauri::command]
 fn log(line: String) {
@@ -316,6 +331,7 @@ pub fn run() {
             ready,
             install_decs,
             log,
+            is_debug,
             pick_folder,
             e2e_shot,
             watch::settings_get,
@@ -339,13 +355,17 @@ pub fn run() {
             }
         })
         .setup(|app| {
+            #[cfg(target_os = "macos")]
+            if background() {
+                app.set_activation_policy(tauri::ActivationPolicy::Accessory);
+            }
             watch::init(app.handle());
             // Shown by `ready` once the first frame is drawn; this is only the fallback if the page never says so.
             let handle = app.handle().clone();
             tauri::async_runtime::spawn(async move {
                 tokio::time::sleep(std::time::Duration::from_millis(1500)).await;
                 if let Some(w) = handle.get_webview_window("main") {
-                    if !w.is_visible().unwrap_or(true) {
+                    if !background() && !w.is_visible().unwrap_or(true) {
                         let _ = w.show();
                     }
                 }

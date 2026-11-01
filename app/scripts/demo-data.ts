@@ -4,7 +4,7 @@
  * runs in a plain browser (screenshots, design work). Mock data only.
  */
 import { execFileSync } from 'node:child_process'
-import { copyFileSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { copyFileSync, mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -38,6 +38,7 @@ function project(name: string, letter: string): string {
 
 const web = project('web', 'W')
 const api = project('api', 'A')
+decs(web, 'setup', ['config', 'name', 'Web app', '--dir', web])
 const auth = 'lane-auth · sign-in flow'
 const build = 'lane-build · bundler'
 const docs = 'lane-docs · docs site'
@@ -107,7 +108,7 @@ for (const lang of ['en', 'zh-Hans', 'zh-Hant', 'fr', 'ar']) {
     encoding: 'utf8',
     env: { ...process.env, DECS_HOME: home, DECS_LANG: lang, NO_COLOR: '1' },
   })
-  writeFileSync(join(OUT, lang === 'en' ? 'bench.json' : `bench.${lang}.json`), json.split(scratch).join(FAKE_HOME))
+  writeFileSync(join(OUT, lang === 'en' ? 'bench.json' : `bench.${lang}.json`), json.split(realpathSync(scratch)).join(FAKE_HOME).split(scratch).join(FAKE_HOME))
 }
 copyFileSync(SHOT, join(OUT, 'signin-preview.png'))
 copyFileSync(OLD_SHOT, join(OUT, 'signin-old.png'))

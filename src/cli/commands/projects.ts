@@ -1,4 +1,4 @@
-import { existsSync } from 'node:fs'
+import { existsSync, realpathSync } from 'node:fs'
 import { basename, resolve } from 'node:path'
 import { addProject, CONFIG_PATH, isScratchPath, readProjects, removeProject, writeProjects, type ProjectEntry } from '../../core/config.ts'
 import { DEFAULT_LETTER, readProjectConfig } from '../../core/project.ts'
@@ -10,9 +10,11 @@ import { t } from '../../i18n/index.ts'
 /** A registered project by its path, its registry name, its folder name or its display name. */
 function findRegistered(target: string): ProjectEntry | undefined {
   const all = readProjects()
-  const abs = resolve(target)
+  // Through symlinks too: a path the store reports is canonical, the registry keeps what was typed.
+  const real = (p: string) => (existsSync(p) ? realpathSync(p) : resolve(p))
+  const abs = real(target)
   return (
-    all.find((p) => resolve(p.root) === abs) ??
+    all.find((p) => real(p.root) === abs) ??
     all.find((p) => p.name === target || basename(p.root) === target) ??
     all.find((p) => displayOf(p) === target) ??
     all.find((p) => displayOf(p).toLowerCase() === target.toLowerCase())

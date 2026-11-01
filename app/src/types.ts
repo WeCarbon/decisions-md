@@ -83,6 +83,8 @@ export interface Node {
   id: number
   ref: string
   project: string
+  project_name?: string
+  file: string
   title: string
   author: string
   who: string
@@ -113,8 +115,12 @@ export interface Node {
 }
 
 export interface Project {
+  /** The folder name: the key in node keys (`web#305`). */
   project: string
+  /** What people see: `decs config name`, else the folder name. */
+  name: string
   letter: string
+  former_letters?: string[]
   root: string
 }
 

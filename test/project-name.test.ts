@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdirSync, readFileSync, rmSync } from 'node:fs'
+import { mkdirSync, readFileSync, realpathSync, rmSync } from 'node:fs'
 import { basename, join } from 'node:path'
 
 import { decs, decsResult, scratch } from './helpers.ts'
@@ -90,4 +90,9 @@ test('decs projects remove: by display name, says the folder stays, --json, and 
 
   decs(web, ['projects', 'add', web], env)
   assert.match(decs(web, ['projects', 'unlink', basename(web)], env), /untouched/)
+
+  // The path the bench reports is the real one; the registry may hold a symlinked spelling.
+  decs(web, ['projects', 'add', web], env)
+  decs(web, ['projects', 'remove', realpathSync(web), '--json'], env)
+  assert.deepEqual(JSON.parse(decs(web, ['projects', '--json'], env)), [])
 })

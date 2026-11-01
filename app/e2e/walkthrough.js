@@ -165,6 +165,70 @@
     await shot('help')
     key('Escape')
 
+    log('STEP context-menus')
+    const rightClick = (el) => {
+      const r = el.getBoundingClientRect()
+      const ev = new MouseEvent('contextmenu', { bubbles: true, cancelable: true, clientX: r.left + 20, clientY: r.top + 10 })
+      el.dispatchEvent(ev)
+      return ev.defaultPrevented
+    }
+    const menuItem = (label) => $$('.ctx-menu .ctx-item').find((i) => i.querySelector('.ctx-label').textContent.startsWith(label))
+    // Anywhere: never the web view's own menu (Reload).
+    if (!rightClick($('.pane-head'))) throw new Error('the built-in context menu was not suppressed')
+    if ($('.ctx-menu')) throw new Error('a menu opened on empty space')
+
+    $$('.nav-item').find((b) => b.textContent.includes('All')).click()
+    await sleep(300)
+    const row = $$('.row.node').find((r) => r.textContent.includes('Pick a CDN') || r.textContent.includes('Write the schema'))
+    rightClick(row)
+    await until('row menu', () => $('.ctx-menu'))
+    if (!row.classList.contains('sel') && !$('.row.sel')?.textContent.includes(row.querySelector('.title').textContent)) throw new Error('right-click did not select the row')
+    for (const want of ['Reply…', 'Copy ', 'Copy title', 'Reveal in Finder', 'Open the file']) if (!menuItem(want)) throw new Error(`row menu lacks ${want}`)
+    await shot('row-menu')
+    key('Escape')
+    await until('menu closed', () => !$('.ctx-menu'))
+
+    // ⇧F10 opens the selected row's menu; arrows and Enter run an item.
+    key('F10', { shiftKey: true })
+    await until('keyboard menu', () => $('.ctx-menu'))
+    key('Escape')
+    await until('menu closed again', () => !$('.ctx-menu'))
+
+    log('STEP announce')
+    // The runner files a decision from outside now; it must reach the bench (and be announced, which the runner checks).
+    await until('the new decision on the bench', () => $$('.row.node').some((r) => r.textContent.includes('Pick a CDN')), 30000)
+
+    log('STEP project-menu')
+    const projectRow = () => $('.project[data-ctx="project"]')
+    rightClick(projectRow())
+    await until('project menu', () => menuItem('Rename'))
+    for (const want of ['Rename', 'Change letter', 'Unlink', 'Reveal in Finder', 'Copy path']) if (!menuItem(want)) throw new Error(`project menu lacks ${want}`)
+    await shot('project-menu')
+    menuItem('Rename').click()
+    const field = await until('rename field', () => $('.project input.rename'))
+    field.value = 'Shop front'
+    field.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }))
+    await toast('Renamed')
+    await until('sidebar shows the new name', () => projectRow()?.textContent.includes('Shop front'))
+
+    rightClick(projectRow())
+    await until('project menu again', () => menuItem('Change letter'))
+    menuItem('Change letter').click()
+    await until('letter picker', () => $('.letter-picker'))
+    await shot('letter-picker')
+    $$('.lp').find((b) => b.textContent === 'Q').click()
+    await toast('Letter changed')
+    await until('sidebar shows Q', () => projectRow()?.querySelector('.letter').textContent === 'Q')
+
+    rightClick(projectRow())
+    await until('project menu for unlink', () => menuItem('Unlink'))
+    menuItem('Unlink').click()
+    await until('confirm', () => $('.confirm'))
+    await shot('unlink-confirm')
+    $$('.confirm button').find((b) => b.textContent.trim() === 'Unlink').click()
+    // It was the only project: the window goes back to "Add a project".
+    await until('back to adding a project', () => $('.drop'))
+
     log('DONE')
   } catch (e) {
     log(`PAGE ${document.body.innerText.replace(/\s+/g, ' ').slice(0, 400)}`)

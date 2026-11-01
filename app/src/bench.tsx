@@ -3,9 +3,11 @@ import * as api from './backend.ts'
 import { Body } from './body.tsx'
 import { Bar, Glyph, Segs } from './segs.tsx'
 import { hiddenCount, isSelectable, nodeCollapsed, reveal, visibleRows, type Folds } from './rows.ts'
+import { ContextMenu, type MenuItem, type MenuState } from './menu.tsx'
+import { LetterPicker, RenameField, UnlinkConfirm } from './projects.tsx'
 import { Settings } from './settings.tsx'
 import { s } from './strings.ts'
-import type { Bench as BenchData, Node, Row, View, ViewName } from './types.ts'
+import type { Bench as BenchData, Node, Project, Row, View, ViewName } from './types.ts'
 
 export interface Prefs {
   view: ViewName
@@ -52,11 +54,19 @@ export function Bench(props: {
   refresh: () => Promise<void>
   refreshing: boolean
   onAddProject: () => void
+  onNoProjects: () => void
 }) {
   const { bench, prefs, setPrefs, refresh } = props
   const view = bench.views.find((v) => v.view === prefs.view) ?? bench.views[0]
   const rows = useMemo(() => visibleRows(view, prefs.folds), [view, prefs.folds])
-  const [composer, setComposer] = useState<Composer>(null)
+  // The composer belongs to the node it was opened on, so moving to another node closes it in the
+  // same render — not in an effect that might land after the next keypress.
+  const [composerOn, setComposerOn] = useState<{ c: Composer; key: string | undefined }>({ c: null, key: undefined })
+  const shownKey = useRef<string | undefined>(undefined)
+  const setComposer = (c: Composer) => {
+    if (c && (composerOn.c?.kind !== c.kind || composerOn.key !== shownKey.current)) setDraft('')
+    setComposerOn({ c, key: shownKey.current })
+  }
   const [draft, setDraft] = useState('')
   const [busy, setBusy] = useState(false)
   const [palette, setPalette] = useState(false)
@@ -89,6 +99,12 @@ export function Bench(props: {
   const [lightbox, setLightbox] = useState<number | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [toast, showToast] = useToast()
+  const [menu, setMenu] = useState<MenuState | null>(null)
+  const [renaming, setRenaming] = useState<string | null>(null)
+  const [letterFor, setLetterFor] = useState<Project | null>(null)
+  const [unlinkFor, setUnlinkFor] = useState<Project | null>(null)
+  const [dialogBusy, setDialogBusy] = useState(false)
+  const [dialogError, setDialogError] = useState<string | null>(null)
   const detailRef = useRef<HTMLDivElement>(null)
   const listRef = useRef<HTMLDivElement>(null)
 
@@ -102,6 +118,8 @@ export function Bench(props: {
   const [archived, setArchived] = useState<Record<string, Node>>({})
   const nodeKey = current?.kind === 'node' ? current.node! : undefined
   const node: Node | undefined = nodeKey ? (bench.nodes[nodeKey] ?? archived[nodeKey]) : undefined
+  shownKey.current = node?.key
+  const composer: Composer = composerOn.key === node?.key ? composerOn.c : null
   const rootOf = (n: Pick<Node, 'project'>) => bench.projects.find((p) => p.project === n.project)?.root ?? ''
 
   useEffect(() => setArchived({}), [bench])
@@ -116,8 +134,6 @@ export function Bench(props: {
   }, [current?.key])
 
   useEffect(() => {
-    setComposer(null)
-    setDraft('')
     detailRef.current?.scrollTo({ top: 0 })
   }, [node?.key])
 
@@ -195,6 +211,182 @@ export function Bench(props: {
     const off = Boolean(node.deferred_at)
     act(() => api.defer(rootOf(node), node.id, off), off ? s('undeferred') : s('deferred'))
   }
+  const markStart = () => node && act(() => api.start(rootOf(node), node.id), s('started'))
+  const markDone = () => node && act(() => api.done(rootOf(node), node.id), s('markedDone'))
+  const goParent = () => {
+    if (node?.parent != null) jump(`${node.project}#${node.parent}`)
+  }
+  const copy = (text: string, shown = text) => void api.copyText(text).then(() => showToast(shown.length > 40 ? s('copiedShort') : s('copiedRef', { text: shown })))
+  const isMac = /Mac/.test(navigator.platform)
+  const revealLabel = isMac ? s('ctxRevealMac') : s('ctxRevealWin')
+  const latest = useRef<Record<string, (...a: never[]) => unknown>>({})
+  latest.current = { startAnswer, pin, seen, startClose, toggleDefer, markStart, markDone, goParent, setComposer } as never
+
+  const nodeMenu = (n: Node | undefined, r: Row): MenuItem[] => {
+    const L = () => latest.current as unknown as {
+      startAnswer: (k: string) => void
+      pin: (w: 'top' | 'bottom' | 'off') => void
+      seen: () => void
+      startClose: () => void
+      toggleDefer: () => void
+      markStart: () => void
+      markDone: () => void
+      goParent: () => void
+      setComposer: (c: Composer) => void
+    }
+    const items: MenuItem[] = []
+    if (n && !n.terminal) {
+      if (n.questions.length) items.push({ label: s('ctxSubQuestions'), run: () => detailRef.current?.querySelector<HTMLButtonElement>('.question .pick')?.focus() })
+      else if (n.options.length)
+        items.push({
+          label: s('ctxAnswer'),
+          sub: n.options.map((o) => ({
+            label: `${o.key} · ${o.label}${n.default === o.key ? `  (${s('defaultOption')})` : ''}`,
+            shortcut: n.default === o.key ? '⏎' : /^[1-9]$/.test(o.key) ? o.key : undefined,
+            checked: n.answer?.choice === o.key,
+            run: () => L().startAnswer(o.key),
+          })),
+        })
+      else if (n.status === 'needs_decision') items.push({ label: s('ctxAnswer'), shortcut: '⏎', run: () => L().setComposer({ kind: 'free' }) })
+    }
+    if (n) items.push({ label: s('ctxReplyMenu'), shortcut: 'N', run: () => L().setComposer({ kind: 'reply' }) })
+    if (n?.can_pin) {
+      items.push({ kind: 'separator' })
+      if (n.pin) items.push({ label: s('unpin'), shortcut: 'U', run: () => L().pin('off') })
+      else items.push({ label: s('pinTop'), shortcut: 'T', run: () => L().pin('top') }, { label: s('pinBottom'), shortcut: 'B', run: () => L().pin('bottom') })
+    }
+    if (n && !n.terminal) {
+      items.push({ kind: 'separator' })
+      if (n.status === 'not_started') items.push({ label: s('ctxStart'), run: () => L().markStart() })
+      if (n.status === 'in_progress' || n.status === 'waiting') items.push({ label: s('ctxDone'), run: () => L().markDone() })
+      items.push({ label: n.deferred_at ? s('undefer') : s('defer'), shortcut: 'D', run: () => L().toggleDefer() })
+      items.push({ label: s('seen'), shortcut: 'A', run: () => L().seen() })
+      items.push({ label: s('ctxCloseMenu'), shortcut: 'X', danger: true, run: () => L().startClose() })
+    }
+    items.push({ kind: 'separator' })
+    if (n?.parent != null) items.push({ label: s('ctxGoParent'), shortcut: '←', run: () => L().goParent() })
+    items.push({ label: s('ctxCopyRef', { ref: r.ref ?? '' }), run: () => copy(r.ref ?? '') })
+    items.push({ label: s('ctxCopyTitle'), run: () => copy(r.title ?? '') })
+    if (n?.file) {
+      items.push({ kind: 'separator' })
+      items.push({ label: revealLabel, run: () => void api.reveal(n.file) })
+      items.push({ label: s('ctxOpenEditor'), run: () => void api.openPath(n.file) })
+    }
+    return items
+  }
+
+  const viewMenu = (v: View): MenuItem[] => {
+    const items: MenuItem[] = [{ label: s('ctxOpen'), run: () => switchView(v.view) }]
+    const tree = v.rows.some((r) => r.has_kids || r.kind === 'fold')
+    if (tree) {
+      const all = (open: boolean) => {
+        const nodes = { ...prefs.folds.nodes }
+        const groups = { ...prefs.folds.groups }
+        for (const r of v.rows) {
+          if (r.kind === 'node' && r.has_kids) nodes[r.key] = !open
+          if (r.kind === 'fold') groups[r.key] = open
+        }
+        setPrefs({ view: v.view, folds: { nodes, groups } })
+      }
+      items.push({ kind: 'separator' }, { label: s('ctxExpandAll'), run: () => all(true) }, { label: s('ctxCollapseAll'), run: () => all(false) })
+    }
+    return items
+  }
+
+  const projectMenu = (p: Project): MenuItem[] => [
+    { label: s('ctxRename'), run: () => setRenaming(p.root) },
+    { label: s('ctxChangeLetter'), run: () => (setDialogError(null), setLetterFor(p)) },
+    { label: s('ctxUnlink'), danger: true, run: () => (setDialogError(null), setUnlinkFor(p)) },
+    { kind: 'separator' },
+    { label: revealLabel, run: () => void api.reveal(p.root) },
+    { label: s('ctxCopyPath'), run: () => copy(p.root, p.root) },
+  ]
+
+  const fileMenu = (path: string, view?: () => void): MenuItem[] => [
+    ...(view ? [{ label: s('ctxOpen'), run: view } as MenuItem] : []),
+    { label: view ? s('ctxOpenEditor') : s('ctxOpen'), run: () => void api.openPath(path) },
+    { label: revealLabel, run: () => void api.reveal(path) },
+    { label: s('ctxCopyPath'), run: () => copy(path, path) },
+  ]
+
+  const noteMenu = (text: string): MenuItem[] => [
+    { label: s('ctxCopyText'), run: () => copy(text, text) },
+    ...(node ? [{ label: s('ctxReplyMenu'), shortcut: 'N', run: () => setComposer({ kind: 'reply' }) } as MenuItem] : []),
+  ]
+
+  /** What the element under the pointer (or the selected row, from the keyboard) offers. */
+  const menuFor = (el: HTMLElement): MenuItem[] | null => {
+    const host = el.closest<HTMLElement>('[data-ctx]')
+    if (!host) return null
+    const d = host.dataset
+    switch (d.ctx) {
+      case 'row': {
+        const r = view.rows.find((x) => x.key === d.key)
+        if (!r || r.kind !== 'node') return null
+        select(r.key)
+        return nodeMenu(bench.nodes[r.node!] ?? archived[r.node!], r)
+      }
+      case 'view': {
+        const v = bench.views.find((x) => x.view === d.view)
+        return v ? viewMenu(v) : null
+      }
+      case 'project': {
+        const p = bench.projects.find((x) => x.root === d.root)
+        return p ? projectMenu(p) : null
+      }
+      case 'image': {
+        const i = Number(d.index)
+        const im = node?.images[i]
+        return im ? fileMenu(im.path, () => setLightbox(i)) : null
+      }
+      case 'file':
+        return d.path ? fileMenu(d.path) : null
+      case 'note':
+        return noteMenu(host.querySelector<HTMLElement>('.note-body')?.innerText.trim() ?? '')
+    }
+    return null
+  }
+
+  const debugBuild = useRef(false)
+  useEffect(() => void api.isDebugBuild().then((v) => (debugBuild.current = v)), [])
+  const openMenuRef = useRef<(e: MouseEvent) => void>(() => {})
+  openMenuRef.current = (e: MouseEvent) => {
+    const target = e.target as HTMLElement
+    const editable = target.closest('input, textarea, [contenteditable="true"]')
+    // Text fields keep the system's Cut/Copy/Paste; debug builds keep Inspect Element on ⌥-right-click.
+    if (editable || (debugBuild.current && e.altKey)) return
+    e.preventDefault()
+    const items = menuFor(target)
+    if (items?.length) setMenu({ x: e.clientX, y: e.clientY, items })
+  }
+  useEffect(() => {
+    const listener = (e: MouseEvent) => openMenuRef.current(e)
+    window.addEventListener('contextmenu', listener)
+    return () => window.removeEventListener('contextmenu', listener)
+  }, [])
+  const openMenuAt = (el: HTMLElement | null | undefined) => {
+    if (!el) return
+    const items = menuFor(el)
+    if (!items?.length) return
+    const r = el.getBoundingClientRect()
+    setMenu({ x: Math.min(r.right - 8, r.left + 200), y: r.bottom - 4, items })
+  }
+
+  const projectAct = async (fn: () => Promise<unknown>, done: string, close: () => void) => {
+    setDialogBusy(true)
+    setDialogError(null)
+    try {
+      await fn()
+      close()
+      showToast(done)
+      await refresh()
+    } catch (e) {
+      setDialogError((e as Error).message)
+    } finally {
+      setDialogBusy(false)
+    }
+  }
+
   const nextStuck = () => {
     const decide = bench.views.find((v) => v.view === 'decide')!
     const stuck = decide.rows.filter((r) => r.kind === 'node' && r.glyph?.bold)
@@ -236,7 +428,11 @@ export function Bench(props: {
         setError(null)
         return
       }
-      if (palette || settingsOpen || isTyping(e)) return
+      if (palette || settingsOpen || menu || letterFor || unlinkFor || renaming || isTyping(e)) return
+      if (e.key === 'ContextMenu' || (e.key === 'F10' && e.shiftKey)) {
+        e.preventDefault()
+        return openMenuAt(listRef.current?.querySelector<HTMLElement>('.row.sel'))
+      }
       if (lightbox !== null) {
         if (!node) return
         if (e.key === 'ArrowRight') setLightbox((i) => Math.min(node.images.length - 1, (i ?? 0) + 1))
@@ -347,7 +543,7 @@ export function Bench(props: {
         <nav>
           <div class="section-label">{s('views')}</div>
           {bench.views.map((v, i) => (
-            <button key={v.view} class={`nav-item ${v.view === view.view ? 'on' : ''}`} onClick={() => switchView(v.view)} title={`⌘${i + 1}`}>
+            <button key={v.view} data-ctx="view" data-view={v.view} class={`nav-item ${v.view === view.view ? 'on' : ''}`} onClick={() => switchView(v.view)} title={`⌘${i + 1}`}>
               <svg viewBox="0 0 16 16" class={`ico ico-${v.view}`}>
                 <path d={VIEW_ICON[v.view]} />
               </svg>
@@ -357,9 +553,33 @@ export function Bench(props: {
           ))}
           <div class="section-label">{s('projects')}</div>
           {bench.projects.map((p) => (
-            <div key={p.project} class="project" title={p.root}>
-              <span class="letter">{p.letter}</span>
-              <span class="label">{p.project}</span>
+            <div key={p.root} class={`project ${renaming === p.root ? 'editing' : ''}`} title={p.root} data-ctx="project" data-root={p.root}>
+              <span class="letter" onDblClick={() => (setDialogError(null), setLetterFor(p))}>
+                {p.letter}
+              </span>
+              {renaming === p.root ? (
+                <RenameField
+                  project={p}
+                  onCancel={() => setRenaming(null)}
+                  onDone={(name) => {
+                    setRenaming(null)
+                    if (name === p.name) return
+                    void projectAct(() => api.renameProject(p.root, name), s('renamed'), () => {})
+                  }}
+                />
+              ) : (
+                <span class="label" onDblClick={() => setRenaming(p.root)}>
+                  {p.name ?? p.project}
+                </span>
+              )}
+              <button
+                class="more"
+                aria-label={s('moreActions')}
+                title={s('moreActions')}
+                onClick={(e) => (e.stopPropagation(), openMenuAt(e.currentTarget.parentElement))}
+              >
+                ⋯
+              </button>
             </div>
           ))}
           <button class="nav-item add" onClick={props.onAddProject}>
@@ -403,6 +623,7 @@ export function Bench(props: {
               hidden={r.kind === 'node' && !isOpen(r) ? hiddenCount(view, view.rows.indexOf(r)) : 0}
               onClick={() => (isSelectable(r) ? select(r.key) : undefined)}
               onToggle={() => setFold(r, !isOpen(r))}
+              onMore={(el) => openMenuAt(el)}
             />
           ))}
         </div>
@@ -452,6 +673,35 @@ export function Bench(props: {
       {palette && <Palette rows={bench.views.find((v) => v.view === 'all')?.rows ?? []} onPick={(k) => (setPalette(false), jump(k))} onClose={() => setPalette(false)} />}
       {help && <Help onClose={() => setHelp(false)} />}
       {settingsOpen && <Settings onClose={() => setSettingsOpen(false)} />}
+      {menu && <ContextMenu state={menu} onClose={() => setMenu(null)} />}
+      {letterFor && (
+        <LetterPicker
+          project={letterFor}
+          projects={bench.projects}
+          busy={dialogBusy}
+          error={dialogError}
+          onClose={() => setLetterFor(null)}
+          onPick={(l) => void projectAct(() => api.setLetter(letterFor.root, l), s('letterChanged'), () => setLetterFor(null))}
+        />
+      )}
+      {unlinkFor && (
+        <UnlinkConfirm
+          project={unlinkFor}
+          busy={dialogBusy}
+          error={dialogError}
+          onClose={() => setUnlinkFor(null)}
+          onConfirm={() =>
+            void projectAct(
+              async () => {
+                await api.unlinkProject(unlinkFor.root)
+                if (!(await api.listProjects()).length) props.onNoProjects()
+              },
+              s('unlinked'),
+              () => setUnlinkFor(null),
+            )
+          }
+        />
+      )}
       {lightbox !== null && node?.images[lightbox] && (
         <div class="lightbox" onClick={() => setLightbox(null)}>
           <img src={api.imageSrc(node.images[lightbox].path)} alt={node.images[lightbox].name} />
@@ -466,7 +716,7 @@ export function Bench(props: {
   )
 }
 
-function ListRow(p: { row: Row; selected: boolean; open: boolean; hidden: number; onClick: () => void; onToggle: () => void }) {
+function ListRow(p: { row: Row; selected: boolean; open: boolean; hidden: number; onClick: () => void; onToggle: () => void; onMore: (el: HTMLElement) => void }) {
   const r = p.row
   if (r.kind === 'header') return <div class="row header">{r.text}</div>
   const indent = { paddingInlineStart: `${12 + r.depth * 18}px` }
@@ -485,6 +735,8 @@ function ListRow(p: { row: Row; selected: boolean; open: boolean; hidden: number
       onClick={p.onClick}
       role="option"
       aria-selected={p.selected}
+      data-ctx="row"
+      data-key={r.key}
     >
       <span class={`mark ${r.mark ?? ''}`}>{r.mark ? '◆' : ''}</span>
       <span
@@ -506,6 +758,19 @@ function ListRow(p: { row: Row; selected: boolean; open: boolean; hidden: number
       <span class="badge short">
         <Segs segs={r.badge_short ?? badge} trim />
       </span>
+      <button
+        class="more"
+        tabIndex={-1}
+        aria-label={s('moreActions')}
+        title={`${s('moreActions')} (⇧F10)`}
+        onClick={(e) => {
+          e.stopPropagation()
+          p.onClick()
+          p.onMore(e.currentTarget.parentElement!)
+        }}
+      >
+        ⋯
+      </button>
     </div>
   )
 }
@@ -617,7 +882,7 @@ function Detail(p: {
           <section class="files">
             <div class="section-title">{s('attachments')}</div>
             {files.map((a, i) => (
-              <button key={i} class="file" onClick={() => api.openPath(a.path)}>
+              <button key={i} class="file" data-ctx="file" data-path={a.path} onClick={() => api.openPath(a.path)}>
                 <span class="file-ico">↗</span>
                 <span>{a.label}</span>
                 {a.caption && <span class="d"> — {a.caption}</span>}
