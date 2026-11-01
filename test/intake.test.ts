@@ -304,3 +304,17 @@ test('the bench marks an unclaimed brief with its own glyph and badge', () => {
     rmSync(root, { recursive: true, force: true })
   }
 })
+
+test('a window\'s --updates monitor, or one with --no-heartbeat, is not a listening session', async (t) => {
+  const p = project(t)
+  const env: NodeJS.ProcessEnv = { ...process.env, NO_COLOR: '1', DECS_LANG: 'en', DECS_HOME: p.home }
+  delete env.CLAUDECODE
+  const kids = [['--updates', '--json', '--all'], ['--no-heartbeat']].map((extra) => spawn(process.execPath, [BIN, 'monitor', '--interval', '200', '--no-sources', ...extra], { cwd: p.root, env }))
+  const outs = kids.map(() => ({ s: '' }))
+  kids.forEach((k, i) => k.stderr.on('data', (b) => (outs[i].s += b)))
+  for (const k of kids) t.after(() => killAndWait(k))
+  await waitFor(() => outs.every((o) => o.s.includes('nod monitor')), 'both monitors to start')
+  await settle()
+  assert.equal(p.json(['sessions']).projects[0].listening, false)
+  assert.equal(p.json(['add', 'fix login'], OWNER).listening, false)
+})

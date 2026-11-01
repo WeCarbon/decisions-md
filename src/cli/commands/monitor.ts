@@ -362,14 +362,18 @@ export async function run(args: Args): Promise<number> {
       started_at: startedListening,
       last_seen: nowStamp(new Date(), { ms: true }),
     })
-  beat()
-  process.on('exit', () => removeHeartbeat(listenerKey))
+  // A window redrawing (--updates) is not an agent that will pick up a brief.
+  const heartbeat = !updates && !bool(args, 'no-heartbeat')
+  if (heartbeat) {
+    beat()
+    process.on('exit', () => removeHeartbeat(listenerKey))
+  }
   for (const sig of ['SIGINT', 'SIGTERM', 'SIGHUP'] as const) process.once(sig, () => process.exit(0))
   let lastBeat = Date.now()
   pass(true)
   const parent = Number(one(args, 'with-parent') ?? 0)
   setInterval(() => {
-    if (Date.now() - lastBeat >= HEARTBEAT_MS) {
+    if (heartbeat && Date.now() - lastBeat >= HEARTBEAT_MS) {
       lastBeat = Date.now()
       beat()
     }
