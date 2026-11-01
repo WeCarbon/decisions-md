@@ -24,6 +24,7 @@ description: nod 的完整用法（`decs` 仍是别名）——建节点/子节�
 | 进度 | `nod progress <pct> "…"` / `nod steps` / `nod step` |
 | 等 owner 答复、等外部来源 | 主 session：plugin 自动启动的 decs monitor；DECS-IDLE 之后或子 agent：用 Monitor 挂 `nod monitor`（子 agent 加 --mine） |
 | 附件 / 改标题 / 挪位置 | `nod attach` / `nod retitle` / `nod move` |
+| 负责人派的活（`DECS-BRIEF`、看板里的 ✎） | `nod claim <id>` → `nod expand <id> <<EOF` → 子节点 `--parent --after --est` → `nod ask <id> -o 1="按计划开始" 2="要改（回复里写怎么改）"`；`nod briefs` / `nod sessions` |
 
 命令做不到的，记一个节点说清楚缺什么（或者到 noddit 仓库提 issue）——不要绕过去手改。
 
@@ -50,3 +51,6 @@ description: nod 的完整用法（`decs` 仍是别名）——建节点/子节�
 - owner 在对话里的话，回复前先 `nod note <id> --human --by "owner（对话里说，<你> 转记）"`。
 - 只有 owner 本人的答复算批准要发出去的内容；不要用 `--human` 替 owner 批准。
 - 不要在后台跑 `nod watch`，它不退出，是给人看的。
+- **负责人派的活**（`DECS-BRIEF`）：先 `nod claim <id>`（原子的，说别人接了就别碰）；`nod expand` 写清做什么 / 为什么 /
+  做完的标准，假设标明是假设，「原话」一个字不改；拆子节点；`nod ask` 请负责人确认，答 1 之前不开工。
+  不要自己 `nod session start`，开不开新会话是负责人的事。

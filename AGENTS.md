@@ -104,6 +104,7 @@ nod 里批（bench 里按数字，或 owner 自己的终端）；`--human` 只�
 
 - owner 的答复/回复 → `nod read` 取走去做；
 - `DECS-UNCLAIMED` → 有答复 5 分钟没人取走，lead 去取；
+- `DECS-BRIEF` → owner 新派了活（或派的活 5 分钟没人接），按下面「owner 派活」接走；
 - 外部来源新条目 → 处理后 `nod source ack`；
 - `DECS-ERROR` → 看一眼，monitor 会继续；
 - `DECS-IDLE` → 连续 2 小时（`--idle-exit`，0 = 不下线）没有事件，monitor 自己下线了。
@@ -313,3 +314,37 @@ nod step <id> 2        # 第 1、2 步算完成，自动按 2/4 算成 50%，记
 `stale_after`（默认 30 分钟，`nod add --stale-after 90m` 按节点自己改）还没更新的节点；
 超过 2 倍阈值是 `very_stale`。owner/lead 定时扫一次就知道哪个 lane 掉线了——不需要你主动
 汇报「还在跑，没有新进展」，`nod progress`/`nod step` 按自己的节奏更新就行。
+
+## owner 派活：接走 → 展开 → 确认（MUST FOLLOW）
+
+owner 用几个字把活交给 AI：自己终端里的 `nod add "…"`（不带 -o / --task / --author 的裸 add 就是派活）、
+bench 里按 `p`（选中节点下面）/ `P`（项目顶层）、app 的新建任务框。这个节点署名 owner，文件头 `intake: true`，
+owner 的话原样放在 `## 原话（human · owner · …）` 下面，bench 里显示 ✎「你新派的」。
+
+```sh
+nod claim X120                     # 原子地接走；别人已经接了会说是谁（退出码 1），那就别碰
+nod expand X120 --title "…" <<'EOF'
+**做什么。** …
+**为什么。** …
+**做完的标准。** …（假设：…）
+EOF
+nod add --task "…" --parent X120 --after X121 --est 30m   # 拆子节点
+nod ask X120 -o 1="按计划开始" 2="要改（回复里写怎么改）"   # 不设默认；答 1 之前不开工
+```
+
+- `nod expand` 只替换「原话」上面的描述；原话和下面的记录不动。没有「原话」段的节点（owner 手写的短节点，
+  `nod claim` 之后）会先把旧描述挪进「原话」。
+- `nod start` / `nod expand` 碰到没人接的派活也会先接走（同一个原子操作）。接走之后它就是你的：
+  `--mine` 的 monitor 能收到 owner 在上面的答复，`nod ask` / `nod done` 不用 `--force`。
+- owner 答 1 → `nod read`，照常执行；答 2 → 按意见再 expand、调整子节点，再 `nod ask`。
+- 转述 owner 在对话里说的新活：`nod add --brief --author owner "<原话>"`。
+
+谁在线：每个 `nod monitor` 在 `$DECS_HOME/sessions/` 下维持心跳（pid、署名、终端程序、lead/teammate、
+开始时间、最后心跳；30 秒一次，90 秒没更新或 pid 不在就不算）。`nod sessions [--json]` 列出来，
+`nod bench --json` 每个项目有 `listening`，bench 标签下面一行 ● / ○。没人在线时 owner 派活，
+终端里的 `nod add` 和 bench 会问要不要开一个会话：`nod session start [--agent claude|codex|kimi]`
+开一个新的前台终端窗口（iTerm2 / Terminal / Windows Terminal / cmd / Linux 终端），在项目真实根目录里启动
+agent，第一句话让它去接派活。已经有 lead 在线就不开。agent 自己不要 `nod session start`。
+
+`$DECS_BRIEF_CMD`：没人在线时派活，会在后台跑这条命令（环境里有 `DECS_REF` / `DECS_TITLE` /
+`DECS_PROJECT_ROOT` …），由 owner 决定它做什么（通知、或者自己起一个 agent）。没设就什么都不做。

@@ -80,3 +80,29 @@ load the decs skill.
   authored in its name — add it and you miss the notification).
 - No `nod wait` in a background shell, no home-grown polling, no
   `nod watch` (that one's for humans).
+
+## Briefs from the owner: claim → expand → ask (MUST FOLLOW)
+
+- The owner hands work over in a few words — `nod add "…"` in their own
+  terminal, `p` in the bench, the app's new-task box. That node is a brief:
+  ✎ in the bench, `intake: true`, the owner's words verbatim under
+  `## 原话`. The lead's monitor prints `DECS-BRIEF <id> …` (once more if
+  still unclaimed after 5 minutes); a `--mine` monitor only for briefs
+  filed under its own nodes.
+- **Claim first**: `nod claim <id>`. It is atomic — if it says someone else
+  has it, leave it. Never expand a brief you didn't claim.
+- **Expand**: `nod expand <id> [--title "…"] <<'EOF' … EOF` — what, why,
+  done when; mark assumptions as assumptions. The words under 原话 are
+  never edited.
+- **Split**: child nodes `nod add --task "…" --parent <id> --after <id>
+  --est 30m`.
+- **The owner confirms before any work starts**: `nod ask <id> -o
+  1="start as planned" 2="change it (say how in your reply)"`, no default.
+  Answer 1 → `nod read <id>` and carry on as usual; answer 2 → revise
+  (expand again, adjust the children) and ask again.
+- Asked in chat to treat a short node the owner wrote this way: `nod claim
+  <id>`, then the same steps. Relaying new work the owner described in
+  chat: `nod add --brief --author owner "<their words>"`.
+- `nod briefs` lists what waits; `nod sessions` shows who is listening.
+  Opening a new session (`nod session start`) is the owner's call — don't
+  start one yourself.

@@ -86,3 +86,32 @@ suite — tout est dans `nod bench`. Hors nod, invisible. Détails :
   est signé de son nom — l'ajouter fait manquer la notification).
 - Pas de `nod wait` en arrière-plan, pas de script de sondage maison,
   pas de `nod watch` (pour les humains).
+
+## Demandes du responsable : prendre → détailler → confirmer (MUST FOLLOW)
+
+- Le responsable confie un travail en quelques mots — `nod add "…"` dans
+  son propre terminal, `p` dans le tableau, la boîte « nouvelle tâche » de
+  l’app. Ce nœud est une demande : ✎ dans le tableau, `intake: true`, ses
+  mots tels quels sous `## 原话`. Le monitor de la session principale
+  affiche `DECS-BRIEF <id> …` (une fois de plus si personne ne l’a prise
+  après 5 minutes) ; un monitor `--mine` seulement pour les demandes
+  déposées sous ses propres nœuds.
+- **Prendre d’abord** : `nod claim <id>`. C’est atomique : s’il dit que
+  quelqu’un d’autre l’a, laissez-la. Ne détaillez jamais une demande que
+  vous n’avez pas prise.
+- **Détailler** : `nod expand <id> [--title "…"] <<'EOF' … EOF` — quoi,
+  pourquoi, terminé quand ; signalez les hypothèses comme telles. Les mots
+  sous 原话 ne sont jamais modifiés.
+- **Découper** : nœuds enfants `nod add --task "…" --parent <id> --after
+  <id> --est 30m`.
+- **Le responsable confirme avant tout travail** : `nod ask <id> -o
+  1="démarrer comme prévu" 2="à modifier (précisez dans la réponse)"`,
+  sans défaut. Réponse 1 → `nod read <id>` puis travail normal ; réponse
+  2 → révisez (nouveau expand, enfants ajustés) et redemandez.
+- Si le responsable vous demande dans le chat de traiter ainsi un nœud
+  court qu’il a écrit : `nod claim <id>`, puis les mêmes étapes. Pour
+  relayer un travail qu’il décrit dans le chat : `nod add --brief --author
+  owner "<ses mots>"`.
+- `nod briefs` liste ce qui attend ; `nod sessions` montre qui écoute.
+  Ouvrir une nouvelle session (`nod session start`) revient au
+  responsable : n’en lancez pas vous-même.
