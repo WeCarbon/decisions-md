@@ -289,11 +289,11 @@ pub fn start_monitor(app: &AppHandle) {
 
 pub fn create_tray(app: &AppHandle) -> tauri::Result<()> {
     let icon = tauri::image::Image::from_bytes(include_bytes!("../icons/tray.png"))?;
-    let menu = Menu::with_items(app, &[&MenuItem::with_id(app, "open", "Open decs", true, None::<&str>)?, &PredefinedMenuItem::separator(app)?, &MenuItem::with_id(app, "quit", "Quit decs", true, None::<&str>)?])?;
+    let menu = Menu::with_items(app, &[&MenuItem::with_id(app, "open", "Open Noddit", true, None::<&str>)?, &PredefinedMenuItem::separator(app)?, &MenuItem::with_id(app, "quit", "Quit Noddit", true, None::<&str>)?])?;
     let tray = TrayIconBuilder::with_id("decs")
         .icon(icon)
         .icon_as_template(true)
-        .tooltip("decs")
+        .tooltip("Noddit")
         .menu(&menu)
         .show_menu_on_left_click(true)
         .on_menu_event(|app, event| on_menu(app, event.id.as_ref()))
@@ -331,7 +331,7 @@ fn update_tray(app: &AppHandle, waiting: &[Waiting]) {
     }
     #[cfg(target_os = "macos")]
     let _ = tray.set_title(if count > 0 { Some(count.to_string()) } else { None });
-    let _ = tray.set_tooltip(Some(if count > 0 { format!("decs · {count}") } else { "decs".into() }));
+    let _ = tray.set_tooltip(Some(if count > 0 { format!("Noddit · {count}") } else { "Noddit".into() }));
     let words = watch.phrases.lock().unwrap().clone();
     let build = || -> tauri::Result<Menu<tauri::Wry>> {
         let menu = Menu::new(app)?;
@@ -345,10 +345,10 @@ fn update_tray(app: &AppHandle, waiting: &[Waiting]) {
         if count > 0 {
             menu.append(&PredefinedMenuItem::separator(app)?)?;
         }
-        menu.append(&MenuItem::with_id(app, "open", phrase(&words.open, "Open decs"), true, None::<&str>)?)?;
+        menu.append(&MenuItem::with_id(app, "open", phrase(&words.open, "Open Noddit"), true, None::<&str>)?)?;
         menu.append(&MenuItem::with_id(app, "settings", phrase(&words.settings, "Settings…"), true, None::<&str>)?)?;
         menu.append(&PredefinedMenuItem::separator(app)?)?;
-        menu.append(&MenuItem::with_id(app, "quit", phrase(&words.quit, "Quit decs"), true, None::<&str>)?)?;
+        menu.append(&MenuItem::with_id(app, "quit", phrase(&words.quit, "Quit Noddit"), true, None::<&str>)?)?;
         Ok(menu)
     };
     if let Ok(menu) = build() {
@@ -374,7 +374,7 @@ pub fn show_main(app: &AppHandle, focus_key: Option<String>) {
 /// Built hidden at startup, so the hotkey only has to show it.
 pub fn create_banner(app: &AppHandle) -> tauri::Result<()> {
     WebviewWindowBuilder::new(app, "banner", WebviewUrl::App("index.html?banner=1".into()))
-        .title("decs")
+        .title("Noddit")
         .inner_size(BANNER_WIDTH, BANNER_HEIGHT)
         .decorations(false)
         .resizable(false)

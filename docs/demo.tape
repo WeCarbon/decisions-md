@@ -22,7 +22,7 @@ Enter
 Sleep 5000ms
 Show
 
-Type "decs"
+Type "nod"
 Enter
 Sleep 2800ms
 
@@ -78,6 +78,6 @@ Type "q"
 Sleep 300ms
 
 # An agent picking up the owner's answer — under two seconds of command line.
-Type "decs read W4"
+Type "nod read W4"
 Enter
 Sleep 900ms

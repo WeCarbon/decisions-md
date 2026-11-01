@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Reference adapter for `decs source` — a template, not a working integration.
+"""Reference adapter for `nod source` — a template, not a working integration.
 
 Polls (or listens to) an external system and syncs *references* — id +
 title, optionally a url/state/from — into `decisions/sources/<name>/`.
@@ -15,7 +15,7 @@ Usage:
     python3 example_sync.py --name github-issues --interval 60
 
 First run (once, or let this script do it — see `ensure_registered` below):
-    decs source register github-issues --title "GitHub issues triage" \\
+    nod source register github-issues --title "GitHub issues triage" \\
         --kind github --adapter "python3 adapters/example_sync.py --name github-issues" \\
         --stale-after 15m
 """
@@ -36,8 +36,8 @@ import time
 #   Feedback: your form's "list new submissions" call; never the full
 #             free-text submission, just a one-line summary
 def fetch_items() -> list[dict]:
-    """The complete current snapshot, not just new items — `decs source
-    sync` diffs this against what decs already knows."""
+    """The complete current snapshot, not just new items — `nod source
+    sync` diffs this against what nod already knows."""
     return [
         {"id": "12345", "title": "示例 issue 1", "url": "https://example.com/issues/12345", "state": "active"},
         {"id": "12346", "title": "示例 issue 2", "state": "new", "from": "someone@example.com"},
@@ -48,7 +48,7 @@ def ensure_registered(name: str, title: str, adapter_cmd: str, stale_after: str)
     """Idempotent and partial — safe to call on every start."""
     subprocess.run(
         [
-            "decs", "source", "register", name,
+            "nod", "source", "register", name,
             "--title", title,
             "--adapter", adapter_cmd,
             "--stale-after", stale_after,
@@ -61,7 +61,7 @@ def sync_once(name: str) -> None:
     items = fetch_items()
     payload = "\n".join(json.dumps(item, ensure_ascii=False) for item in items) + "\n"
     result = subprocess.run(
-        ["decs", "source", "sync", name],
+        ["nod", "source", "sync", name],
         input=payload,
         text=True,
         capture_output=True,
@@ -75,7 +75,7 @@ def sync_once(name: str) -> None:
 
 def main() -> None:
     p = argparse.ArgumentParser()
-    p.add_argument("--name", required=True, help="the decs source name, e.g. github-issues")
+    p.add_argument("--name", required=True, help="the nod source name, e.g. github-issues")
     p.add_argument("--title", default=None, help="human title; defaults to --name")
     p.add_argument("--interval", type=int, default=60, help="seconds between polls")
     p.add_argument("--stale-after", default="15m")

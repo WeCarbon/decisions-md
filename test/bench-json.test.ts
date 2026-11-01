@@ -128,7 +128,7 @@ test('decs monitor --updates: an agent writing progress is a line, which plain m
     for (const end = Date.now() + 10_000; !ok(); await new Promise((r) => setTimeout(r, 50)))
       if (Date.now() > end) throw new Error(`timed out waiting for ${what}: ${out}${err}`)
   }
-  await until(() => err.includes('decs monitor: watching'), 'the monitor to start')
+  await until(() => err.includes('nod monitor: watching'), 'the monitor to start')
   await new Promise((r) => setTimeout(r, 300))
   assert.equal(out, '', 'nothing on start: the first pass only takes stock')
   decs(root, ['progress', '50', '--node', '1'])

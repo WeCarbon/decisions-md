@@ -1,18 +1,19 @@
 {
-  "name": "@wecarbon/decisions-md",
+  "name": "@wecarbon/noddit",
   "version": "0.1.0",
-  "description": "decs — a task & decision hub for long-running AI agents, stored as plain markdown files in your repo",
+  "description": "Noddit — a task & decision hub for long-running AI agents, stored as plain markdown files in your repo",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/wecarbon/decisions-md.git"
+    "url": "git+https://github.com/wecarbon/noddit.git"
   },
-  "homepage": "https://github.com/wecarbon/decisions-md",
+  "homepage": "https://github.com/wecarbon/noddit",
   "type": "module",
   "publishConfig": {
     "access": "public"
   },
   "bin": {
+    "nod": "./dist/bin/nod.js",
     "decs": "./dist/bin/decs.js",
     "decisions-md": "./dist/bin/decs.js"
   },

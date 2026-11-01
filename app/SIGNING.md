@@ -35,13 +35,13 @@ You need a paid [Apple Developer Program](https://developer.apple.com/programs/)
 
 2. **Give `notarytool` credentials.** Notarisation uploads the dmg to Apple, which scans it
    and issues a ticket. `notarytool` keeps the credentials in the keychain under a profile
-   name; the build uses the profile `decs-notary`. Use one of:
+   name; the build uses the profile `noddit-notary`. Use one of:
 
    - **An app-specific password.** Create one at [account.apple.com](https://account.apple.com)
      → Sign-In and Security → App-Specific Passwords. Then:
 
      ```sh
-     xcrun notarytool store-credentials decs-notary \
+     xcrun notarytool store-credentials noddit-notary \
        --apple-id <the Apple Account email> --team-id <TEAMID1234>
      # it prompts for the app-specific password; it is never written anywhere else
      ```
@@ -51,14 +51,14 @@ You need a paid [Apple Developer Program](https://developer.apple.com/programs/)
      the `AuthKey_<KEYID>.p8` once, and either store it in the profile:
 
      ```sh
-     xcrun notarytool store-credentials decs-notary \
+     xcrun notarytool store-credentials noddit-notary \
        --key AuthKey_<KEYID>.p8 --key-id <KEYID> --issuer <ISSUER-UUID>
      ```
 
      or skip the profile and export `APPLE_API_KEY_PATH`, `APPLE_API_KEY` (the key id) and
      `APPLE_API_ISSUER` for the build.
 
-   Check the profile works: `xcrun notarytool history --keychain-profile decs-notary`.
+   Check the profile works: `xcrun notarytool history --keychain-profile noddit-notary`.
 
 ### Building a release
 
@@ -66,16 +66,16 @@ You need a paid [Apple Developer Program](https://developer.apple.com/programs/)
 cd app
 npm run dmg
 # … Submitting to Apple's notary service (usually a few minutes)…
-# src-tauri/target/release/bundle/dmg/decs_0.1.0_aarch64.dmg (2.1M, signed, notarised)
+# src-tauri/target/release/bundle/dmg/noddit_0.1.0_aarch64.dmg (2.1M, signed, notarised)
 ```
 
 What it does:
 
 1. Finds the first *Developer ID Application* identity in the keychain (or uses
-   `APPLE_SIGNING_IDENTITY`), and has Tauri sign `decs.app` with it, with the hardened
+   `APPLE_SIGNING_IDENTITY`), and has Tauri sign `Noddit.app` with it, with the hardened
    runtime and [`src-tauri/entitlements.plist`](src-tauri/entitlements.plist).
 2. Packs the app into a dmg and signs the dmg.
-3. Submits the dmg with `notarytool` (profile `NOTARY_PROFILE`, default `decs-notary`, or
+3. Submits the dmg with `notarytool` (profile `NOTARY_PROFILE`, default `noddit-notary`, or
    the API key variables), waits, prints Apple's log if it is rejected.
 4. Staples the ticket to the dmg, so it opens without a network round trip.
 
@@ -85,22 +85,22 @@ identity in the keychain it builds unsigned and says so.
 ### Checking a build
 
 ```sh
-codesign --verify --deep --strict --verbose=2 src-tauri/target/release/bundle/macos/decs.app
-codesign -dv src-tauri/target/release/bundle/macos/decs.app   # flags=…(runtime), Authority=Developer ID Application: …
-xcrun stapler validate src-tauri/target/release/bundle/dmg/decs_*.dmg
-spctl -a -t open --context context:primary-signature -vv src-tauri/target/release/bundle/dmg/decs_*.dmg
+codesign --verify --deep --strict --verbose=2 src-tauri/target/release/bundle/macos/Noddit.app
+codesign -dv src-tauri/target/release/bundle/macos/Noddit.app   # flags=…(runtime), Authority=Developer ID Application: …
+xcrun stapler validate src-tauri/target/release/bundle/dmg/noddit_*.dmg
+spctl -a -t open --context context:primary-signature -vv src-tauri/target/release/bundle/dmg/noddit_*.dmg
 # …: accepted   source=Notarized Developer ID
-spctl -a -vv /Applications/decs.app                            # after installing from the dmg
+spctl -a -vv /Applications/Noddit.app                            # after installing from the dmg
 ```
 
 ### Entitlements
 
 The app runs with the hardened runtime and no exceptions (`entitlements.plist` is an
-empty dictionary). Nothing it does needs one: it starts `node`/`decs` as child processes
+empty dictionary). Nothing it does needs one: it starts `node`/`nod` as child processes
 that run under their own signatures, the global hotkey uses Carbon's `RegisterEventHotKey`,
 notifications are granted by the user on first use, and WebKit's JIT runs in WebKit's own
 process. It is not sandboxed, because it reads project folders anywhere on disk and runs the
-`decs` CLI. If a future feature needs an exception (loading a third-party library, say),
+`nod` CLI. If a future feature needs an exception (loading a third-party library, say),
 add only that key and say why next to it.
 
 ## Windows: Authenticode
@@ -119,7 +119,7 @@ service that holds one for you.
 | [Azure Artifact Signing](https://learn.microsoft.com/en-us/azure/trusted-signing/) (formerly Trusted Signing) | ~US$9.99/month (Basic, 5,000 signatures) | An Azure subscription; Microsoft validates the organisation's identity (a few business days) | Microsoft's recommended route outside the Store. Organisations in the USA, Canada, EU and UK; individuals in the USA and Canada only — check eligibility first. No hardware token. |
 | OV code-signing certificate (DigiCert, Sectigo, GlobalSign…) | ~US$150–300/year | The CA validates the organisation; since June 2023 the private key must live on a hardware token or a cloud HSM | Works from any country. |
 | EV code-signing certificate | ~US$400+/year | Stricter validation, hardware token or HSM | Since 2024 no longer skips SmartScreen; no advantage over OV for that. |
-| [SignPath Foundation](https://signpath.io) | Free for qualifying open-source projects | An application; signing runs in their managed pipeline | decs is MIT-licensed, so worth checking. |
+| [SignPath Foundation](https://signpath.io) | Free for qualifying open-source projects | An application; signing runs in their managed pipeline | Noddit is MIT-licensed, so worth checking. |
 
 Prices are approximate, as listed by Microsoft in
 [Code signing options for Windows app developers](https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/code-signing-options)
@@ -135,7 +135,7 @@ See [Windows Code Signing](https://v2.tauri.app/distribute/sign/windows/).
   `AZURE_TENANT_ID`) and add to `tauri.conf.json`:
 
   ```json
-  "bundle": { "windows": { "signCommand": "artifact-signing-cli -e https://<region>.codesigning.azure.net -a <account> -c <certificate-profile> -d decs %1" } }
+  "bundle": { "windows": { "signCommand": "artifact-signing-cli -e https://<region>.codesigning.azure.net -a <account> -c <certificate-profile> -d Noddit %1" } }
   ```
 
 - **OV/EV certificate on a token or in a cloud HSM:** `signtool` with the vendor's

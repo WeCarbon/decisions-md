@@ -1,7 +1,7 @@
 [
   {
-    "name": "decs",
+    "name": "nod",
     "command": "node \"${CLAUDE_PLUGIN_ROOT}/plugin/run-cli.mjs\" monitor --here",
-    "description": "decs: owner 的答复/回复、外部来源新条目"
+    "description": "nod: owner 的答复/回复、外部来源新条目"
   }
 ]

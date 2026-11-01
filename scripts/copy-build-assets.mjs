@@ -11,6 +11,8 @@ const dist = join(repoRoot, 'dist')
 
 cpSync(join(repoRoot, 'src', 'i18n', 'locales'), join(dist, 'src', 'i18n', 'locales'), { recursive: true })
 
-const bin = join(dist, 'bin', 'decs.js')
-if (!existsSync(bin)) throw new Error(`build did not produce ${bin}`)
-chmodSync(bin, 0o755)
+for (const name of ['nod.js', 'decs.js']) {
+  const bin = join(dist, 'bin', name)
+  if (!existsSync(bin)) throw new Error(`build did not produce ${bin}`)
+  chmodSync(bin, 0o755)
+}

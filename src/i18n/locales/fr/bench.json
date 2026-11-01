@@ -1,7 +1,7 @@
 {
-  "help": "decs bench [<dossier>...] [--view available|active|decide|all|waiting|deferred]\n\n  decs bench          ouvre tous les dossiers enregistrés avec decs projects, depuis n’importe où\n  decs bench .        ouvre uniquement le projet du dossier courant\n  decs bench ~/Code/a ~/Code/b   ouvre uniquement ceux-ci (--dir fonctionne aussi)\n  decs bench --json   tout ce que montre le tableau — les lignes de chaque vue, le détail de chaque nœud — en un objet JSON, pour une fenêtre qui le dessine\n  decs bench --json --node <id>   le détail d’un seul nœud, archivé ou non\n\n\nEn haut, les onglets : Disponible N / Actif N / À décider N / Tout / En attente N (⇥ pour changer, ouverture sur Disponible).\n  Disponible  ce qui bouge maintenant : en cours, en attente externe, prêt à démarrer, à décider, répondu en attente d’une IA (arbre, ancêtres en gris)\n  Actif       en cours et à décider (arbre)\n  À décider   ce que vous devez trancher, groupé par projet, les nœuds qui bloquent une IA en premier\n  Tout        tous les nœuds ; les terminés se replient en « ✓ Terminé N » / « ✓ Clos N », +/- déplie\n  En attente  en attente de l’extérieur\n              la dernière ligne, « Reporté N », regroupe ce que vous avez reporté avec d (ou decs defer), + déplie ; l’état ne change pas,\n              lui et ses sous-nœuds sortent de Disponible/Actif/À décider. --view deferred ouvre En attente avec cette ligne dépliée.\nLes anciens --view tree|owner|running|timeline|done fonctionnent toujours (vers la vue la plus proche).\nS’il y a des sources externes, une ligne sous les onglets dit si elles sont à jour. À gauche les nœuds, à droite celui en cours.\n↑↓ choisit un nœud, ←→ / +- replie/déplie, les chiffres répondent, Entrée prend le choix par défaut, w va à la prochaine décision,\ng va directement à un numéro, d reporte/annule le report, ? affiche toutes les touches, , ouvre les Réglages.\nLa souris fonctionne aussi : cliquez un onglet, un nœud, une option, une pièce jointe ; la molette défile le panneau survolé.\nAppuyez sur o pour voir une capture directement dans le terminal (familles iTerm2 / kitty ; tmux l’avale,\nréglez DECS_IMAGES=iterm avec le passthrough activé).\nEnregistrer un dossier : decs projects add <dossier> (decs init le fait automatiquement) ; stocké dans ~/.decs/config.json.\nSans rien d’enregistré, decs remonte depuis le dossier courant à la recherche d’un dossier decisions/.",
+  "help": "nod bench [<dossier>...] [--view available|active|decide|all|waiting|deferred]\n\n  nod bench          ouvre tous les dossiers enregistrés avec nod projects, depuis n’importe où\n  nod bench .        ouvre uniquement le projet du dossier courant\n  nod bench ~/Code/a ~/Code/b   ouvre uniquement ceux-ci (--dir fonctionne aussi)\n  nod bench --json   tout ce que montre le tableau — les lignes de chaque vue, le détail de chaque nœud — en un objet JSON, pour une fenêtre qui le dessine\n  nod bench --json --node <id>   le détail d’un seul nœud, archivé ou non\n\n\nEn haut, les onglets : Disponible N / Actif N / À décider N / Tout / En attente N (⇥ pour changer, ouverture sur Disponible).\n  Disponible  ce qui bouge maintenant : en cours, en attente externe, prêt à démarrer, à décider, répondu en attente d’une IA (arbre, ancêtres en gris)\n  Actif       en cours et à décider (arbre)\n  À décider   ce que vous devez trancher, groupé par projet, les nœuds qui bloquent une IA en premier\n  Tout        tous les nœuds ; les terminés se replient en « ✓ Terminé N » / « ✓ Clos N », +/- déplie\n  En attente  en attente de l’extérieur\n              la dernière ligne, « Reporté N », regroupe ce que vous avez reporté avec d (ou nod defer), + déplie ; l’état ne change pas,\n              lui et ses sous-nœuds sortent de Disponible/Actif/À décider. --view deferred ouvre En attente avec cette ligne dépliée.\nLes anciens --view tree|owner|running|timeline|done fonctionnent toujours (vers la vue la plus proche).\nS’il y a des sources externes, une ligne sous les onglets dit si elles sont à jour. À gauche les nœuds, à droite celui en cours.\n↑↓ choisit un nœud, ←→ / +- replie/déplie, les chiffres répondent, Entrée prend le choix par défaut, w va à la prochaine décision,\ng va directement à un numéro, d reporte/annule le report, ? affiche toutes les touches, , ouvre les Réglages.\nLa souris fonctionne aussi : cliquez un onglet, un nœud, une option, une pièce jointe ; la molette défile le panneau survolé.\nAppuyez sur o pour voir une capture directement dans le terminal (familles iTerm2 / kitty ; tmux l’avale,\nréglez DECS_IMAGES=iterm avec le passthrough activé).\nEnregistrer un dossier : nod projects add <dossier> (nod init le fait automatiquement) ; stocké dans ~/.decs/config.json.\nSans rien d’enregistré, nod remonte depuis le dossier courant à la recherche d’un dossier decisions/.",
   "cli": {
-    "needsTty": "decs bench a besoin d’un terminal. Pour les scripts, voir decs show / decs queue.",
+    "needsTty": "nod bench a besoin d’un terminal. Pour les scripts, voir nod show / nod queue.",
     "noActiveDir": "{{root}} n’a pas de decisions/active, ignoré"
   },
   "tabs": {
@@ -112,12 +112,12 @@
     "noHeartbeat": " !adaptateur sans signal depuis {{age}}",
     "noHeartbeatEver": " !adaptateur n’a jamais eu de signal",
     "sources": " Sources ",
-    "sourcesNone": "aucune enregistrée (decs source register)",
+    "sourcesNone": "aucune enregistrée (nod source register)",
     "sourcesAllClear": "tout à jour ",
     "working": " En cours ",
     "workingNone": "rien en cours",
     "workingNoneUpNext": "rien en cours ; ensuite ",
-    "cycle": " cycle de dépendance : {{chain}}{{more}} (decs check)",
+    "cycle": " cycle de dépendance : {{chain}}{{more}} (nod check)",
     "cycleMore": " et {{count}} de plus",
     "colon": " : ",
     "extraSeparator": ", ",
@@ -171,7 +171,7 @@
     "cannotDeferTerminal": "Un nœud terminé n’a pas besoin d’être reporté",
     "undeferred": "{{ref}} repris · {{status}}",
     "deferred": "{{ref}} reporté (annulez dans En attente → Reporté)",
-    "dismissed": "{{ref}} archivé (decs archive {{id}} --undo pour le récupérer)",
+    "dismissed": "{{ref}} archivé (nod archive {{id}} --undo pour le récupérer)",
     "nowNeedsDecision": "{{refs}} à décider maintenant",
     "onlyAttachments_one": "Seulement {{count}} pièce jointe",
     "onlyAttachments_many": "Seulement {{count}} de pièces jointes",

@@ -49,10 +49,10 @@
     "titleRequired": "un titre est requis",
     "questionsAndOptionsMixed": "les sous-questions et les options simples ne se mélangent pas : avec --question, les options du nœud lui-même sont générées automatiquement",
     "taskOrFyiNoQuestions": "une tâche ou une info n’a pas de sous-questions",
-    "taskNoOptions": "une tâche n’a pas d’options — utilisez decs ask plus tard si une décision est nécessaire",
+    "taskNoOptions": "une tâche n’a pas d’options — utilisez nod ask plus tard si une décision est nécessaire",
     "fyiNoOptions": "une info n’a pas d’options",
     "parentInAnotherProject": "{{ref}} est dans un autre projet",
-    "parentTreeArchived": "l’arbre de {{ref}} est déjà archivé ; d’abord decs archive {{id}} --undo",
+    "parentTreeArchived": "l’arbre de {{ref}} est déjà archivé ; d’abord nod archive {{id}} --undo",
     "fyiIsRoot": "une info est un nœud racine ; elle n’a pas de parent",
     "bodyHasQuestionsSection": "le corps a déjà une section ## 子问题 — supprimez-la, --question l’écrit",
     "questionsBlockMismatch": "le bloc 子问题 ne se relit pas comme il a été écrit — une étiquette contient sans doute un marqueur de titre",
@@ -75,7 +75,7 @@
     "closeNeedsReason": "fermer a besoin d’une raison : superseded | obsolete | merged-into:<ref> | texte libre",
     "multipleOptionsBlocks": "le texte a plus d’un bloc ## 选项 — garder-en un seul",
     "askTextOptionsMismatch": "le bloc ## 选项 du texte ne correspond pas à -o : {{diff}} — supprimez le bloc, ou faites-le correspondre exactement à -o",
-    "askNoOptions": "ce nœud n’a plus d’options à proposer : decs ask a besoin de -o 1=\"…\" 2=\"…\"",
+    "askNoOptions": "ce nœud n’a plus d’options à proposer : nod ask a besoin de -o 1=\"…\" 2=\"…\"",
     "optionsDidNotRoundTrip": "{{ref}} : les nouvelles options ne se relisent pas comme elles ont été écrites — vérifiez le corps à la main",
     "alreadyArchived": "{{ref}} est déjà archivé",
     "notArchived": "{{ref}} n’est pas archivé",
@@ -121,7 +121,7 @@
     "defaultNotAnOption": "le défaut {{default}} de {{key}} n’est pas une de ses options ({{keys}})"
   },
   "steps": {
-    "noneYet": "il n’y a pas encore d’étapes — définissez-les d’abord avec decs steps <id> \"a\" \"b\" …",
+    "noneYet": "il n’y a pas encore d’étapes — définissez-les d’abord avec nod steps <id> \"a\" \"b\" …",
     "onlyNSteps_one": "il n’y a qu’{{count}} étape",
     "onlyNSteps_many": "il n’y a que {{count}} étapes",
     "onlyNSteps_other": "il n’y a que {{count}} étapes"
@@ -135,13 +135,13 @@
     "none": "(aucun)",
     "numberedOptions": "options en liste numérotée → titres ###",
     "dropStaleDefault": "retirer le défaut périmé « {{default}} » (terminé, aucune option à désigner)",
-    "optionsNotRecognised": "options non reconnues — corrigez à la main avec decs ask (défaut « {{default}} »)"
+    "optionsNotRecognised": "options non reconnues — corrigez à la main avec nod ask (défaut « {{default}} »)"
   },
   "sources": {
     "badName": "le nom de source « {{name}} » n’est pas valide — seulement lettres/chiffres/._- , et ça ne peut pas commencer par un symbole",
     "badDuration": "« {{value}} » n’est pas une durée valide, utilisez un format comme 30s / 15m / 2h / 1d",
-    "notRegistered": "la source « {{name}} » n’est pas encore enregistrée — lancez d’abord `decs source register {{name}} --title \"...\"`",
-    "ackNeedsIds": "quels id ? `decs source ack <name> <id>...`",
+    "notRegistered": "la source « {{name}} » n’est pas encore enregistrée — lancez d’abord `nod source register {{name}} --title \"...\"`",
+    "ackNeedsIds": "quels id ? `nod source ack <name> <id>...`",
     "noSuchIds": "la source « {{name}} » n’a pas ces id : {{ids}}",
     "badJsonLine": "la ligne {{line}} n’est pas du JSON valide : {{message}}",
     "notAJsonObject": "la ligne {{line}} n’est pas un objet JSON",

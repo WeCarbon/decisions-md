@@ -216,13 +216,13 @@ test('decs wait prints the --since to resume from', (t) => {
   t.after(() => rmSync(root, { recursive: true, force: true }))
   const store = new Store([initLayout(root)])
   store.answer(store.create({ title: 't', author: 'lane · x' }), { choice: '1' })
-  assert.match(decs(root, ['wait']), /decs changes --since \d{4}-\d{2}-\d{2}T/)
+  assert.match(decs(root, ['wait']), /nod changes --since \d{4}-\d{2}-\d{2}T/)
   assert.ok(JSON.parse(decs(root, ['wait', '--json'])).since)
 
   store.deliver(store.get(1)!)
   const timedOut = decsResult(root, ['wait', '--timeout', '1'])
   assert.equal(timedOut.code, 2)
-  assert.match(timedOut.stderr, /decs changes --since/)
+  assert.match(timedOut.stderr, /nod changes --since/)
 })
 
 test('decs read --done collects and archives in one call; refuses a bare follow-up', (t) => {

@@ -70,7 +70,7 @@ export function run(args: Args): Promise<number> {
           updates: true,
           count_at_wake: items.length,
           ids_at_wake: items.map((d) => ({ id: d.id, ref: refOf(d), project: d.project, status: d.state })),
-          next: 'decs queue --json',
+          next: 'nod queue --json',
           since: checkedAt,
         }),
       )

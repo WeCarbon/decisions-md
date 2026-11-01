@@ -29,7 +29,7 @@
     "source": {
       "flag": "--lang",
       "env": "DECS_LANG",
-      "config": "decs config lang",
+      "config": "nod config lang",
       "system": "系統語言設定",
       "default": "預設值"
     },

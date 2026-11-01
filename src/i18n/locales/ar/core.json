@@ -55,10 +55,10 @@
     "titleRequired": "العنوان مطلوب",
     "questionsAndOptionsMixed": "الأسئلة الفرعية والخيارات العادية لا تُمزَج: مع --question، خيارات العقدة نفسها تُنشأ تلقائيًا",
     "taskOrFyiNoQuestions": "المهمة أو عنصر للعلم لا يحتوي أسئلة فرعية",
-    "taskNoOptions": "المهمة بلا خيارات — استخدم decs ask لاحقًا إن احتاجت قرارًا",
+    "taskNoOptions": "المهمة بلا خيارات — استخدم nod ask لاحقًا إن احتاجت قرارًا",
     "fyiNoOptions": "عنصر للعلم بلا خيارات",
     "parentInAnotherProject": "{{ref}} في مشروع آخر",
-    "parentTreeArchived": "شجرة {{ref}} مؤرشفة بالفعل؛ نفّذ أولًا decs archive {{id}} --undo",
+    "parentTreeArchived": "شجرة {{ref}} مؤرشفة بالفعل؛ نفّذ أولًا nod archive {{id}} --undo",
     "fyiIsRoot": "عنصر للعلم هو عقدة جذر؛ لا والد له",
     "bodyHasQuestionsSection": "النص يحتوي بالفعل قسم ## 子问题 — احذفه، --question يكتبه",
     "questionsBlockMismatch": "كتلة 子问题 لم تُقرأ كما كُتبت — ربما تحتوي تسمية رمز عنوان",
@@ -81,7 +81,7 @@
     "closeNeedsReason": "الإغلاق يحتاج سببًا: superseded | obsolete | merged-into:<ref> | نص حر",
     "multipleOptionsBlocks": "النص يحتوي أكثر من كتلة ## 选项 واحدة — احتفظ بواحدة فقط",
     "askTextOptionsMismatch": "كتلة ## 选项 في النص لا تطابق -o: {{diff}} — احذف الكتلة، أو اجعلها تطابق -o تمامًا",
-    "askNoOptions": "هذه العقدة ليس فيها خيارات لإعادة السؤال عنها: decs ask يحتاج -o 1=\"…\" 2=\"…\"",
+    "askNoOptions": "هذه العقدة ليس فيها خيارات لإعادة السؤال عنها: nod ask يحتاج -o 1=\"…\" 2=\"…\"",
     "optionsDidNotRoundTrip": "{{ref}}: الخيارات الجديدة لم تُقرأ كما كُتبت — تحقق من النص يدويًا",
     "alreadyArchived": "{{ref}} مؤرشفة بالفعل",
     "notArchived": "{{ref}} غير مؤرشفة",
@@ -130,7 +130,7 @@
     "defaultNotAnOption": "افتراضي {{key}} وهو {{default}} ليس أحد خياراته ({{keys}})"
   },
   "steps": {
-    "noneYet": "لا خطوات بعد، حدِّدها أولًا بـ decs steps <id> \"a\" \"b\" …",
+    "noneYet": "لا خطوات بعد، حدِّدها أولًا بـ nod steps <id> \"a\" \"b\" …",
     "onlyNSteps_zero": "لا خطوات",
     "onlyNSteps_one": "خطوة واحدة فقط",
     "onlyNSteps_two": "خطوتان فقط",
@@ -147,13 +147,13 @@
     "none": "(لا شيء)",
     "numberedOptions": "خيارات بقائمة مرقّمة → عناوين ###",
     "dropStaleDefault": "حذف الافتراضي القديم \"{{default}}\" (منتهية، ولا خيارات يشير إليها)",
-    "optionsNotRecognised": "لم تُعرف الخيارات — أصلحها يدويًا بـ decs ask (الافتراضي \"{{default}}\")"
+    "optionsNotRecognised": "لم تُعرف الخيارات — أصلحها يدويًا بـ nod ask (الافتراضي \"{{default}}\")"
   },
   "sources": {
     "badName": "اسم المصدر \"{{name}}\" غير صالح — فقط حروف/أرقام/._- ، ولا يبدأ برمز",
     "badDuration": "\"{{value}}\" ليست مدة صالحة، استخدم صيغة مثل 30s / 15m / 2h / 1d",
-    "notRegistered": "المصدر \"{{name}}\" غير مسجَّل بعد — شغّل أولًا `decs source register {{name}} --title \"...\"`",
-    "ackNeedsIds": "أي id؟ `decs source ack <name> <id>...`",
+    "notRegistered": "المصدر \"{{name}}\" غير مسجَّل بعد — شغّل أولًا `nod source register {{name}} --title \"...\"`",
+    "ackNeedsIds": "أي id؟ `nod source ack <name> <id>...`",
     "noSuchIds": "المصدر \"{{name}}\" ليس فيه هذه الـ id: {{ids}}",
     "badJsonLine": "السطر {{line}} ليس JSON صالحًا: {{message}}",
     "notAJsonObject": "السطر {{line}} ليس كائن JSON",

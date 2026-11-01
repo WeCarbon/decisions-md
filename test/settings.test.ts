@@ -26,7 +26,7 @@ test('decs config <setting> <value> round-trips every setting through config.jso
     const value = s.key === 'lang' ? 'en' : s.values.find((v) => v !== s.default)!
     decs(h, ['config', s.key, value], env)
     assert.equal(stored(h)[s.key], value, s.key)
-    assert.match(decs(h, ['config', s.key], env), new RegExp(`from decs config ${s.key}$`, 'm'), s.key)
+    assert.match(decs(h, ['config', s.key], env), new RegExp(`from nod config ${s.key}$`, 'm'), s.key)
     decs(h, ['config', s.key, '--off'], env)
     assert.equal(stored(h)[s.key], undefined, `${s.key} --off`)
     assert.match(decs(h, ['config', s.key], env), /from (the default|the system locale)$/m, `${s.key} default`)

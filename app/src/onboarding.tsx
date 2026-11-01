@@ -5,7 +5,7 @@ import type { ShellEnv } from './types.ts'
 
 type Step = 'welcome' | 'check' | 'add' | 'agents' | 'done'
 
-const NPM_INSTALL = 'npm install -g @wecarbon/decisions-md'
+const NPM_INSTALL = 'npm install -g @wecarbon/noddit'
 const NODE_INSTALL = 'brew install node'
 const AGENTS: { id: api.Agent; name: string }[] = [
   { id: 'claude', name: 'Claude Code' },
@@ -35,8 +35,8 @@ function Copyable({ text }: { text: string }) {
 }
 
 /**
- * First launch, or no decs on this machine yet: welcome → check Node/decs →
- * pick a folder (`decs init`) → agent integrations → the bench.
+ * First launch, or no nod on this machine yet: welcome → check Node/nod →
+ * pick a folder (`nod init`) → agent integrations → the bench.
  * `startAt: 'add'` is the same flow for adding another project later.
  */
 export function Onboarding(props: { env: ShellEnv | null; startAt?: Step; onEnv: (e: ShellEnv) => void; onDone: () => void; onCancel?: () => void }) {

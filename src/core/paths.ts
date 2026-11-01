@@ -86,7 +86,7 @@ export function requireLayout(cwd = process.cwd()): Layout {
   if (!l) {
     throw new Error(
       'no decisions/ directory found here or in any parent.\n' +
-        'Run `decs init` in the project root to create one.',
+        'Run `nod init` in the project root to create one.',
     )
   }
   return l

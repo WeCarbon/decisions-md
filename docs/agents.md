@@ -1,7 +1,7 @@
-# Coding agent CLIs: what each one reads, and how `decs setup` uses it
+# Coding agent CLIs: what each one reads, and how `nod setup` uses it
 
-Research behind `decs setup` (see `src/core/agents.ts`, `src/cli/commands/setup.ts`).
-Covers the three CLIs `decs setup` detects: Claude Code (`claude`), OpenAI's
+Research behind `nod setup` (see `src/core/agents.ts`, `src/cli/commands/setup.ts`).
+Covers the three CLIs `nod setup` detects: Claude Code (`claude`), OpenAI's
 Codex CLI (`codex`), and Moonshot's Kimi Code CLI (`kimi`). All three were
 installed locally and queried with `<cli> --help` / `<cli> <subcommand>
 --help`; version numbers are what was on hand when this was written and will
@@ -15,7 +15,7 @@ drift.
 | Codex CLI | `AGENTS.md` (or `AGENTS.override.md`) | root → cwd, concatenated, closest wins | yes (added ~March 2026) — `codex plugin marketplace add` / `codex plugin add` | `hooks.json`, incl. `SessionStart`, but needs one-time interactive trust | yes, `codex mcp add` | no — hooks can be `async` but not long-lived |
 | Kimi Code CLI | `AGENTS.md` | project (incl. `.kimi-code/AGENTS.md`) → user (`~/.kimi-code/AGENTS.md`) → plugin → built-in | no marketplace; has skills/sub-agents/MCP instead | yes, but **user-level `config.toml` only** — no project-level hook file | yes, `~/.kimi-code/mcp.json` or project `.kimi-code/mcp.json` | not addressed in the docs; not project-scoped either way |
 
-This is why `decs setup`'s three integrations look different: Claude gets the
+This is why `nod setup`'s three integrations look different: Claude gets the
 real plugin; Codex and Kimi both get the same thing instead — a `decs`
 section dropped into the project's `AGENTS.md` — because that is the one
 mechanism both of them read and that a script can safely edit.
@@ -23,7 +23,7 @@ mechanism both of them read and that a script can safely edit.
 ## Claude Code (`claude`)
 
 - **Instructions file**: `CLAUDE.md`, discovered per the normal nested-directory
-  rule (closest to cwd wins); this is the platform decs already plugs into, so
+  rule (closest to cwd wins); this is the platform nod already plugs into, so
   it isn't re-researched here.
 - **Plugins**: `.claude-plugin/plugin.json` + `.claude-plugin/marketplace.json`
   (this repo has both). Installed interactively inside a session with
@@ -35,10 +35,10 @@ mechanism both of them read and that a script can safely edit.
   machine-readable result line. `marketplace add` has no `--json`/`-y` of its
   own — it's a plain git-fetch-and-register step.
 - **Hooks**: `hooks/hooks.json`, wired up by the plugin manifest; events include
-  `SessionStart`. This is how decs injects its rules and starts `decs monitor`
+  `SessionStart`. This is how nod injects its rules and starts `nod monitor`
   every session (`plugin/session-start.mjs`, `monitors/monitors.json`) — a
   Claude Code plugin feature, not something generic to all three CLIs.
-- **`decs setup`'s approach**: run the two non-interactive commands above,
+- **`nod setup`'s approach**: run the two non-interactive commands above,
   scoped to the target project (`--scope project`, cwd set to that project).
   If either fails (offline, an older `claude` without `plugin`, a trust prompt
   that can't be answered non-interactively, …), fall back to printing the two
@@ -58,25 +58,25 @@ mechanism both of them read and that a script can safely edit.
 - **Plugins**: added to the CLI around March 2026 — `codex plugin marketplace add <owner/repo|git-url|path> [--ref <ref>] [--sparse <path>]`
   then `codex plugin add <plugin>@<marketplace>`. Both support `--json`.
   `codex plugin list [--json] [--available]` and `codex plugin marketplace list`
-  round out the read side. A decs marketplace/plugin for Codex is plausible
-  future work, but `decs` doesn't ship a Codex plugin today (it would need a
-  separate manifest under `.codex-plugin/`), so `decs setup` doesn't attempt
+  round out the read side. A nod marketplace/plugin for Codex is plausible
+  future work, but `nod` doesn't ship a Codex plugin today (it would need a
+  separate manifest under `.codex-plugin/`), so `nod setup` doesn't attempt
   one — see "Why no hooks or plugin for Codex/Kimi yet" below.
 - **Hooks**: `hooks.json`, with the same precedence idea as everywhere else —
   project `.codex/hooks.json` (or `[hooks]` in `.codex/config.toml`) over user
   `~/.codex/hooks.json` over a plugin's own `hooks/hooks.json`. Events include
   `SessionStart`, `SubagentStart`/`SubagentStop`, etc. Command hooks support
   `"async": true`, which runs a one-shot background task and delivers its
-  output at the next safe point — not a persistent watcher like `decs monitor`.
+  output at the next safe point — not a persistent watcher like `nod monitor`.
   Crucially, **a non-managed hook requires interactive review and trust**
   (`/hooks` inside a session) before Codex will run it; only hooks shipped via
   system/MDM/cloud/`requirements.toml` are trusted automatically. A script
   that drops a `hooks.json` into a project cannot make Codex act on it without
   that one-time manual step. Source: [developers.openai.com/codex/hooks](https://developers.openai.com/codex/hooks).
 - **MCP**: `codex mcp add <name> (--url <url> | -- <command>...)`, with
-  `--env`, OAuth flags, etc. — not used by decs (decs is a CLI, not an MCP
+  `--env`, OAuth flags, etc. — not used by nod (nod is a CLI, not an MCP
   server).
-- **`decs setup`'s approach**: write the `decs` section into the project's
+- **`nod setup`'s approach**: write the `decs` section into the project's
   `AGENTS.md`, same content Claude's plugin injects (`plugin/rules.<lang>.md`).
   No hook is installed, for the trust-prompt reason above — a hook a script
   drops in place is dead weight until a human clicks through `/hooks` anyway,
@@ -93,7 +93,7 @@ mechanism both of them read and that a script can safely edit.
   Source: [MoonshotAI/kimi-code docs/en/customization/agents.md](https://github.com/MoonshotAI/kimi-code/blob/main/docs/en/customization/agents.md).
 - **Plugins**: none. Kimi's "Customization" surface is Agent Skills
   (`--skills-dir`, project/user skill directories), sub-agents, MCP, and
-  hooks — no plugin manifest or marketplace to install decs into.
+  hooks — no plugin manifest or marketplace to install nod into.
 - **Hooks**: configured only in `~/.kimi-code/config.toml` (`[[hooks]]`) — there
   is **no project-level hook file**. Events include `SessionStart`,
   `SessionEnd`, `SessionHeartbeat` (every 60s), `TurnStarted`,
@@ -101,17 +101,17 @@ mechanism both of them read and that a script can safely edit.
   (fail-open: a broken hook is skipped, not blocking), but because they only
   live in the user's global config, a project-scoped setup script would have
   to either edit that global file (touching every other project Kimi is used
-  in) or skip hooks entirely. `decs setup` skips them.
+  in) or skip hooks entirely. `nod setup` skips them.
 - **MCP**: `~/.kimi-code/mcp.json` globally, or `.kimi-code/mcp.json` per
-  project — again not relevant to decs, which has no MCP server.
-- **`decs setup`'s approach**: the same `AGENTS.md` section as Codex, since
+  project — again not relevant to nod, which has no MCP server.
+- **`nod setup`'s approach**: the same `AGENTS.md` section as Codex, since
   both read the same file. If a project has both Codex and Kimi installed,
-  `decs setup` writes the section once and both pick it up — there's no
+  `nod setup` writes the section once and both pick it up — there's no
   reason to track them as separate files.
 
 ## Why no hooks or plugin for Codex/Kimi yet
 
-`decs setup` could in principle also drop a `hooks.json` next to the
+`nod setup` could in principle also drop a `hooks.json` next to the
 `AGENTS.md` edit. It doesn't, because of what's above:
 
 - Codex requires a human to approve any non-managed hook via `/hooks` before
@@ -119,7 +119,7 @@ mechanism both of them read and that a script can safely edit.
   by then the guidance is already in `AGENTS.md`.
 - Kimi's hooks are global, not per-project — writing one would affect every
   other Kimi project on the machine, which breaks "never clobber user
-  content" for anything outside the one project `decs setup` was asked about.
+  content" for anything outside the one project `nod setup` was asked about.
 
 Both are revisitable later (a real Codex plugin manifest, or a Kimi hook
 guarded to check `cwd` itself), but they're follow-up work, not part of this

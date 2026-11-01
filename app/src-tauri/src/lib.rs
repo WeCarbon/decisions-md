@@ -84,7 +84,13 @@ fn first_line(cmd: &str, args: &[&str], path: &str) -> Option<String> {
 
 fn probe() -> ShellEnv {
     let path = login_path();
-    let decs = std::env::var("DECS_BIN").ok().filter(|p| !p.is_empty()).or_else(|| which("decs", &path));
+    // Prefer `nod` (the current name); fall back to `decs` for older installs
+    // that only have the alias on PATH.
+    let decs = std::env::var("DECS_BIN")
+        .ok()
+        .filter(|p| !p.is_empty())
+        .or_else(|| which("nod", &path))
+        .or_else(|| which("decs", &path));
     let node = which("node", &path);
     ShellEnv {
         node_version: node.as_ref().and_then(|n| first_line(n, &["--version"], &path)),
@@ -140,7 +146,7 @@ async fn shell_env(app: AppHandle, state: State<'_, AppState>, refresh: bool) ->
 }
 
 pub(crate) fn decs_command(env: &ShellEnv, args: &[String], cwd: Option<&str>) -> Result<Command, String> {
-    let bin = env.decs.clone().ok_or("decs is not installed")?;
+    let bin = env.decs.clone().ok_or("nod is not installed")?;
     let mut cmd = Command::new(bin);
     cmd.args(args)
         .env("PATH", &env.path)

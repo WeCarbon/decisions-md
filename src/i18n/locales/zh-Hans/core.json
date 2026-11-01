@@ -45,10 +45,10 @@
     "titleRequired": "标题是必须的",
     "questionsAndOptionsMixed": "子问题和普通选项不能混用：有 --question 时，节点自己的选项是自动生成的",
     "taskOrFyiNoQuestions": "任务或知会不能有子问题",
-    "taskNoOptions": "任务没有选项——要决策的话之后用 decs ask",
+    "taskNoOptions": "任务没有选项——要决策的话之后用 nod ask",
     "fyiNoOptions": "知会没有选项",
     "parentInAnotherProject": "{{ref}} 在另一个项目里",
-    "parentTreeArchived": "{{ref}} 所在的树已经归档；先 decs archive {{id}} --undo",
+    "parentTreeArchived": "{{ref}} 所在的树已经归档；先 nod archive {{id}} --undo",
     "fyiIsRoot": "知会是根节点；它没有父节点",
     "bodyHasQuestionsSection": "正文里已经有 ## 子问题 一节——删掉它，--question 会写",
     "questionsBlockMismatch": "子问题块读回来和写的不一样——大概哪个标题里带了标题标记",
@@ -71,7 +71,7 @@
     "closeNeedsReason": "关闭要给原因：superseded | obsolete | merged-into:<ref> | 任意一句话",
     "multipleOptionsBlocks": "正文里有不止一个 ## 选项 块——只留一个",
     "askTextOptionsMismatch": "正文里的 ## 选项 块和 -o 对不上：{{diff}}——删掉这块，或者让它和 -o 完全一致",
-    "askNoOptions": "这个节点没有选项可以再问：decs ask 要给 -o 1=\"…\" 2=\"…\"",
+    "askNoOptions": "这个节点没有选项可以再问：nod ask 要给 -o 1=\"…\" 2=\"…\"",
     "optionsDidNotRoundTrip": "{{ref}}：新选项读回来和写的不一样——手动检查一下正文",
     "alreadyArchived": "{{ref}} 已经归档了",
     "notArchived": "{{ref}} 没有被归档",
@@ -115,7 +115,7 @@
     "defaultNotAnOption": "{{key}} 的默认 {{default}} 不是它的选项（{{keys}}）"
   },
   "steps": {
-    "noneYet": "还没有 steps，先 decs steps <id> \"a\" \"b\" … 设置",
+    "noneYet": "还没有 steps，先 nod steps <id> \"a\" \"b\" … 设置",
     "onlyNSteps_other": "只有 {{count}} 步"
   },
   "upgrade": {
@@ -127,13 +127,13 @@
     "none": "（无）",
     "numberedOptions": "编号列表选项 → ### 标题",
     "dropStaleDefault": "删掉过时的默认「{{default}}」（已结束，没有选项可指）",
-    "optionsNotRecognised": "认不出选项——用 decs ask 手动修（默认「{{default}}」）"
+    "optionsNotRecognised": "认不出选项——用 nod ask 手动修（默认「{{default}}」）"
   },
   "sources": {
     "badName": "source 名字 \"{{name}}\" 不合法 — 只能是字母/数字/._- ，且不能以符号开头",
     "badDuration": "\"{{value}}\" 不是有效的时长，用 30s / 15m / 2h / 1d 这种格式",
-    "notRegistered": "source \"{{name}}\" 还没注册 — 先 `decs source register {{name}} --title \"...\"`",
-    "ackNeedsIds": "哪些 id？`decs source ack <name> <id>...`",
+    "notRegistered": "source \"{{name}}\" 还没注册 — 先 `nod source register {{name}} --title \"...\"`",
+    "ackNeedsIds": "哪些 id？`nod source ack <name> <id>...`",
     "noSuchIds": "source \"{{name}}\" 没有这些 id：{{ids}}",
     "badJsonLine": "第 {{line}} 行不是合法 JSON：{{message}}",
     "notAJsonObject": "第 {{line}} 行不是一个 JSON 对象",

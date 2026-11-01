@@ -1,19 +1,19 @@
 [English](README.md) · **简体中文** · [繁體中文](README.zh-Hant.md) · [Français](README.fr.md) · [العربية](README.ar.md)
 
-# decisions-md
+# Noddit
 
 你把一件两小时的活交给一个智能体——或者五个智能体，各管一块——然后就不去管了。
 一小时后，其中三个卡在一个问题上，等在你没盯着的对话窗口里，你连哪个还在跑都
 分不清。
 
-**decs 给你的智能体一个地方放工作和问题，给你一个屏幕看着全部。智能体发问，
+**Noddit 给你的智能体一个地方放工作和问题，给你一个屏幕看着全部。智能体发问，
 你按一个键答复，智能体当场收到，接着往下做。**
 
-![演示：decs 看板打开就是一棵正在进行的任务树；读一个待决策问题，按一个键答复，然后 agent 用 decs read 取走答复](docs/demo.gif)
+![演示：nod 看板打开就是一棵正在进行的任务树；读一个待决策问题，按一个键答复，然后 agent 用 nod read 取走答复](docs/demo.gif)
 
 ## 为什么
 
-| 没有 decs | 有了 decs |
+| 没有 Noddit | 有了 Noddit |
 |---|---|
 | 智能体在对话里问"A 还是 B？"，你没看到，它就等一个小时。 | 所有待决问题都在一个屏幕上，卡住智能体的排在最前面。 |
 | 你答了，答案滚走了，下一个会话根本没看到。 | 问题和你的答复是 git 里的一个 markdown 文件，永久留着。 |
@@ -29,10 +29,10 @@
 1. 智能体碰到一个选择。它不在对话里问，而是跑：
 
    ```sh
-   decs ask W4 -o 1="Keep current CDN" 2="Switch to Fastly" --default 1
+   nod ask W4 -o 1="Keep current CDN" 2="Switch to Fastly" --default 1
    ```
 
-2. 你在任意终端跑 `decs`。W4 排在最上面，标着 ◆ 待决，带着两个选项和各自的
+2. 你在任意终端跑 `nod`。W4 排在最上面，标着 ◆ 待决，带着两个选项和各自的
    代价。
 
 3. 你按 `2`。
@@ -43,19 +43,19 @@
 ## 快速开始（Claude Code）
 
 ```sh
-npm i -g @wecarbon/decisions-md
-cd your-project && decs init
+npm i -g @wecarbon/noddit
+cd your-project && nod init
 ```
 
 然后，在 Claude Code 里：
 
 ```
-/plugin marketplace add wecarbon/decisions-md
+/plugin marketplace add wecarbon/noddit
 /plugin install decs@decisions-md
 ```
 
-就这样。照常给智能体派任务。它会自己用 decs 记录工作、提出问题。在另一个
-终端跑 `decs` 看着就行。
+就这样。照常给智能体派任务。它会自己用 nod 记录工作、提出问题。在另一个
+终端跑 `nod` 看着就行。
 
 用别的智能体？把 [`AGENTS.md`](AGENTS.md) 贴进它的指令——这些规则都是普通的
 CLI 调用，任何能跑终端的智能体都能照着做。
@@ -64,7 +64,7 @@ CLI 调用，任何能跑终端的智能体都能照着做。
 
 - **节点** —— 智能体正在做的一件事。一个 markdown 文件。
 - **待决** —— 一个需要你答复的节点。它带着选项出现；按一个数字就行。
-- **看板** —— 跑 `decs` 看到的那个屏幕。全部内容，实时的。
+- **看板** —— 跑 `nod` 看到的那个屏幕。全部内容，实时的。
 
 这就是开始要知道的全部。剩下的内容讲的是它底层怎么运作。
 
@@ -93,7 +93,7 @@ decisions/
 
 ## 你能得到什么
 
-**给人用的——看板。** `decs bench` 是一个覆盖你注册过的所有项目的实时终端 UI。
+**给人用的——看板。** `nod bench` 是一个覆盖你注册过的所有项目的实时终端 UI。
 五个标签：
 
 | 标签 | 看到什么 |
@@ -113,23 +113,23 @@ Ghostty、WezTerm）。
 也会收到你答复的通知：
 
 ```sh
-decs add "Ship v2.4" --task --author "lead · release"          # → W12
-decs add "Run full test suite" --task --parent W12 --after W14
-decs start W13
-pytest | decs progress --parse pytest                           # 进度条自己走
-decs ask W15 -o 1="Short & playful" 2="Plain & direct" --default 2 <<'EOF'
+nod add "Ship v2.4" --task --author "lead · release"          # → W12
+nod add "Run full test suite" --task --parent W12 --after W14
+nod start W13
+pytest | nod progress --parse pytest                           # 进度条自己走
+nod ask W15 -o 1="Short & playful" 2="Plain & direct" --default 2 <<'EOF'
 **What.** The first screen new users see after sign-up …
 EOF
 ```
 
-**不用轮询的通知。** `decs monitor` 每行打印一件智能体要处理的事——负责人的答复、
+**不用轮询的通知。** `nod monitor` 每行打印一件智能体要处理的事——负责人的答复、
 一条回复、外部来源来的新条目、五分钟没人取走的答案——并且记得每个会话看到
-哪里了。Claude Code 插件会在整个会话期间自动起一个（`decs monitor --here`，
+哪里了。Claude Code 插件会在整个会话期间自动起一个（`nod monitor --here`，
 只盯当前项目）；连续两小时没事件会自己下线，打一行 `DECS-IDLE`。子智能体，或者
 `DECS-IDLE` 之后的会话，用 Claude Code 的 Monitor 工具自己挂一个：
 
 ```
-Monitor({ command: "decs monitor --mine", description: "decs", timeout_ms: 1800000 })
+Monitor({ command: "nod monitor --mine", description: "nod", timeout_ms: 1800000 })
 ```
 
 **依赖与顺序。** `--after W13` 会把一个节点拦住，直到 W13 完成。你仍然可以提前
@@ -143,8 +143,8 @@ Monitor({ command: "decs monitor --mine", description: "decs", timeout_ms: 18000
 外部来源 github-issues ✗ 未处理 2 等 W7 1   support-inbox ✓清了
 ```
 
-**给任何要发出去的东西加审批关。** 用 `--approval-content` 附一份草稿，decs 会
-记下它的 sha256。发送前，智能体跑 `decs approved W20 --check draft.html`——除非
+**给任何要发出去的东西加审批关。** 用 `--approval-content` 附一份草稿，nod 会
+记下它的 sha256。发送前，智能体跑 `nod approved W20 --check draft.html`——除非
 *你*专门为*这份内容*选过批准项，否则就不通过。智能体把对话里的"发吧"当成你的
 批准是行不通的。
 
@@ -156,29 +156,29 @@ Monitor({ command: "decs monitor --mine", description: "decs", timeout_ms: 18000
 需要 Node 22.18+（TypeScript 直接运行，没有构建步骤）。
 
 ```sh
-git clone https://github.com/wecarbon/decisions-md.git
-cd decisions-md && npm install
+git clone https://github.com/wecarbon/noddit.git
+cd noddit && npm install
 export PATH="$PWD/bin:$PATH"          # add to your shell profile
 
 cd ~/code/your-project
-decs init --letter W                  # creates decisions/, registers the project
-decs add "Try decs" --task --author "me · kicking the tyres"
-decs                                  # the bench (same as decs bench); q to quit
+nod init --letter W                  # creates decisions/, registers the project
+nod add "Try nod" --task --author "me · kicking the tyres"
+nod                                  # the bench (same as nod bench); q to quit
 ```
 
 ### 配合 Claude Code
 
 这个仓库同时是一个 Claude Code 插件市场。插件会在每个会话开头注入使用
 规则（外加项目里还开着的节点，让恢复的会话能接着自己的活往下做），为整个
-会话起一个 `decs monitor`，让你的答复不用轮询就能传到智能体，还会提醒智能体
+会话起一个 `nod monitor`，让你的答复不用轮询就能传到智能体，还会提醒智能体
 在回复之前先把你在对话里说的话记到对应节点上。
 
 ```
-/plugin marketplace add wecarbon/decisions-md
+/plugin marketplace add wecarbon/noddit
 /plugin install decs@decisions-md
 ```
 
-(`/plugin marketplace add /path/to/decisions-md` 对本地克隆也适用。)
+(`/plugin marketplace add /path/to/noddit` 对本地克隆也适用。)
 
 完整的智能体用法在 [`AGENTS.md`](AGENTS.md)——如果你用别的智能体框架，直接把它
 贴进你自己的 `AGENTS.md` / `CLAUDE.md`。这些规则都是 CLI 调用，任何能跑终端的
@@ -186,19 +186,19 @@ decs                                  # the bench (same as decs bench); q to qui
 
 ## 语言
 
-`decs` 按下面的顺序选界面语言：
+`nod` 按下面的顺序选界面语言：
 
-1. 任何命令上的 `--lang <code>`，比如 `decs bench --lang fr`
+1. 任何命令上的 `--lang <code>`，比如 `nod bench --lang fr`
 2. `DECS_LANG` 环境变量
-3. `decs config lang <code>`——按用户存在 `~/.decs/config.json`（即
-   `$DECS_HOME/config.json`）。单独跑 `decs config lang` 会显示当前语言和它
-   从哪来；`decs config lang --off` 会删掉这项设置。
+3. `nod config lang <code>`——按用户存在 `~/.decs/config.json`（即
+   `$DECS_HOME/config.json`）。单独跑 `nod config lang` 会显示当前语言和它
+   从哪来；`nod config lang --off` 会删掉这项设置。
 4. 系统语言设置（`LC_ALL` / `LC_MESSAGES` / `LANG`，忽略 `C` / `POSIX`）：
    `zh_CN` → `zh-Hans`，`zh_TW` / `zh_HK` → `zh-Hant`，`fr_*` → `fr`，
    `ar_*` → `ar`
 5. 这些环境变量都没设的时候，用操作系统的显示语言——纯 Windows 终端（cmd、
-   PowerShell）就没有这些变量，decs 会按 Node 的 `Intl` 读到的结果来定
-6. 否则就是英语——decs 没有对应翻译的语言，也会落到英语
+   PowerShell）就没有这些变量，nod 会按 Node 的 `Intl` 读到的结果来定
+6. 否则就是英语——nod 没有对应翻译的语言，也会落到英语
 
 
 
@@ -206,16 +206,16 @@ decs                                  # the bench (same as decs bench); q to qui
 规则和提示提醒遵循同一套解析逻辑（`plugin/rules.<code>.md`）。
 
 阿拉伯语是从右往左排的。`DECS_BIDI=visual|terminal`（或者
-`decs config bidi visual|terminal`，`--off` 取消）决定怎么排：`visual`
-（默认）是 decs 自己用 Unicode 双向算法重排每一行，给那些只会严格从左往右画的
-终端用（比如 macOS 自带的 Terminal）；`terminal` 是 decs 按逻辑顺序写，把嵌在
+`nod config bidi visual|terminal`，`--off` 取消）决定怎么排：`visual`
+（默认）是 nod 自己用 Unicode 双向算法重排每一行，给那些只会严格从左往右画的
+终端用（比如 macOS 自带的 Terminal）；`terminal` 是 nod 按逻辑顺序写，把嵌在
 里面的从左到右片段（W12 这样的引用、数字、命令、英文标题）包进 Unicode
 隔离符，给自己处理双向排版的终端用（开了 bidi 的 iTerm2、kitty、基于 VTE
 的终端）。阿拉伯语下看板本身也会镜像：列表在右边，详情在左边。输出到管道和
 `--json` 永远是逻辑顺序，脚本和智能体读到的不受影响。相对时间（"3 天前"这种）
 也跟着语言走。
 
-磁盘上的文件格式不会跟着语言变：decs 永远写同一批标题和词（`## 选项`、
+磁盘上的文件格式不会跟着语言变：nod 永远写同一批标题和词（`## 选项`、
 `### 1 · …`、`## 已答（…）`、`## 回复（…）`、`## 补充（…）`、`## 附件`、
 `## 子问题`、`验收通过`……），这样不管团队里每个人的 CLI 说什么语言，仓库都能
 读。手写文件时，解析器也认 `## Options`、`## Attachments`、`## Questions`
@@ -223,45 +223,45 @@ decs                                  # the bench (same as decs bench); q to qui
 
 ## 一次会话是怎样的
 
-1. 你给主控会话一个目标。它跑 `decs add "Ship v2.4" --task`，启动它，再拆成
+1. 你给主控会话一个目标。它跑 `nod add "Ship v2.4" --task`，启动它，再拆成
    带 `--after` 依赖关系的子节点。
 2. 它把各条工作线（子智能体）分出去，各带自己的节点。每条工作线把长命令接进
-   `decs progress`，看板上的进度条自己走。
-3. 一条工作线走到分岔口。它跑 `decs ask <id> -o …`，带着选项、代价和默认值。
+   `nod progress`，看板上的进度条自己走。
+3. 一条工作线走到分岔口。它跑 `nod ask <id> -o …`，带着选项、代价和默认值。
    节点在你的看板上变成黄色的 `◆`。
-4. 你按 `2`。`decs monitor` 叫醒那条工作线，它跑 `decs read`，接着干，最后
-   `decs done <id> --note "412/412 passing"`。
+4. 你按 `2`。`nod monitor` 叫醒那条工作线，它跑 `nod read`，接着干，最后
+   `nod done <id> --note "412/412 passing"`。
 5. 你从来不用问"现在到哪了"——下周，整个故事还在 `decisions/archived/` 里。
 
 ## CLI 速查表
 
 | | |
 |---|---|
-| `decs init [--letter W]` | 在这里建 `decisions/` 并注册项目 |
-| `decs add <title> [--task] [-o 1=… 2=…]` | 新建节点；带选项就是待决策。正文来自 stdin |
-| `decs add <title> --parent W12 --after W13` | 子节点，排在另一个之后 |
-| `decs start / done / close <id>` | 待开始 → 执行中 → 已完成 / 已关闭（`--reason obsolete\|superseded\|merged-into:W15`） |
-| `decs ask <id> -o 1=… 2=…` | 在跑的节点需要负责人拍板 |
-| `decs hold <id> --on "Carol: icon set"` | 卡在外部某人身上；不算卡住 |
-| `decs progress <pct> "msg"` · `… \| decs progress --parse pytest` | 报进度（或者让一个管道自己报） |
-| `decs steps <id> "a" "b" "c"` · `decs step <id> 2` | 多步骤的活，百分比帮你算好 |
-| `decs note <id> "…"` | 追加一条记录（默认是智能体；`--human` 给负责人用） |
-| `decs push <id> 2 [--note …]` | 记一条答复 |
-| `decs monitor [--mine] [--here] [--idle-exit 2h]` | 智能体的通知流 |
-| `decs read <id>` · `decs queue` | 取走答复 / 看还有哪些没取 |
-| `decs attach <id> file [--approval-content --approve-on 1]` | 附一个文件；可以挂上批准关 |
-| `decs approved <id> --check <file>` | 只有这份内容被批准过才退出 0 |
-| `decs defer <id>` · `decs undefer <id>` | 延迟 / 解除延迟 |
-| `decs show [open\|active\|deferred\|…] [--stale]` · `decs tree` · `decs get <id>` | 读这个存储 |
-| `decs search <words> [--all]` | 标题、正文、记录、附件名 |
-| `decs source register/sync/push/list/items/ack` | 外部来源 |
-| `decs changes --since <t>` | 游标之后的一切，方便接上进度 |
-| `decs bench [.\|<dir>…] [--view decide]` | 实时屏幕 |
-| `decs` | 在终端里等于 `decs bench`；接管道或在脚本里时打印用法 |
-| `decs config [<设置> [<值>\|--off]]` | 你的设置：lang、bidi、view、images、mouse、idle-exit、unclaimed-after（看板里按 `,` 也能改） |
+| `nod init [--letter W]` | 在这里建 `decisions/` 并注册项目 |
+| `nod add <title> [--task] [-o 1=… 2=…]` | 新建节点；带选项就是待决策。正文来自 stdin |
+| `nod add <title> --parent W12 --after W13` | 子节点，排在另一个之后 |
+| `nod start / done / close <id>` | 待开始 → 执行中 → 已完成 / 已关闭（`--reason obsolete\|superseded\|merged-into:W15`） |
+| `nod ask <id> -o 1=… 2=…` | 在跑的节点需要负责人拍板 |
+| `nod hold <id> --on "Carol: icon set"` | 卡在外部某人身上；不算卡住 |
+| `nod progress <pct> "msg"` · `… \| nod progress --parse pytest` | 报进度（或者让一个管道自己报） |
+| `nod steps <id> "a" "b" "c"` · `nod step <id> 2` | 多步骤的活，百分比帮你算好 |
+| `nod note <id> "…"` | 追加一条记录（默认是智能体；`--human` 给负责人用） |
+| `nod push <id> 2 [--note …]` | 记一条答复 |
+| `nod monitor [--mine] [--here] [--idle-exit 2h]` | 智能体的通知流 |
+| `nod read <id>` · `nod queue` | 取走答复 / 看还有哪些没取 |
+| `nod attach <id> file [--approval-content --approve-on 1]` | 附一个文件；可以挂上批准关 |
+| `nod approved <id> --check <file>` | 只有这份内容被批准过才退出 0 |
+| `nod defer <id>` · `nod undefer <id>` | 延迟 / 解除延迟 |
+| `nod show [open\|active\|deferred\|…] [--stale]` · `nod tree` · `nod get <id>` | 读这个存储 |
+| `nod search <words> [--all]` | 标题、正文、记录、附件名 |
+| `nod source register/sync/push/list/items/ack` | 外部来源 |
+| `nod changes --since <t>` | 游标之后的一切，方便接上进度 |
+| `nod bench [.\|<dir>…] [--view decide]` | 实时屏幕 |
+| `nod` | 在终端里等于 `nod bench`；接管道或在脚本里时打印用法 |
+| `nod config [<设置> [<值>\|--off]]` | 你的设置：lang、bidi、view、images、mouse、idle-exit、unclaimed-after（看板里按 `,` 也能改） |
 
 编号可以写成 `305`、`W305`（项目字母）、`web:305`（项目名），或者老式的 `D305`。
-`decs <command> --help` 有剩下的细节。
+`nod <command> --help` 有剩下的细节。
 
 ## 看板按键
 
@@ -328,7 +328,7 @@ Measured again: 1.9 s p95 from Singapore.
 ## 设计原则
 
 - **是文件，不是服务。** 一切都在 `decisions/` 里，跟你的代码一起进版本控制，
-  不装 decs 也能读。
+  不装 nod 也能读。
 - **文件系统就是锁。** 编号来自 `O_EXCL` 文件；每次写都在自己的锁下重新读节点，
   通过先写后改名落地。二十多个并发写者拿到连续的编号，谁都不丢——这点有测试
   保证。
@@ -349,22 +349,22 @@ Measured again: 1.9 s p95 from Singapore.
 `DECS_SESSION`。
 
 **能用 git worktree 吗？**
-能。`decs` 总是解析到主工作区的 `decisions/`，所以各条工作线的 worktree
+能。`nod` 总是解析到主工作区的 `decisions/`，所以各条工作线的 worktree
 共享同一个存储。
 
 **同时管几个仓库？**
-`decs init` 给每个项目注册一下；不带参数的 `decs bench` 会按项目字母分组，
+`nod init` 给每个项目注册一下；不带参数的 `nod bench` 会按项目字母分组，
 打开全部项目。
 
 **没人回答怎么办？**
-每个问题都带一个默认值和一个 `--if-no-answer`。`decs wait --timeout` 会以
+每个问题都带一个默认值和一个 `--if-no-answer`。`nod wait --timeout` 会以
 退出码 2 结束并打印默认值——这就是该照它继续的时候。
 
 **能手动改文件吗？**
 读是自由的。要写，用 CLI：它负责保持编号、锁、答复队列和附件历史的一致性。
 
 **我有一份老的 `DECISIONS.md`。**
-`decs migrate --dir <project> --dry-run`，确认没问题后去掉 `--dry-run` 再跑一次。
+`nod migrate --dir <project> --dry-run`，确认没问题后去掉 `--dry-run` 再跑一次。
 
 ## 开发
 

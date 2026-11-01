@@ -1,6 +1,6 @@
 {
-  "usage": "decs —— 任務和決策，存成一般的 markdown 檔案\n\n一個節點就是一件事。AI 知道怎麼做，它就是任務；要負責人先回答，\n它就待決策。同一種東西，同一個編號。\n\n  decs init                        在這個專案裡建立 decisions/\n  decs setup [--for <智能體>]       把 decs 接進專案裡裝了的程式智能體終端\n  decs add <標題> [參數]            新節點；-o 1=… 2=… 讓負責人決策，--task 是任務\n                                   標題 ≤ 32 欄（約 16 個漢字）：只寫要決定什麼\n                                   內文可以從管線讀入：decs add \"T\" <<'EOF' … EOF\n  decs get <id>                    印出一個節點\n  decs show [範圍|狀態]             列出節點，一行一個（預設：待決策）\n  decs start <id>                  待開始 → 執行中\n  decs ask <id> -o 1=… 2=…         執行中的節點需要負責人 → 待決策\n  decs done <id> [--note]          → 已完成（archived/）\n  decs add <標題> --parent W305     子節點，放進 W305 的資料夾\n  decs tree [<id>] [--json]        節點樹\n  decs move <id> --parent <id>|--root   連同子樹換個上層\n  decs supersede <舊> --by <新>     舊的 → 已關閉（被取代），雙向連結\n  decs search <詞>... [--all]       搜尋標題、內文、追問、附件名稱\n  decs close <id> --reason <原因>   → 已關閉：superseded | obsolete | merged-into:W15\n  decs defer <id>... [--off]       延後：移出工作清單，狀態不變（--off 或 undefer 恢復）\n  decs push <id> <選項> [--note]    記下你的答覆（別名：choose）\n  decs queue [--mine] [--stale 1h] 還沒有 AI 代理取走的答覆\n  decs read <id>...                從佇列裡取走一則更新\n  decs archive <id>...             把做完的節點封存\n  decs note <id> <文字> [--human]   加一筆紀錄（預設算 AI 代理的）；不封存\n  decs pin <id> [top|bottom|off]   看板裡的排序\n  decs retitle <id> <標題>          縮短標題（檔案和編號不變）\n  decs attach <id> <路徑|網址>...    附上截圖、檔案或連結\n  decs approved <id> --check <p>   <p> 和核准過的內容一致嗎？（看結束碼）\n  decs open <id> [n]               用系統檢視器開啟附件\n  decs check                       檢查所有節點\n  decs wait [--mine]               阻塞到有答覆再結束（給 AI 代理用）\n  decs changes --since <t> [--mine]  t 之後的一切：答覆、紀錄、移動\n  decs monitor [--mine]            每則負責人回覆或外部來源項目一行——給 AI 代理的 Monitor 工具用\n  decs watch [--mine]              持續輸出變化，不結束（給人開一個窗格看）\n  decs source <動作> ...            轉接器同步進 decs 的外部來源\n                                   register/sync/push/heartbeat/list/items/ack/wait/events\n  decs bench [.|<目錄>...]          即時看板；不帶參數 = 所有登記過的資料夾\n  decs                             在終端機裡等於 decs bench；接管線時印出這份說明\n  decs migrate <DECISIONS.md>      把舊格式檔案拆進 decisions/\n  decs projects [add|rm|list|prune]  看板在任何位置都能開啟的資料夾（~/.decs/config.json）\n  decs config letter W             專案字母：節點 305 顯示為 W305\n  decs config lang <代碼>           介面語言：en、zh-Hans、zh-Hant、fr、ar\n  decs progress <0-100|--parse …>  給 DECS_NODE 指向的節點寫入進度（可接管線，stdin 原樣輸出）\n  decs steps <id> \"a\" \"b\"          設定節點的步驟\n  decs step <id> <n>               第 n 步完成 → 進度 n/總數\n\n<id> 可以寫 305、W305（專案字母 W）、舊寫法 D305、W:305 或 web:305。\n通用參數：--json  --author \"<AI 代理> · <在做什麼>\"  --dir <專案>  --lang <代碼>\n其餘用法見 `decs <指令> --help`。",
-  "unknownCommand": "decs: 不認識的命令 \"{{name}}\"\n\n{{usage}}",
+  "usage": "nod —— 任務和決策，存成一般的 markdown 檔案\n\n一個節點就是一件事。AI 知道怎麼做，它就是任務；要負責人先回答，\n它就待決策。同一種東西，同一個編號。\n\n  nod init                        在這個專案裡建立 decisions/\n  nod setup [--for <智能體>]       把 nod 接進專案裡裝了的程式智能體終端\n  nod add <標題> [參數]            新節點；-o 1=… 2=… 讓負責人決策，--task 是任務\n                                   標題 ≤ 32 欄（約 16 個漢字）：只寫要決定什麼\n                                   內文可以從管線讀入：nod add \"T\" <<'EOF' … EOF\n  nod get <id>                    印出一個節點\n  nod show [範圍|狀態]             列出節點，一行一個（預設：待決策）\n  nod start <id>                  待開始 → 執行中\n  nod ask <id> -o 1=… 2=…         執行中的節點需要負責人 → 待決策\n  nod done <id> [--note]          → 已完成（archived/）\n  nod add <標題> --parent W305     子節點，放進 W305 的資料夾\n  nod tree [<id>] [--json]        節點樹\n  nod move <id> --parent <id>|--root   連同子樹換個上層\n  nod supersede <舊> --by <新>     舊的 → 已關閉（被取代），雙向連結\n  nod search <詞>... [--all]       搜尋標題、內文、追問、附件名稱\n  nod close <id> --reason <原因>   → 已關閉：superseded | obsolete | merged-into:W15\n  nod defer <id>... [--off]       延後：移出工作清單，狀態不變（--off 或 undefer 恢復）\n  nod push <id> <選項> [--note]    記下你的答覆（別名：choose）\n  nod queue [--mine] [--stale 1h] 還沒有 AI 代理取走的答覆\n  nod read <id>...                從佇列裡取走一則更新\n  nod archive <id>...             把做完的節點封存\n  nod note <id> <文字> [--human]   加一筆紀錄（預設算 AI 代理的）；不封存\n  nod pin <id> [top|bottom|off]   看板裡的排序\n  nod retitle <id> <標題>          縮短標題（檔案和編號不變）\n  nod attach <id> <路徑|網址>...    附上截圖、檔案或連結\n  nod approved <id> --check <p>   <p> 和核准過的內容一致嗎？（看結束碼）\n  nod open <id> [n]               用系統檢視器開啟附件\n  nod check                       檢查所有節點\n  nod wait [--mine]               阻塞到有答覆再結束（給 AI 代理用）\n  nod changes --since <t> [--mine]  t 之後的一切：答覆、紀錄、移動\n  nod monitor [--mine]            每則負責人回覆或外部來源項目一行——給 AI 代理的 Monitor 工具用\n  nod watch [--mine]              持續輸出變化，不結束（給人開一個窗格看）\n  nod source <動作> ...            轉接器同步進 nod 的外部來源\n                                   register/sync/push/heartbeat/list/items/ack/wait/events\n  nod bench [.|<目錄>...]          即時看板；不帶參數 = 所有登記過的資料夾\n  nod                             在終端機裡等於 nod bench；接管線時印出這份說明\n  nod migrate <DECISIONS.md>      把舊格式檔案拆進 decisions/\n  nod projects [add|rm|list|prune]  看板在任何位置都能開啟的資料夾（~/.decs/config.json）\n  nod config letter W             專案字母：節點 305 顯示為 W305\n  nod config lang <代碼>           介面語言：en、zh-Hans、zh-Hant、fr、ar\n  nod progress <0-100|--parse …>  給 DECS_NODE 指向的節點寫入進度（可接管線，stdin 原樣輸出）\n  nod steps <id> \"a\" \"b\"          設定節點的步驟\n  nod step <id> <n>               第 n 步完成 → 進度 n/總數\n\n<id> 可以寫 305、W305（專案字母 W）、舊寫法 D305、W:305 或 web:305。\n通用參數：--json  --author \"<AI 代理> · <在做什麼>\"  --dir <專案>  --lang <代碼>\n其餘用法見 `nod <指令> --help`。",
+  "unknownCommand": "nod: 不認識的命令 \"{{name}}\"\n\n{{usage}}",
   "args": {
     "flagNeedsKeyTitle": "--{{name}} 要寫成 --{{name}} Q1 \"標題\"",
     "flagNeedsTitleAfter": "--{{name}} {{value}} 後面要跟標題",
@@ -14,44 +14,44 @@
     "noDecisionsAbove": "{{path}} 以及它的上級目錄裡都沒有 decisions/",
     "noActiveDir": "{{path}} 沒有 decisions/active —— 跳過",
     "noDirHasDecisions": "給的 --dir 路徑裡沒有一個有 decisions/ 目錄",
-    "noDecisionsHere": "這裡以及上級目錄都沒有 decisions/ 目錄。\n在專案根目錄跑 `decs init`，或者傳 --dir <project>。",
+    "noDecisionsHere": "這裡以及上級目錄都沒有 decisions/ 目錄。\n在專案根目錄跑 `nod init`，或者傳 --dir <project>。",
     "letterClash": "專案字母 {{letter}} 同時屬於 {{projects}}——這些專案只能用專案名引用（{{example}}:305）",
     "noAuthor": "這是誰寫的？傳 --author \"<AI 代理> · <在做什麼>\"，或者設 DECS_AUTHOR。",
-    "otherAuthor": "提示：{{ref}} 的提出者是「{{author}}」，不是你（{{me}}）。你掛的 decs monitor --mine 看不到它的答覆——主控工作階段請不加 --mine 跑監聽。",
+    "otherAuthor": "提示：{{ref}} 的提出者是「{{author}}」，不是你（{{me}}）。你掛的 nod monitor --mine 看不到它的答覆——主控工作階段請不加 --mine 跑監聽。",
     "notYours": "{{ref}} 是「{{author}}」提的，不是你（{{me}}）——先核對編號。確實要動它，加 --force。"
   },
   "help": {
-    "approved": "decs approved <id> --check <path>\n\n檢查 <path> 現在的內容，和負責人批准這個節點時記下的哈希是否一致。\n發送任何用 `decs attach --approval-content` 標過的內容之前，先跑這個——\n不一致，或者從沒被批准過，就不要發。\n\n  --json\n\n退出碼：0 = 一致；2 = 這個節點沒有名字匹配的待批准附件、還沒被批准過，\n或者負責人的答覆不是算批准的那個選項；\n1 = 內容變了，和批准時不一致。原因打在 stderr（或 --json 的 reason 裡）。",
-    "steps": "decs steps <id> \"a\" \"b\" \"c\"          定義這個節點的步驟（替換掉已有的）\n\n同一次把所有步驟給全，順序就是做的順序。沒有哪一步算完成；\n用 decs step <id> <n> 把前 n 步標成完成，並按 n/總數 算百分比。",
-    "step": "decs step <id> <n>                   第 1..n 步算完成了，按 n/總數 換算百分比\n\n  --note \"...\"   補一句這步做了什麼（AI 代理補充，記進正文）\n\n沒有 steps 時先 decs steps <id> \"a\" \"b\" … 設定。",
-    "progress": "decs progress <0-100> [\"msg\"]                一次性設定（用 DECS_NODE 綁定的節點）\ndecs progress --parse pytest                             從 stdin 識別 \"[ 37%]\"，同時把 stdin 原樣傳到 stdout\ndecs progress --regex '(\\d+)/(\\d+)'                      自定義正則，從 stdin 按 N/M 換算成百分比；\n                                                           只有一個捕獲組時當成字面百分比\ndecs progress --from-file run.log [--parse NAME|--regex R] [--until-exit <pid>] [--idle <ms>]\n                                                           跟著檔案增長（像 tail -f），\n                                                           給了 --until-exit 就等那個進程退出，\n                                                           沒給就等 --idle 毫秒（預設 5000）沒有新內容\ndecs progress --count-lines log.txt --total 23            讀一次檔案當前行數，按 行數/23 算百分比，不跟隨增長\n\n  --node <id>     不設就讀 DECS_NODE（DECS_TASK 也認，老名字）；兩者都沒有就報清楚的錯，非零退出\n  --msg \"...\"\n\n內置解析器（--parse）：{{parsers}}；不給 --parse/--regex 時按順序都試一遍。\n節流：同一個節點最多每 5 秒寫一次檔案，但最後一次值一定落地（進程退出/檔案讀完時 flush）。\nstdin 模式按行處理——用 \\r 原地刷新、不換行的進度條不會被實時 tee 出來，只有換行後的那一行會被看到。\n數字一到，待開始的節點自動變執行中——管進 pytest 之前不用再專門 `decs start`。",
-    "move": "decs move <id> --parent <id>     掛到另一個節點下面（連同它的整棵子樹）\ndecs move <id> --root            變成根節點\n\n編號不變，所有引用照常有效；檔案和子節點檔案夾一起改名挪過去，\n正文裡指向附件的相對鏈接會跟著改。",
-    "search": "decs search <詞>... [--all] [--json]     在節點裡找字\n\n搜標題、正文（含追問、補充、答覆）和附件檔名，不分大小寫。幾個詞都要出現。\n預設只搜 active/；--all 連 archived/ 一起。",
-    "supersede": "decs supersede <舊 id> --by <新 id>     舊節點被新節點取代\n\n舊的 → 已關閉（原因 superseded），收進 archived/，正文記一句「被 W304 取代」；\n兩邊檔頭都記下鏈接（superseded_by / supersedes），get 時雙向顯示。",
-    "tree": "decs tree [<id>] [--all] [--json]     節點樹\n\n不給 id：active/ 裡的每棵樹（--all 連 archived/ 一起）。給 id：以它為根的子樹。\n每行：編號 · 狀態 · 標題；「等前置」是排在沒完成的節點後面，「◆」是這棵子樹裡有待決策。\n\n  --json   嵌套結構：{ ref, id, status, title, ..., children: [...] }\n\n子節點是一個工作線規劃時細化出來的：decs add \"<標題>\" --parent W305。\n挪位置：decs move <id> --parent <id> 或 decs move <id> --root。",
-    "monitor": "decs monitor                給 Claude Code 的 Monitor 工具跑——標準用法只有這一條\n\n  Monitor({ command: \"decs monitor\", description: \"decs\", timeout_ms: 1800000 })\n\n  - 開工就掛，不要等到「要等答覆」才掛。\n  - 30 分鐘到期（或進程退出）後，**原樣再掛一次同一條命令**，不用帶任何參數：\n    它記得這個工作階段上次看到哪，中間發生的會先補出來。\n  - 主控工作階段：只用 `decs monitor`，**不加 --mine**（你替工作線提的節點署的是工作線的名字）。\n  - 子 AI 代理 / 隊友只管自己的節點：一律 `decs monitor --mine`。\n    不是自己的節點不處理，那是主控工作階段的事。\n\n每一行是一件要處理的事：\n  - 負責人的答覆、回覆（AI 代理自己寫的記錄不算）；被回覆從歸檔拉回的節點\n  - 啟動時先列出「已答待取」的節點\n  - 外部來源（decs source）新出現、有變化的條目\n  - DECS-UNCLAIMED …：答覆超過 5 分鐘沒人取走（不管 --mine）\n  - DECS-ERROR …：讀出錯，繼續盯，不退出\n\n  --mine / --author <s>    只看某個 AI 代理提的（按 · 前面的名字）——只給子 AI 代理用\n                           隊友工作階段（AI 代理帶 --agent-name 啟動）不加也自動只看自己的；--all 強制看全部\n  --since <ISO|時長>        從指定時間開始（一般不用：預設接著這個工作階段上次的位置）\n  --no-sources             不看外部來源\n  --unclaimed-after <時長>  預設 5m\n  --here                   只盯當前目錄所在的專案；不在 decs 專案裡就直接退出（外掛自動啟動用）\n  --idle-exit <時長>       連續這麼久沒有任何事件就自己下線（預設 2h，0 = 不下線）\n  --interval <毫秒>        預設 2000\n  --updates                每次寫入也報一行——AI 的進度、新建或歸檔的節點——\n                           格式 DECS-UPDATED <編號>（JSON：event \"updated\"）；給要重畫的視窗用\n  --with-parent <pid>      那個行程沒了就結束（啟動這個監聽的視窗）\n  --json                   一行一個 JSON",
-    "defer": "decs defer <id>...          延後：後面再做，先從可用/活動/待決裡拿掉\ndecs defer <id>... --off    解除延後（同 decs undefer <id>...）\n\n不是歸檔——沒做完，只是現在不做。節點的狀態（執行中、待決策、等待……）不變，\n解除延後後原樣回來。延後一個父節點，它下面的整棵子樹都不出現在工作列表裡。\n看板裡按 d 也是這個；「延後」tab 列出所有延後的節點。\n\n負責人自己終端裡跑算 `human`，Claude Code 的終端機裡算 AI 代理；\n--human / --agent 改。工作線收到「負責人延後」就先停手，解除前別動它。\n\n  --off      解除延後\n  --by <名>  署名（預設 `owner` / $DECS_AUTHOR）\n  --json",
-    "start": "decs start <id>...              AI 開始做這個節點 → 執行中\n\n  --force   節點還在待決策、或排在沒完成的節點後面，也開始",
-    "done": "decs done <id>... [--note \"…\"]   做完了 → 已完成，收進 archived/\n\n  --note    記一句做了什麼（AI 代理補充）\n  --force   連還在待決策的節點也算做完（很少是對的）\n\n做完以後，排在它後面、早就答覆並取走了的節點會自動進入執行中。",
-    "close": "decs close <id>... --reason <原因>   不做了 → 已關閉，收進 archived/\n\n  --reason  superseded | obsolete | merged-into:W15 | 任意一句話",
-    "hold": "decs hold <id> --on \"<誰/什麼>\"     卡在外部 → 等待\n\n等同事、客戶、供應商，或者等某個服務恢復。等負責人拍板用 decs ask，\n等別的節點用 --after，都不是這個。等待中的節點不算卡住；恢復用 decs start。\n\n  decs hold 305 --on \"Carol 回信確認賬單金額\"",
-    "ask": "decs ask <id> -o 1=\"…\" 2=\"…\" [--default 1]    做著做著要負責人拍板 → 待決策\ndecs ask <id>                                  不給 -o：把原來的問題再問一次\n                                               （例如負責人回覆過的驗收，改好了請他再看）\n\n負責人一回復，節點就變成「待 AI 取走」——輪到 AI 了，不再算「待決」。\nAI 處理完要負責人再看時，用 decs ask 把它放回待決策。\n\n同一個節點變成待決策，不用另開一條。問題的背景從 stdin 或 --text 給；\n選項寫成「## 選項（第 N 輪）」，上一輪的選項和答覆留在正文裡當歷史。\n\n  decs ask 305 -o 1=\"繼續用現在的 CDN\" 2=\"換新的 CDN\" --default 1 <<'EOF'\n  跑到一半發現新 CDN 在部分地區延後更高……\n  EOF",
-    "retitle": "decs retitle <id> \"<新標題>\"     改標題\n\n標題上限 {{max}} 列（約 {{half}} 個漢字），只寫要決什麼。\n只改檔頭裡的 title；檔名不動，編號不變，所有引用照常有效。",
-    "migrate": "decs migrate —— 把舊的 DECISIONS.md / DECISIONS.old.md 拆進 decisions/\n\n  decs migrate [--dir <專案根目錄>] [--dry-run] [--force]\n  decs migrate --upgrade [--dry-run]         status: open/answered → 節點狀態，寫回檔案；\n                                             舊式編號清單的選項（1. 標籤：代價）改寫成 ### 1 · 標籤\n  decs migrate --strip-prefix [--dry-run]    D305-….md → 305-….md，attachments/D305 → 305，修正內文連結\n\n  --dir <路徑>   從哪個專案根目錄讀 DECISIONS.md / DECISIONS.old.md（預設：目前目錄）\n  --dry-run      只印出會寫什麼，什麼都不動\n  --force        那個編號的節點檔案已經存在時覆寫它\n\n舊檔案不會被修改或刪除——這裡只讀取它們。",
-    "source": "decs source <verb> ...        外部來源：AI 代理接進來的通知系統\n\nAI 寫一個轉接器（通常是後臺跑的 python，輪詢 issue tracker / 郵箱 / 反饋表單……），\n把「有什麼」同步進 decs —— 只有 id + title（可選 url/state/from），不同步正文。\n目的是知道外部有哪些來源存在、什麼時候有更新，並實時處理，而不是讓負責人\n反覆問「issues/mail/feedback 是不是都清了」。\n\n給轉接器用（也可以從 python 用 subprocess 調）：\n  decs source register <name> --title \"...\" [--kind github|mail|feedback|...]\n                        [--adapter \"python3 ~/…/sync.py\"] [--owner-agent \"...\"]\n                        [--stale-after 15m]\n  decs source sync <name> < items.jsonl        全量快照：diff 出 new/changed/gone\n  decs source push <name> --id X --title \"...\" [--url] [--state] [--from]\n  decs source heartbeat <name>                 只報活，不帶資料\n\nsync/push 的 stdin/參數是同一套 JSON-lines 協議，一行一個對象：\n  {\"id\":\"123\",\"title\":\"...\", \"url\":\"...\", \"state\":\"open\", \"from\":\"someone\"}\n只有 id/title 必填。\n\n給 AI 代理用：\n  decs source list [--json] [--stale]          每個來源：未處理數、卡在誰手上、\n                                                心跳多久前、轉接器是不是像掛了\n  decs source items <name> [--unhandled] [--json]\n  decs source ack <name> <id>... [--note \"...\"] [--waiting-on owner|us|<人>|W304]\n                                                處理掉，或者記下現在卡在誰手上\n                                                （W304 這種是節點編號——decs 裡決策和\n                                                任務現在統一叫「節點」，共用一套編號，\n                                                前綴是專案字母；裸的 D304/304 也認，\n                                                當老格式處理）\n  decs source wait [<name>] [--timeout <秒>] [--json]\n                                                阻塞到有未處理的 new/changed，打印後退出\n                                                （和 decs wait 一個哲學：不常駐）\n  decs source events [<name>] [--since <ISO>] [--json]\n                                                since 之後的變化（wait 退出時會打印一個 since 游標）\n\n\"清空\"（cleared）= 沒有未處理的條目，也沒有條目卡在 owner/us/一個還開著的節點（如 W304）上。\n卡在別人（比如 Bob）名下不算擋著 cleared —— 那是交出去了，不是還欠我們的。",
-    "attach": "decs attach <id> <路徑或 URL>...\n\n  --link              只記路徑，不復制進 decisions/attachments/\n  --name              自定義鏈接文字（只在附一個東西時有意義）\n  --replace           同名檔案直接覆蓋最新版，舊版本挪進 .history/，\n                      正文裡的鏈接永遠指向最新版；不給這個 flag 時同名\n                      檔案會變成 name-2.ext，兩個都保留\n  --label \"選項 1\" a.png --label \"選項 2\" b.png\n                      給緊跟著的那個檔案分組；同一組在看板裡可以\n                      左右切換對比。按出現順序和檔案一一對應——每個\n                      檔案前面放一個 --label，別漏、別多\n  --caption \"…\"       同上，給緊跟著的檔案配一行說明，顯示在圖下方\n  --approval-content  標記為「待發出去之前要你批准」的內容，記下\n                      sha256；你在看板裡批這個節點時順帶批准它，\n                      之後用 `decs approved <id> --check <path>` 核對\n  --approve-on 1,3    哪些答覆算批准這份內容（逗號分隔；子問題寫 Q2:1）。\n                      只有一個選項的節點（驗收）預設就是那個選項；\n                      有多個選項或子問題時必須給。負責人選了別的，內容\n                      就不算批准\n\n截圖預設會被複制進 decisions/attachments/<編號>/，因為暫存區\n遲早會被清掉，而驗收節點下個月還要看。圖片寫成 ![](…)，\n所以在任何 markdown 檢視器裡直接就是圖。",
-    "note": "decs note <id> <文字>          追加一段補充；不答覆、不歸檔\n\n  --human           這是負責人本人的回覆（會進隊列、會把歸檔的條目拉回來）\n  --agent           這是工作線記的補充（不進隊列、不喚醒任何人）\n  --role human|agent\n  --author / --by   署名；`agent` 預設取 --author / DECS_AUTHOR / 分支名，`human` 預設 `owner`\n  --heading <詞>    段落標題，預設 `human`「回覆」、`agent`「補充」\n\n不給 --human/--agent 時看是誰在跑：Claude Code 的終端機（設了 CLAUDECODE）\n或 DECS_ROLE=agent 算 AI 代理——記下自己做了什麼、補一條事實，**不會**進隊列，\n也不會喚醒任何人；其餘（負責人在自己的終端裡敲）算 `human`，會進隊列。\nDECS_ROLE=human 強制算 `human`。\n\n寫出來的段落標題帶角色、署名和時間，例如：\n  ## 補充（agent · lead/ship-v2 · 2026-10-28 10:51:30）\n  ## 回覆（human · owner · 2026-10-28 11:02:07）",
-    "archive": "decs archive <id>...        這個節點做完了 → 已完成，收進 archived/（同 decs done）\ndecs archive <id> --seen    看過了、不用處理 → 記一句然後歸檔\ndecs archive <id> --undo    拿回 active/\n\n  --force   連還沒答覆的條目也歸檔（很少是對的）\n\n--seen 是給驗收類條目用的：它記下「看過了，不用處理」，然後歸檔，\n**不進隊列**——提出它的工作線不需要為這件事被喚醒。\n\n歸檔是「我做完了」，不是「我看到了」。看到用 decs read——\n它把條目從隊列裡劃掉，但留在 active/，因為活還沒幹完。",
-    "read": "decs read <id>...        取走這幾條更新（decs pop 是同一個命令）\n\n  --mine / --author <s>   只是過濾檢查用；id 仍然必須給\n  --peek                  只看不取，不出隊\n  --done                  取走並且歸檔——這件事已經解決、或者不再需要解決\n  --json\n\nid 是必須的。沒有「取隊列最前面那條」的寫法：幾條工作線同時在跑的時候，\n盲取會把別人的答覆取走，而且是靜默丟失。先看隊列，再指名取：\n\n  decs queue --mine\n  decs read 415\n\n**取走不等於歸檔。** read = 「我看到了」，archive = 「我做完了」，\n這兩件事常常隔著好幾天。做完之後自己收尾：\n\n  decs archive 415\n\n只有讀完當場就辦完的（例如答覆是「不用做了」），才用 --done 一步到位。",
-    "watch": "decs watch [flags]        一直跑，把變化往外流\n\n  --mine / --author <s>   只看某個提出者的\n  --json                  一行一個 JSON 事件\n  --dir <專案>            可重複\n\n這個命令**不會退出**，所以它是給人開一個終端窗格看的。\nAI 代理要等答覆請用 `decs wait`——那個拿到答覆就退出，\n放進後臺終端機才會把你喚醒。",
-    "changes": "decs changes --since <時間> [flags]     這之後發生的所有事\n\n  --since <ISO|時長>     2026-10-28T10:00:00+08:00，或 2h / 30m（從現在往回）\n  --mine / --author <s>  只看某個提出者的條目\n  --role human|agent     只看負責人的 / 只看 AI 代理的\n  --json                 { since, until, next_since, events: [...], source_events: [...] }\n\n列出答覆、追問、AI 代理補充、新建、完成、關閉、歸檔後被拉回，以及外部來源\n（decs source）裡新出現、變化、消失的條目。--role 只篩節點，給了就不列來源；\n--mine / --author 對來源按它註冊時的 owner_agent 篩，沒登記 owner_agent 的\n來源誰都看得到。\n沒有守護進程，也沒有事件日誌——全是從條目裡的段落標題和檔頭\n時間戳推出來的，所以工作階段斷了、wait 進程沒了，回來跑一次就能補齊：\n\n  decs changes --since 2026-10-28T10:00:00+08:00 --mine --json\n\n輸出裡的 next_since 就是下次該傳的 --since。老條目的段落標題只精確到\n分鐘，同一分鐘內的事件可能出現兩次——寧可重複，不會漏。",
-    "wait": "decs wait [<id>...] [flags]        阻塞到隊列裡有東西，然後退出\n\n  --mine / --author <s>   只等某個提出者的條目\n  --timeout <秒>          超時退出，退出碼 2；預設無限等\n  --json\n\n它**只告訴你「有更新」**，不告訴你更新的內容——因為你可能一口氣答了好幾條，\n把內容塞進這一次退出裡會漏掉後面的。拿內容用 decs read：\n\n  decs wait --mine        (run_in_background: true) → 退出時你被喚醒\n  decs queue --mine       → 看有哪些\n  decs read <id>          → 指名取走（不歸檔；做完再 decs archive）\n\n退出時會打印一個 --since 值。wait 進程會隨工作階段一起消失——\n回來以後先跑一次，補齊這段時間裡的所有答覆和追問：\n\n  decs changes --since <它打印的值> --mine\n\n給人看的流式版本是 decs watch，那個不退出。",
-    "push": "decs push <id> <選項> [--note \"...\"]     記下你的決定\ndecs push <id> --note \"...\"               沒有選項時的自由文本答覆\ndecs push <id> Q1=B Q2=1                  有子問題的節點：逐條答\ndecs push <id> --defaults [Q2=2]          全部按預設，只改寫出來的幾條\ndecs push <id> R3=3:\"第二段刪掉\"           某一項選「改」並寫改法\n（decs choose / decs answer 是同一個命令）\n\n  --note        你的原話\n  --human       這是負責人本人的答覆（預設看終端機：Claude Code 裡是 `agent`）\n  --agent       這是 AI 代理記下的答覆\n  --by          署名；`human` 預設 `owner`，`agent` 預設 --author / DECS_AUTHOR / 分支名\n  --json        返回裡有 answers: { Q1: \"B\", … }\n\n答完之後節點**留在 active/**，狀態「已決策待 AI 取走」。\n工作線用 decs read 取走後才算開始執行——這樣萬一沒人來取，\n你在 decs queue 裡看得見。\n\n不管誰答，答覆都照樣記下、照樣進隊列；角色只決定一件事——\n`decs attach --approval-content` 的內容算不算被批准：只有 `human`\n的答覆才算。主控工作階段把負責人在對話裡說的話轉記進來時，是 AI 代理的答覆，\n不批准任何內容；要發出去的東西由負責人自己在看板 / 自己的終端裡批。",
-    "queue": "decs queue [--mine|--author <s>] [--stale <時長>] [--json]\n\n列出你已經答覆、但還沒有 AI 代理取走的條目，先答的在前面（FIFO）。\n只讀——取走用 decs read。\n\n  --stale 1h    只列答了超過這麼久還沒人取走的（30m / 1h / 2d；純數字是分鐘）。\n                AI 代理中斷後忘了 read，這些就是被晾著的答覆。",
-    "get": "decs get <id> [flags]\n\n  --json        機器讀的完整結構\n  --raw         原始檔案內容\n  --answer      只打印答覆（沒答就打印 open）\n  --no-images   不要內聯渲染截圖\n  --cols <n>    截圖佔多少列寬（預設 60，或終端寬度的一半）\n\n截圖在支持的終端裡直接畫出來（iTerm2 / WezTerm 走 OSC 1337，\nkitty / Ghostty 走 kitty graphics）。tmux 裡會自動關掉——\n轉義序列會被它吞掉，畫一半比不畫更糟。\n\n附件行還會帶上：--label 分的組（一行一組標題）、--replace 留下的\n「歷史版本 N」、--approval-content 的批准狀態（待批准 / 已批准 /\n內容已變更需重新批准）。",
-    "show": "decs show [範圍] [--json] [--author <s>] [--stale]\n\n  open        待決策——等負責人回答的節點（預設）\n  answered    有答覆的\n  active      active/ 裡的全部節點（待開始、執行中、待決策、已決策待 AI 取走）\n  archived    archived/ 裡的（已完成、已關閉）\n  all         全部\n  fyi         知會類節點（告訴一聲，不用回）\n  deferred    延後的節點（以後再做；看板裡按 d / decs defer）\n  <狀態>      not_started | in_progress | needs_decision | decided | completed | closed\n\n  --stale     只留執行中、且過了自己 stale_after（預設 30 分鐘）還沒更新的——\n              放在範圍後面：decs show active --stale。不給範圍時預設看 active。\n              2 倍閾值以上是「很可能卡住」，--json 裡有 staleness 字段。\n\n排序：置頂的先，然後緊急度、截止時間，最後等得久的。",
-    "add": "decs add <標題> [flags]        新建一個節點（decs send 是同一個命令）\n\n節點是 AI 要做的一件事。AI 自己知道怎麼做的，用 --task；\n要負責人先回答一個問題才知道做不做、怎麼做的，給 -o 選項（待決策）。\n後來做著做著遇到問題，用 decs ask <id> -o … 把同一個節點變成待決策。\n\n標題是一句短話，只寫要決什麼：最多 {{max}} 列（約 {{half}} 個漢字），\n超了直接拒絕——看板的列表會把後半截切成「…」，被切掉的總是關鍵那半句。\n背景、數字、PR 號都放正文。\n\n  --author, -a  \"<AI 代理> · <在做什麼>\"   預設取 DECS_AUTHOR，再退到 git 分支名\n  --option, -o  1=\"...\" 2=\"...\"          可重複；鍵是數字。不給就是\n                                         1=\"驗收通過\"——「做完了，等你看一眼」\n                                         就是這種只有一個選項的條目\n                default:2=\"...\"          在鍵前面加 default: 就是預設動作，\n                                         看板裡按回車直接就選它\n  --question    Q1 \"選哪個 CDN\"           子問題；它的選項寫 -o Q1:A=\"繼續用現在的\" Q1:B=\"換新的\"，\n                                         預設寫 --default Q1:A（每個子問題都要有預設）\n  --review-item R1 \"回覆 Dave 的草稿\"      批量審閱的一項：選項固定是 1 通過 / 2 不通過 / 3 改，\n                                         預設 2（不發）；節點自己的選項自動生成：\n                                         1 全部按預設 · 2 逐條回覆\n  --body        \"...\"                    或 --body-file <path>，或從 stdin 讀\n  --default     1                        你不回時會發生什麼\n  --tag         a b c\n  --urgency     high | normal | low      預設 normal；high 在 show / 看板裡置頂\n  --due         <ISO 時間 | 4h | 2d>     什麼時候之前要答覆\n  --if-no-answer \"<你不回時我做什麼>\"   看板和 decs get 直接顯示\n  --reversible  yes | no                 那個預設動作能不能撤回\n  --fyi                                  只是告訴一聲，不用回：不進 show / wait 的\n                                         「待決」列表（`decs show fyi` 能看到）\n  --notify                               high 的條目推送：跑 $DECS_NOTIFY_CMD，\n                                         環境變量裡有 DECS_REF / DECS_TITLE 等；\n                                         沒設這個變量就什麼都不做\n  --task                                 AI 自己知道怎麼做：沒有選項，狀態「待開始」\n  --parent      W305                     細化：寫成 W305 的子節點（放進它的檔案夾）\n  --after       W12 W13                  排在這些節點後面（它們完成了才能開始）\n  --est / --when / --stale-after         預估、計劃時間、多久沒動算卡住——只存不解釋\n  --json\n\n正文走管道最省事，heredoc 裡可以直接寫 markdown：\n\n  decs add \"部署守門規則要多嚴\" -a \"deploy-lane · 本地部署路徑\" \\\n      -o 1=\"嚴格：樹必須一致\" 2=\"只看會上線的檔案\" --default 1 <<'EOF'\n  **這是什麼。** CI 的關卡拿掉之後……\n  EOF\n\n整條也可以直接喂進來——第一行 `# 標題` 會被當成標題，\n帶 YAML 檔頭的檔案（author / default / tags）同樣認：\n\n  decs add < entry.md",
-    "setup": "decs setup [--for claude|codex|kimi|all] [--dir <專案>] [--json] [--dry-run]\n\n把 decs 接進專案裡裝了的那些程式智能體終端：\n  claude   裝 decs 插件——先插件市場再插件本身，`claude plugin …` 能無需互動\n           跑通就自動裝；跑不通就印出兩行，到 Claude Code 裡手動跑\n  codex    在專案的 AGENTS.md 裡加一段 decs 規則\n  kimi     加同一段——Kimi 也讀 AGENTS.md\n\n  --for <id>     只處理這一個（可重複，或用逗號分隔）；預設：裝了的全處理\n  --dir <path>   要處理哪個專案（預設：目前目錄）\n  --dry-run      只印出會改什麼，不寫入；不會去跑 `claude`\n  --json         輸出一筆給呼叫方（例如新手引導介面）用的機器可讀結果\n\n重複跑是安全的：已經接好的會回報「已接好」。AGENTS.md 裡只動\n<!-- decs:start --> 到 <!-- decs:end --> 之間那一段，其他一概不碰。"
+    "approved": "nod approved <id> --check <path>\n\n檢查 <path> 現在的內容，和負責人批准這個節點時記下的哈希是否一致。\n發送任何用 `nod attach --approval-content` 標過的內容之前，先跑這個——\n不一致，或者從沒被批准過，就不要發。\n\n  --json\n\n退出碼：0 = 一致；2 = 這個節點沒有名字匹配的待批准附件、還沒被批准過，\n或者負責人的答覆不是算批准的那個選項；\n1 = 內容變了，和批准時不一致。原因打在 stderr（或 --json 的 reason 裡）。",
+    "steps": "nod steps <id> \"a\" \"b\" \"c\"          定義這個節點的步驟（替換掉已有的）\n\n同一次把所有步驟給全，順序就是做的順序。沒有哪一步算完成；\n用 nod step <id> <n> 把前 n 步標成完成，並按 n/總數 算百分比。",
+    "step": "nod step <id> <n>                   第 1..n 步算完成了，按 n/總數 換算百分比\n\n  --note \"...\"   補一句這步做了什麼（AI 代理補充，記進正文）\n\n沒有 steps 時先 nod steps <id> \"a\" \"b\" … 設定。",
+    "progress": "nod progress <0-100> [\"msg\"]                一次性設定（用 DECS_NODE 綁定的節點）\nnod progress --parse pytest                             從 stdin 識別 \"[ 37%]\"，同時把 stdin 原樣傳到 stdout\nnod progress --regex '(\\d+)/(\\d+)'                      自定義正則，從 stdin 按 N/M 換算成百分比；\n                                                           只有一個捕獲組時當成字面百分比\nnod progress --from-file run.log [--parse NAME|--regex R] [--until-exit <pid>] [--idle <ms>]\n                                                           跟著檔案增長（像 tail -f），\n                                                           給了 --until-exit 就等那個進程退出，\n                                                           沒給就等 --idle 毫秒（預設 5000）沒有新內容\nnod progress --count-lines log.txt --total 23            讀一次檔案當前行數，按 行數/23 算百分比，不跟隨增長\n\n  --node <id>     不設就讀 DECS_NODE（DECS_TASK 也認，老名字）；兩者都沒有就報清楚的錯，非零退出\n  --msg \"...\"\n\n內置解析器（--parse）：{{parsers}}；不給 --parse/--regex 時按順序都試一遍。\n節流：同一個節點最多每 5 秒寫一次檔案，但最後一次值一定落地（進程退出/檔案讀完時 flush）。\nstdin 模式按行處理——用 \\r 原地刷新、不換行的進度條不會被實時 tee 出來，只有換行後的那一行會被看到。\n數字一到，待開始的節點自動變執行中——管進 pytest 之前不用再專門 `nod start`。",
+    "move": "nod move <id> --parent <id>     掛到另一個節點下面（連同它的整棵子樹）\nnod move <id> --root            變成根節點\n\n編號不變，所有引用照常有效；檔案和子節點檔案夾一起改名挪過去，\n正文裡指向附件的相對鏈接會跟著改。",
+    "search": "nod search <詞>... [--all] [--json]     在節點裡找字\n\n搜標題、正文（含追問、補充、答覆）和附件檔名，不分大小寫。幾個詞都要出現。\n預設只搜 active/；--all 連 archived/ 一起。",
+    "supersede": "nod supersede <舊 id> --by <新 id>     舊節點被新節點取代\n\n舊的 → 已關閉（原因 superseded），收進 archived/，正文記一句「被 W304 取代」；\n兩邊檔頭都記下鏈接（superseded_by / supersedes），get 時雙向顯示。",
+    "tree": "nod tree [<id>] [--all] [--json]     節點樹\n\n不給 id：active/ 裡的每棵樹（--all 連 archived/ 一起）。給 id：以它為根的子樹。\n每行：編號 · 狀態 · 標題；「等前置」是排在沒完成的節點後面，「◆」是這棵子樹裡有待決策。\n\n  --json   嵌套結構：{ ref, id, status, title, ..., children: [...] }\n\n子節點是一個工作線規劃時細化出來的：nod add \"<標題>\" --parent W305。\n挪位置：nod move <id> --parent <id> 或 nod move <id> --root。",
+    "monitor": "nod monitor                給 Claude Code 的 Monitor 工具跑——標準用法只有這一條\n\n  Monitor({ command: \"nod monitor\", description: \"nod\", timeout_ms: 1800000 })\n\n  - 開工就掛，不要等到「要等答覆」才掛。\n  - 30 分鐘到期（或進程退出）後，**原樣再掛一次同一條命令**，不用帶任何參數：\n    它記得這個工作階段上次看到哪，中間發生的會先補出來。\n  - 主控工作階段：只用 `nod monitor`，**不加 --mine**（你替工作線提的節點署的是工作線的名字）。\n  - 子 AI 代理 / 隊友只管自己的節點：一律 `nod monitor --mine`。\n    不是自己的節點不處理，那是主控工作階段的事。\n\n每一行是一件要處理的事：\n  - 負責人的答覆、回覆（AI 代理自己寫的記錄不算）；被回覆從歸檔拉回的節點\n  - 啟動時先列出「已答待取」的節點\n  - 外部來源（nod source）新出現、有變化的條目\n  - DECS-UNCLAIMED …：答覆超過 5 分鐘沒人取走（不管 --mine）\n  - DECS-ERROR …：讀出錯，繼續盯，不退出\n\n  --mine / --author <s>    只看某個 AI 代理提的（按 · 前面的名字）——只給子 AI 代理用\n                           隊友工作階段（AI 代理帶 --agent-name 啟動）不加也自動只看自己的；--all 強制看全部\n  --since <ISO|時長>        從指定時間開始（一般不用：預設接著這個工作階段上次的位置）\n  --no-sources             不看外部來源\n  --unclaimed-after <時長>  預設 5m\n  --here                   只盯當前目錄所在的專案；不在 nod 專案裡就直接退出（外掛自動啟動用）\n  --idle-exit <時長>       連續這麼久沒有任何事件就自己下線（預設 2h，0 = 不下線）\n  --interval <毫秒>        預設 2000\n  --updates                每次寫入也報一行——AI 的進度、新建或歸檔的節點——\n                           格式 DECS-UPDATED <編號>（JSON：event \"updated\"）；給要重畫的視窗用\n  --with-parent <pid>      那個行程沒了就結束（啟動這個監聽的視窗）\n  --json                   一行一個 JSON",
+    "defer": "nod defer <id>...          延後：後面再做，先從可用/活動/待決裡拿掉\nnod defer <id>... --off    解除延後（同 nod undefer <id>...）\n\n不是歸檔——沒做完，只是現在不做。節點的狀態（執行中、待決策、等待……）不變，\n解除延後後原樣回來。延後一個父節點，它下面的整棵子樹都不出現在工作列表裡。\n看板裡按 d 也是這個；「延後」tab 列出所有延後的節點。\n\n負責人自己終端裡跑算 `human`，Claude Code 的終端機裡算 AI 代理；\n--human / --agent 改。工作線收到「負責人延後」就先停手，解除前別動它。\n\n  --off      解除延後\n  --by <名>  署名（預設 `owner` / $DECS_AUTHOR）\n  --json",
+    "start": "nod start <id>...              AI 開始做這個節點 → 執行中\n\n  --force   節點還在待決策、或排在沒完成的節點後面，也開始",
+    "done": "nod done <id>... [--note \"…\"]   做完了 → 已完成，收進 archived/\n\n  --note    記一句做了什麼（AI 代理補充）\n  --force   連還在待決策的節點也算做完（很少是對的）\n\n做完以後，排在它後面、早就答覆並取走了的節點會自動進入執行中。",
+    "close": "nod close <id>... --reason <原因>   不做了 → 已關閉，收進 archived/\n\n  --reason  superseded | obsolete | merged-into:W15 | 任意一句話",
+    "hold": "nod hold <id> --on \"<誰/什麼>\"     卡在外部 → 等待\n\n等同事、客戶、供應商，或者等某個服務恢復。等負責人拍板用 nod ask，\n等別的節點用 --after，都不是這個。等待中的節點不算卡住；恢復用 nod start。\n\n  nod hold 305 --on \"Carol 回信確認賬單金額\"",
+    "ask": "nod ask <id> -o 1=\"…\" 2=\"…\" [--default 1]    做著做著要負責人拍板 → 待決策\nnod ask <id>                                  不給 -o：把原來的問題再問一次\n                                               （例如負責人回覆過的驗收，改好了請他再看）\n\n負責人一回復，節點就變成「待 AI 取走」——輪到 AI 了，不再算「待決」。\nAI 處理完要負責人再看時，用 nod ask 把它放回待決策。\n\n同一個節點變成待決策，不用另開一條。問題的背景從 stdin 或 --text 給；\n選項寫成「## 選項（第 N 輪）」，上一輪的選項和答覆留在正文裡當歷史。\n\n  nod ask 305 -o 1=\"繼續用現在的 CDN\" 2=\"換新的 CDN\" --default 1 <<'EOF'\n  跑到一半發現新 CDN 在部分地區延後更高……\n  EOF",
+    "retitle": "nod retitle <id> \"<新標題>\"     改標題\n\n標題上限 {{max}} 列（約 {{half}} 個漢字），只寫要決什麼。\n只改檔頭裡的 title；檔名不動，編號不變，所有引用照常有效。",
+    "migrate": "nod migrate —— 把舊的 DECISIONS.md / DECISIONS.old.md 拆進 decisions/\n\n  nod migrate [--dir <專案根目錄>] [--dry-run] [--force]\n  nod migrate --upgrade [--dry-run]         status: open/answered → 節點狀態，寫回檔案；\n                                             舊式編號清單的選項（1. 標籤：代價）改寫成 ### 1 · 標籤\n  nod migrate --strip-prefix [--dry-run]    D305-….md → 305-….md，attachments/D305 → 305，修正內文連結\n\n  --dir <路徑>   從哪個專案根目錄讀 DECISIONS.md / DECISIONS.old.md（預設：目前目錄）\n  --dry-run      只印出會寫什麼，什麼都不動\n  --force        那個編號的節點檔案已經存在時覆寫它\n\n舊檔案不會被修改或刪除——這裡只讀取它們。",
+    "source": "nod source <verb> ...        外部來源：AI 代理接進來的通知系統\n\nAI 寫一個轉接器（通常是後臺跑的 python，輪詢 issue tracker / 郵箱 / 反饋表單……），\n把「有什麼」同步進 nod —— 只有 id + title（可選 url/state/from），不同步正文。\n目的是知道外部有哪些來源存在、什麼時候有更新，並實時處理，而不是讓負責人\n反覆問「issues/mail/feedback 是不是都清了」。\n\n給轉接器用（也可以從 python 用 subprocess 調）：\n  nod source register <name> --title \"...\" [--kind github|mail|feedback|...]\n                        [--adapter \"python3 ~/…/sync.py\"] [--owner-agent \"...\"]\n                        [--stale-after 15m]\n  nod source sync <name> < items.jsonl        全量快照：diff 出 new/changed/gone\n  nod source push <name> --id X --title \"...\" [--url] [--state] [--from]\n  nod source heartbeat <name>                 只報活，不帶資料\n\nsync/push 的 stdin/參數是同一套 JSON-lines 協議，一行一個對象：\n  {\"id\":\"123\",\"title\":\"...\", \"url\":\"...\", \"state\":\"open\", \"from\":\"someone\"}\n只有 id/title 必填。\n\n給 AI 代理用：\n  nod source list [--json] [--stale]          每個來源：未處理數、卡在誰手上、\n                                                心跳多久前、轉接器是不是像掛了\n  nod source items <name> [--unhandled] [--json]\n  nod source ack <name> <id>... [--note \"...\"] [--waiting-on owner|us|<人>|W304]\n                                                處理掉，或者記下現在卡在誰手上\n                                                （W304 這種是節點編號——nod 裡決策和\n                                                任務現在統一叫「節點」，共用一套編號，\n                                                前綴是專案字母；裸的 D304/304 也認，\n                                                當老格式處理）\n  nod source wait [<name>] [--timeout <秒>] [--json]\n                                                阻塞到有未處理的 new/changed，打印後退出\n                                                （和 nod wait 一個哲學：不常駐）\n  nod source events [<name>] [--since <ISO>] [--json]\n                                                since 之後的變化（wait 退出時會打印一個 since 游標）\n\n\"清空\"（cleared）= 沒有未處理的條目，也沒有條目卡在 owner/us/一個還開著的節點（如 W304）上。\n卡在別人（比如 Bob）名下不算擋著 cleared —— 那是交出去了，不是還欠我們的。",
+    "attach": "nod attach <id> <路徑或 URL>...\n\n  --link              只記路徑，不復制進 decisions/attachments/\n  --name              自定義鏈接文字（只在附一個東西時有意義）\n  --replace           同名檔案直接覆蓋最新版，舊版本挪進 .history/，\n                      正文裡的鏈接永遠指向最新版；不給這個 flag 時同名\n                      檔案會變成 name-2.ext，兩個都保留\n  --label \"選項 1\" a.png --label \"選項 2\" b.png\n                      給緊跟著的那個檔案分組；同一組在看板裡可以\n                      左右切換對比。按出現順序和檔案一一對應——每個\n                      檔案前面放一個 --label，別漏、別多\n  --caption \"…\"       同上，給緊跟著的檔案配一行說明，顯示在圖下方\n  --approval-content  標記為「待發出去之前要你批准」的內容，記下\n                      sha256；你在看板裡批這個節點時順帶批准它，\n                      之後用 `nod approved <id> --check <path>` 核對\n  --approve-on 1,3    哪些答覆算批准這份內容（逗號分隔；子問題寫 Q2:1）。\n                      只有一個選項的節點（驗收）預設就是那個選項；\n                      有多個選項或子問題時必須給。負責人選了別的，內容\n                      就不算批准\n\n截圖預設會被複制進 decisions/attachments/<編號>/，因為暫存區\n遲早會被清掉，而驗收節點下個月還要看。圖片寫成 ![](…)，\n所以在任何 markdown 檢視器裡直接就是圖。",
+    "note": "nod note <id> <文字>          追加一段補充；不答覆、不歸檔\n\n  --human           這是負責人本人的回覆（會進隊列、會把歸檔的條目拉回來）\n  --agent           這是工作線記的補充（不進隊列、不喚醒任何人）\n  --role human|agent\n  --author / --by   署名；`agent` 預設取 --author / DECS_AUTHOR / 分支名，`human` 預設 `owner`\n  --heading <詞>    段落標題，預設 `human`「回覆」、`agent`「補充」\n\n不給 --human/--agent 時看是誰在跑：Claude Code 的終端機（設了 CLAUDECODE）\n或 DECS_ROLE=agent 算 AI 代理——記下自己做了什麼、補一條事實，**不會**進隊列，\n也不會喚醒任何人；其餘（負責人在自己的終端裡敲）算 `human`，會進隊列。\nDECS_ROLE=human 強制算 `human`。\n\n寫出來的段落標題帶角色、署名和時間，例如：\n  ## 補充（agent · lead/ship-v2 · 2026-10-28 10:51:30）\n  ## 回覆（human · owner · 2026-10-28 11:02:07）",
+    "archive": "nod archive <id>...        這個節點做完了 → 已完成，收進 archived/（同 nod done）\nnod archive <id> --seen    看過了、不用處理 → 記一句然後歸檔\nnod archive <id> --undo    拿回 active/\n\n  --force   連還沒答覆的條目也歸檔（很少是對的）\n\n--seen 是給驗收類條目用的：它記下「看過了，不用處理」，然後歸檔，\n**不進隊列**——提出它的工作線不需要為這件事被喚醒。\n\n歸檔是「我做完了」，不是「我看到了」。看到用 nod read——\n它把條目從隊列裡劃掉，但留在 active/，因為活還沒幹完。",
+    "read": "nod read <id>...        取走這幾條更新（nod pop 是同一個命令）\n\n  --mine / --author <s>   只是過濾檢查用；id 仍然必須給\n  --peek                  只看不取，不出隊\n  --done                  取走並且歸檔——這件事已經解決、或者不再需要解決\n  --json\n\nid 是必須的。沒有「取隊列最前面那條」的寫法：幾條工作線同時在跑的時候，\n盲取會把別人的答覆取走，而且是靜默丟失。先看隊列，再指名取：\n\n  nod queue --mine\n  nod read 415\n\n**取走不等於歸檔。** read = 「我看到了」，archive = 「我做完了」，\n這兩件事常常隔著好幾天。做完之後自己收尾：\n\n  nod archive 415\n\n只有讀完當場就辦完的（例如答覆是「不用做了」），才用 --done 一步到位。",
+    "watch": "nod watch [flags]        一直跑，把變化往外流\n\n  --mine / --author <s>   只看某個提出者的\n  --json                  一行一個 JSON 事件\n  --dir <專案>            可重複\n\n這個命令**不會退出**，所以它是給人開一個終端窗格看的。\nAI 代理要等答覆請用 `nod wait`——那個拿到答覆就退出，\n放進後臺終端機才會把你喚醒。",
+    "changes": "nod changes --since <時間> [flags]     這之後發生的所有事\n\n  --since <ISO|時長>     2026-10-28T10:00:00+08:00，或 2h / 30m（從現在往回）\n  --mine / --author <s>  只看某個提出者的條目\n  --role human|agent     只看負責人的 / 只看 AI 代理的\n  --json                 { since, until, next_since, events: [...], source_events: [...] }\n\n列出答覆、追問、AI 代理補充、新建、完成、關閉、歸檔後被拉回，以及外部來源\n（nod source）裡新出現、變化、消失的條目。--role 只篩節點，給了就不列來源；\n--mine / --author 對來源按它註冊時的 owner_agent 篩，沒登記 owner_agent 的\n來源誰都看得到。\n沒有守護進程，也沒有事件日誌——全是從條目裡的段落標題和檔頭\n時間戳推出來的，所以工作階段斷了、wait 進程沒了，回來跑一次就能補齊：\n\n  nod changes --since 2026-10-28T10:00:00+08:00 --mine --json\n\n輸出裡的 next_since 就是下次該傳的 --since。老條目的段落標題只精確到\n分鐘，同一分鐘內的事件可能出現兩次——寧可重複，不會漏。",
+    "wait": "nod wait [<id>...] [flags]        阻塞到隊列裡有東西，然後退出\n\n  --mine / --author <s>   只等某個提出者的條目\n  --timeout <秒>          超時退出，退出碼 2；預設無限等\n  --json\n\n它**只告訴你「有更新」**，不告訴你更新的內容——因為你可能一口氣答了好幾條，\n把內容塞進這一次退出裡會漏掉後面的。拿內容用 nod read：\n\n  nod wait --mine        (run_in_background: true) → 退出時你被喚醒\n  nod queue --mine       → 看有哪些\n  nod read <id>          → 指名取走（不歸檔；做完再 nod archive）\n\n退出時會打印一個 --since 值。wait 進程會隨工作階段一起消失——\n回來以後先跑一次，補齊這段時間裡的所有答覆和追問：\n\n  nod changes --since <它打印的值> --mine\n\n給人看的流式版本是 nod watch，那個不退出。",
+    "push": "nod push <id> <選項> [--note \"...\"]     記下你的決定\nnod push <id> --note \"...\"               沒有選項時的自由文本答覆\nnod push <id> Q1=B Q2=1                  有子問題的節點：逐條答\nnod push <id> --defaults [Q2=2]          全部按預設，只改寫出來的幾條\nnod push <id> R3=3:\"第二段刪掉\"           某一項選「改」並寫改法\n（nod choose / nod answer 是同一個命令）\n\n  --note        你的原話\n  --human       這是負責人本人的答覆（預設看終端機：Claude Code 裡是 `agent`）\n  --agent       這是 AI 代理記下的答覆\n  --by          署名；`human` 預設 `owner`，`agent` 預設 --author / DECS_AUTHOR / 分支名\n  --json        返回裡有 answers: { Q1: \"B\", … }\n\n答完之後節點**留在 active/**，狀態「已決策待 AI 取走」。\n工作線用 nod read 取走後才算開始執行——這樣萬一沒人來取，\n你在 nod queue 裡看得見。\n\n不管誰答，答覆都照樣記下、照樣進隊列；角色只決定一件事——\n`nod attach --approval-content` 的內容算不算被批准：只有 `human`\n的答覆才算。主控工作階段把負責人在對話裡說的話轉記進來時，是 AI 代理的答覆，\n不批准任何內容；要發出去的東西由負責人自己在看板 / 自己的終端裡批。",
+    "queue": "nod queue [--mine|--author <s>] [--stale <時長>] [--json]\n\n列出你已經答覆、但還沒有 AI 代理取走的條目，先答的在前面（FIFO）。\n只讀——取走用 nod read。\n\n  --stale 1h    只列答了超過這麼久還沒人取走的（30m / 1h / 2d；純數字是分鐘）。\n                AI 代理中斷後忘了 read，這些就是被晾著的答覆。",
+    "get": "nod get <id> [flags]\n\n  --json        機器讀的完整結構\n  --raw         原始檔案內容\n  --answer      只打印答覆（沒答就打印 open）\n  --no-images   不要內聯渲染截圖\n  --cols <n>    截圖佔多少列寬（預設 60，或終端寬度的一半）\n\n截圖在支持的終端裡直接畫出來（iTerm2 / WezTerm 走 OSC 1337，\nkitty / Ghostty 走 kitty graphics）。tmux 裡會自動關掉——\n轉義序列會被它吞掉，畫一半比不畫更糟。\n\n附件行還會帶上：--label 分的組（一行一組標題）、--replace 留下的\n「歷史版本 N」、--approval-content 的批准狀態（待批准 / 已批准 /\n內容已變更需重新批准）。",
+    "show": "nod show [範圍] [--json] [--author <s>] [--stale]\n\n  open        待決策——等負責人回答的節點（預設）\n  answered    有答覆的\n  active      active/ 裡的全部節點（待開始、執行中、待決策、已決策待 AI 取走）\n  archived    archived/ 裡的（已完成、已關閉）\n  all         全部\n  fyi         知會類節點（告訴一聲，不用回）\n  deferred    延後的節點（以後再做；看板裡按 d / nod defer）\n  <狀態>      not_started | in_progress | needs_decision | decided | completed | closed\n\n  --stale     只留執行中、且過了自己 stale_after（預設 30 分鐘）還沒更新的——\n              放在範圍後面：nod show active --stale。不給範圍時預設看 active。\n              2 倍閾值以上是「很可能卡住」，--json 裡有 staleness 字段。\n\n排序：置頂的先，然後緊急度、截止時間，最後等得久的。",
+    "add": "nod add <標題> [flags]        新建一個節點（nod send 是同一個命令）\n\n節點是 AI 要做的一件事。AI 自己知道怎麼做的，用 --task；\n要負責人先回答一個問題才知道做不做、怎麼做的，給 -o 選項（待決策）。\n後來做著做著遇到問題，用 nod ask <id> -o … 把同一個節點變成待決策。\n\n標題是一句短話，只寫要決什麼：最多 {{max}} 列（約 {{half}} 個漢字），\n超了直接拒絕——看板的列表會把後半截切成「…」，被切掉的總是關鍵那半句。\n背景、數字、PR 號都放正文。\n\n  --author, -a  \"<AI 代理> · <在做什麼>\"   預設取 DECS_AUTHOR，再退到 git 分支名\n  --option, -o  1=\"...\" 2=\"...\"          可重複；鍵是數字。不給就是\n                                         1=\"驗收通過\"——「做完了，等你看一眼」\n                                         就是這種只有一個選項的條目\n                default:2=\"...\"          在鍵前面加 default: 就是預設動作，\n                                         看板裡按回車直接就選它\n  --question    Q1 \"選哪個 CDN\"           子問題；它的選項寫 -o Q1:A=\"繼續用現在的\" Q1:B=\"換新的\"，\n                                         預設寫 --default Q1:A（每個子問題都要有預設）\n  --review-item R1 \"回覆 Dave 的草稿\"      批量審閱的一項：選項固定是 1 通過 / 2 不通過 / 3 改，\n                                         預設 2（不發）；節點自己的選項自動生成：\n                                         1 全部按預設 · 2 逐條回覆\n  --body        \"...\"                    或 --body-file <path>，或從 stdin 讀\n  --default     1                        你不回時會發生什麼\n  --tag         a b c\n  --urgency     high | normal | low      預設 normal；high 在 show / 看板裡置頂\n  --due         <ISO 時間 | 4h | 2d>     什麼時候之前要答覆\n  --if-no-answer \"<你不回時我做什麼>\"   看板和 nod get 直接顯示\n  --reversible  yes | no                 那個預設動作能不能撤回\n  --fyi                                  只是告訴一聲，不用回：不進 show / wait 的\n                                         「待決」列表（`nod show fyi` 能看到）\n  --notify                               high 的條目推送：跑 $DECS_NOTIFY_CMD，\n                                         環境變量裡有 DECS_REF / DECS_TITLE 等；\n                                         沒設這個變量就什麼都不做\n  --task                                 AI 自己知道怎麼做：沒有選項，狀態「待開始」\n  --parent      W305                     細化：寫成 W305 的子節點（放進它的檔案夾）\n  --after       W12 W13                  排在這些節點後面（它們完成了才能開始）\n  --est / --when / --stale-after         預估、計劃時間、多久沒動算卡住——只存不解釋\n  --json\n\n正文走管道最省事，heredoc 裡可以直接寫 markdown：\n\n  nod add \"部署守門規則要多嚴\" -a \"deploy-lane · 本地部署路徑\" \\\n      -o 1=\"嚴格：樹必須一致\" 2=\"只看會上線的檔案\" --default 1 <<'EOF'\n  **這是什麼。** CI 的關卡拿掉之後……\n  EOF\n\n整條也可以直接喂進來——第一行 `# 標題` 會被當成標題，\n帶 YAML 檔頭的檔案（author / default / tags）同樣認：\n\n  nod add < entry.md",
+    "setup": "nod setup [--for claude|codex|kimi|all] [--dir <專案>] [--json] [--dry-run]\n\n把 nod 接進專案裡裝了的那些程式智能體終端：\n  claude   裝 decs 插件——先插件市場再插件本身，`claude plugin …` 能無需互動\n           跑通就自動裝；跑不通就印出兩行，到 Claude Code 裡手動跑\n  codex    在專案的 AGENTS.md 裡加一段 decs 規則\n  kimi     加同一段——Kimi 也讀 AGENTS.md\n\n  --for <id>     只處理這一個（可重複，或用逗號分隔）；預設：裝了的全處理\n  --dir <path>   要處理哪個專案（預設：目前目錄）\n  --dry-run      只印出會改什麼，不寫入；不會去跑 `claude`\n  --json         輸出一筆給呼叫方（例如新手引導介面）用的機器可讀結果\n\n重複跑是安全的：已經接好的會回報「已接好」。AGENTS.md 裡只動\n<!-- decs:start --> 到 <!-- decs:end --> 之間那一段，其他一概不碰。"
   },
   "send": {
     "badUrgency": "--urgency 只能是 {{urgencies}}，收到「{{value}}」",
@@ -65,11 +65,11 @@
     "letterClash": "專案字母 {{letter}} 被不只一個專案使用——{{letter}}1 這樣的引用有歧義；改用專案名稱引用",
     "idReused": "編號 {{id}} 也被 {{other}} 用了",
     "idMismatch": "檔頭寫的是 id {{fmId}}，檔名是 {{fileId}}",
-    "titleTooLong": "標題超過 {{max}} 欄——看板會截斷；用 decs retitle <id> \"<短標題>\" 修改",
+    "titleTooLong": "標題超過 {{max}} 欄——看板會截斷；用 nod retitle <id> \"<短標題>\" 修改",
     "noAuthor": "沒有提出者——沒人知道追問該找誰",
     "noCreated": "沒有建立時間",
     "emptyBody": "內文是空的",
-    "duplicateOptions": "第 {{fromLine}}–{{toLine}} 行的選項區塊重複了前一塊，內文都是空的——讀出來是 {{count}} 個選項；decs check --fix 會刪掉它",
+    "duplicateOptions": "第 {{fromLine}}–{{toLine}} 行的選項區塊重複了前一塊，內文都是空的——讀出來是 {{count}} 個選項；nod check --fix 會刪掉它",
     "duplicateOptionsPreview": "{{rel}}：刪掉第 {{fromLine}}–{{toLine}} 行（{{drops}} 內文為空，重複了 {{keeps}}）",
     "optionKeyRepeated": "選項編號重複：{{keys}}",
     "defaultNoOptions": "預設是「{{default}}」，但一個選項都沒有——選項區塊大概沒解析出來",
@@ -93,12 +93,12 @@
     "summaryOk": "{{total}} 條，沒有問題"
   },
   "open": {
-    "usage": "用法：decs open 313 [第幾個附件]",
+    "usage": "用法：nod open 313 [第幾個附件]",
     "none": "{{ref}} 沒有附件。",
     "onlyNAttachments_other": "{{ref}} 只有 {{count}} 個附件"
   },
   "approved": {
-    "usage": "用法：decs approved 313 --check draft.html",
+    "usage": "用法：nod approved 313 --check draft.html",
     "neverAttached": "{{ref}} 沒有名字匹配「{{path}}」的 --approval-content 附件 —— 從沒被標成待批准內容。",
     "answerNotApproving": "{{ref}} 的 {{path}}：答覆是 {{answer}}，不算批准{{approveOn}}。",
     "approveOnSuffix": "（答 {{approveOn}} 才算）",
@@ -109,20 +109,20 @@
   },
   "init": {
     "created": "已創建 {{root}}/{active,archived}",
-    "registered": "已註冊「{{root}}」—— `decs bench` 在哪都能看到它"
+    "registered": "已註冊「{{root}}」—— `nod bench` 在哪都能看到它"
   },
   "steps": {
     "needOneStep": "至少給一步",
-    "usage": "用法：decs step <id> <第幾步>"
+    "usage": "用法：nod step <id> <第幾步>"
   },
   "progress": {
     "noNode": "沒有節點：傳 --node <id>，或者先 export DECS_NODE=W12（DECS_TASK 也認）。",
     "unknownParser": "不認識的解析器 \"{{name}}\"（{{parsers}}）",
     "countLinesNeedsTotal": "--count-lines 要配 --total <N>",
-    "noInput": "沒有可讀的輸入：給個百分數（decs progress 45 \"msg\"），或者用管道接 --parse/--regex。"
+    "noInput": "沒有可讀的輸入：給個百分數（nod progress 45 \"msg\"），或者用管道接 --parse/--regex。"
   },
   "move": {
-    "usage": "用法：decs move 306 --parent 305 | --root",
+    "usage": "用法：nod move 306 --parent 305 | --root",
     "underParent": "{{ref}} 下面",
     "toRoot": "根節點"
   },
@@ -131,7 +131,7 @@
     "activeOnlyHint": "（只搜了 active/，加 --all 連歸檔一起）"
   },
   "supersede": {
-    "usage": "用法：decs supersede 278 --by 304",
+    "usage": "用法：nod supersede 278 --by 304",
     "done": "{{ref}} 被 {{by}} 取代 → 已關閉"
   },
   "tree": {
@@ -146,7 +146,7 @@
     "sourceNew": "新條目",
     "sourceChanged": "有變化",
     "unclaimed": "{{ref}} 已答 {{duration}}沒人取走：{{title}}（提出者 {{author}}）",
-    "watching": "decs monitor: 盯著 {{count}} 個專案{{author}}，{{from}}",
+    "watching": "nod monitor: 盯著 {{count}} 個專案{{author}}，{{from}}",
     "onlyAuthor": "，只看 {{author}}",
     "resuming": "接著上次，從 {{cursor}} 起",
     "startingAt": "從 {{cursor}} 起",
@@ -154,7 +154,7 @@
     "repliedChoice": "答覆 {{choice}}",
     "hasReply": "有回覆",
     "queued": "{{ref}} 已答待取：{{title}} —— {{text}}",
-    "idle": "{{duration}}沒有新事件，監聽下線。要繼續盯時再掛 decs monitor。"
+    "idle": "{{duration}}沒有新事件，監聽下線。要繼續盯時再掛 nod monitor。"
   },
   "defer": {
     "undeferred": "已解除延後",
@@ -174,26 +174,26 @@
     "closed": "關閉（{{reason}}）"
   },
   "retitle": {
-    "usage": "用法：decs retitle 203 \"定價頁文案怎麼改\""
+    "usage": "用法：nod retitle 203 \"定價頁文案怎麼改\""
   },
   "projects": {
-    "noDecisions": "{{root}} 沒有 decisions/ — 先在那裡跑 `decs init`",
+    "noDecisions": "{{root}} 沒有 decisions/ — 先在那裡跑 `nod init`",
     "added": "已添加 {{root}}",
     "whichProject": "哪個專案？給名字或路徑",
     "removed": "已移除 {{target}}",
     "pruned": "已移除 {{name}}  {{root}}",
     "unknownSubcommand": "不認識的子命令「{{verb}}」（list | add | rm | prune）",
-    "none": "沒有註冊的專案。`decs init` 會自動註冊；也可以 `decs projects add <path>`。",
+    "none": "沒有註冊的專案。`nod init` 會自動註冊；也可以 `nod projects add <path>`。",
     "decisionsGone": "（decisions/ 不在了）"
   },
   "migrate": {
-    "noLegacyFiles": "decs migrate：{{dir}} 裡沒有 DECISIONS.md 或 DECISIONS.old.md",
+    "noLegacyFiles": "nod migrate：{{dir}} 裡沒有 DECISIONS.md 或 DECISIONS.old.md",
     "skippedLine": "D{{id}} → {{fname}}（{{path}} 已經存在；用 --force）",
     "archivedTag": "歸檔",
     "activeTag": "活躍",
     "wouldWrite": "將寫入",
     "wrote": "已寫入",
-    "heading": "decs migrate：{{dir}}",
+    "heading": "nod migrate：{{dir}}",
     "activeSummary": "active：   解析到 {{count}} 條{{written}}",
     "archivedSummary": "archived： 解析到 {{count}} 條{{written}}",
     "writtenSuffix": "，寫入 {{count}} 條",
@@ -212,45 +212,45 @@
     "alreadyUpToDate": "已經是最新格式，沒有要改的。"
   },
   "source": {
-    "unknownSubcommand": "不認識的 `decs source` 子命令「{{verb}}」",
-    "notRegistered": "沒有名叫 \"{{name}}\" 的 source — 先 `decs source register {{name}} --title \"...\"`",
+    "unknownSubcommand": "不認識的 `nod source` 子命令「{{verb}}」",
+    "notRegistered": "沒有名叫 \"{{name}}\" 的 source — 先 `nod source register {{name}} --title \"...\"`",
     "ambiguousProject": "\"{{name}}\" 在不止一個專案裡：{{projects}} — 加 --project <name> 指定",
-    "whichSourceRegister": "哪個 source？`decs source register <name> --title \"...\"`",
+    "whichSourceRegister": "哪個 source？`nod source register <name> --title \"...\"`",
     "registered": "source \"{{name}}\" 已註冊 · {{title}}{{adapter}}",
     "adapterSuffix": " · 轉接器：{{adapter}}",
-    "whichSourceSync": "哪個 source？`decs source sync <name> < items.jsonl`",
+    "whichSourceSync": "哪個 source？`nod source sync <name> < items.jsonl`",
     "syncResult": "source \"{{name}}\"：新 {{new}} · 變化 {{changed}} · 消失 {{gone}} · 沒變 {{unchanged}}",
-    "whichSourcePush": "哪個 source？`decs source push <name> --id X --title \"...\"`",
+    "whichSourcePush": "哪個 source？`nod source push <name> --id X --title \"...\"`",
     "pushNeedsIdTitle": "push 需要 --id 和 --title",
     "pushed": "source \"{{name}}\" #{{id}}：{{kind}}",
-    "whichSourceHeartbeat": "哪個 source？`decs source heartbeat <name>`",
+    "whichSourceHeartbeat": "哪個 source？`nod source heartbeat <name>`",
     "heartbeat": "source \"{{name}}\" 心跳：{{at}}",
     "cleared": "清空",
     "unhandled": "未處理 {{n}}",
     "waitingOnBucket": "等 {{bucket}} {{n}}",
     "heartbeatAgo": "心跳 {{ago}}",
-    "noneRegistered": "沒有註冊的 source。`decs source register <name> --title \"...\"` 先註冊一個。",
+    "noneRegistered": "沒有註冊的 source。`nod source register <name> --title \"...\"` 先註冊一個。",
     "gone": "消失了",
     "handled": "已處理",
     "unhandledWord": "未處理",
     "waitingOnWho": "等 {{who}}",
     "from": "來自 {{from}}",
-    "whichSourceItems": "哪個 source？`decs source items <name>`",
+    "whichSourceItems": "哪個 source？`nod source items <name>`",
     "noneUnhandled": "source \"{{name}}\" 沒有未處理的條目。",
     "noItems": "source \"{{name}}\" 還沒有條目。",
-    "ackUsage": "用法：`decs source ack <name> <id>... [--note \"...\"] [--waiting-on ...]`",
+    "ackUsage": "用法：`nod source ack <name> <id>... [--note \"...\"] [--waiting-on ...]`",
     "acked": "source \"{{name}}\" #{{id}} 已處理{{waitingOn}}",
     "waitingOnSuffix": " · 等 {{who}}",
-    "waitHint": "decs source items {{name}} --unhandled 看內容 · decs source events --since {{since}} 看變化",
+    "waitHint": "nod source items {{name}} --unhandled 看內容 · nod source events --since {{since}} 看變化",
     "waitTimedOut": "等了 {{seconds}} 秒，還沒有未處理的條目。",
     "noEventsRecorded": "沒有記錄過事件。"
   },
   "attach": {
-    "usage": "用法：decs attach 313 <path>",
+    "usage": "用法：nod attach 313 <path>",
     "pending": "待批准（答 {{approveOn}} 算批准）· {{hash}}"
   },
   "pin": {
-    "whichOne": "哪一個？例如 `decs pin 313 top`",
+    "whichOne": "哪一個？例如 `nod pin 313 top`",
     "badWhere": "「{{value}}」——應該是 top | bottom | off",
     "done": "{{ref}} {{where}}",
     "top": "置頂",
@@ -258,17 +258,17 @@
     "off": "取消置頂/置底"
   },
   "note": {
-    "whichOne": "哪一個？例如 `decs note 313 \"還有個前提…\"`",
+    "whichOne": "哪一個？例如 `nod note 313 \"還有個前提…\"`",
     "nothingToAdd": "沒有要加的內容",
     "badRole": "--role 只能是 `human` 或 `agent`",
     "humanOrAgentOnly": "--human 和 --agent 只能給一個",
-    "holdHint": "提示：如果 {{ref}} 是卡在別人或外部服務上，用 decs hold {{id}} --on \"<誰/什麼>\"，看板才會把它顯示成「等待」⏸；等到了 decs start {{id}}。",
+    "holdHint": "提示：如果 {{ref}} 是卡在別人或外部服務上，用 nod hold {{id}} --on \"<誰/什麼>\"，看板才會把它顯示成「等待」⏸；等到了 nod start {{id}}。",
     "appended": "{{ref}} 已追加「{{kind}}」（{{role}}）",
     "revived": "，並從 archived/ 拉回 active/，標了「歸檔後有新回覆」",
     "queued": "，已進隊列"
   },
   "archive": {
-    "whichOne": "哪一條？例如 `decs archive 415`",
+    "whichOne": "哪一條？例如 `nod archive 415`",
     "backToActive": "{{ref}} 拿回 active/",
     "seen": "{{ref}} 看過了 → {{file}}",
     "stillNeedsDecision": "{{ref}} 還在等負責人決定，歸檔它等於把問題丟掉。真要歸檔加 --force。",
@@ -277,12 +277,12 @@
   },
   "read": {
     "answered": "已答{{choice}}",
-    "fullTextHint": "全文：decs get {{id}}    檔案：{{file}}",
+    "fullTextHint": "全文：nod get {{id}}    檔案：{{file}}",
     "whichOne": "要取哪一條？隊列裡有：{{refs}}",
-    "notQueued": "這些條目不在隊列裡（沒有待取的更新）：{{refs}}\n已經取過了，或者還沒被答覆。decs get <id> 看它的狀態。",
-    "cantDoneUnanswered": "{{refs}} 只有回覆、還沒選選項，--done 不能替它歸檔。先 decs read 取走；辦完了再 decs archive <id> --force",
-    "archivedHint": "已歸檔：{{refs}}（拿回來：decs archive <id> --undo）",
-    "doneNextHint": "做完之後：decs archive {{ids}}",
+    "notQueued": "這些條目不在隊列裡（沒有待取的更新）：{{refs}}\n已經取過了，或者還沒被答覆。nod get <id> 看它的狀態。",
+    "cantDoneUnanswered": "{{refs}} 只有回覆、還沒選選項，--done 不能替它歸檔。先 nod read 取走；辦完了再 nod archive <id> --force",
+    "archivedHint": "已歸檔：{{refs}}（拿回來：nod archive <id> --undo）",
+    "doneNextHint": "做完之後：nod archive {{ids}}",
     "leftInQueue_other": "隊列裡還有 {{count}} 條：{{refs}}"
   },
   "watch": {
@@ -304,13 +304,13 @@
     "needSince": "要給 --since，例如 --since 2026-10-28T10:00:00+08:00 或 --since 2h",
     "badRole": "--role 只能是 `human` 或 `agent`",
     "noneSince": "{{since}} 之後沒有變化。",
-    "nextHint": "下次：decs changes --since {{until}}"
+    "nextHint": "下次：nod changes --since {{until}}"
   },
   "wait": {
     "updates": "有更新。",
     "snapshotHint": "喚醒時隊列裡：{{ids}}——這只是那一瞬間的快照，去 queue 裡看當前的全部。",
-    "nextSteps": "decs queue{{flag}} 看列表 · decs read <id> 取走（取走不歸檔）",
-    "catchUpHint": "下次補齊：decs changes --since {{since}}{{flag}}",
+    "nextSteps": "nod queue{{flag}} 看列表 · nod read <id> 取走（取走不歸檔）",
+    "catchUpHint": "下次補齊：nod changes --since {{since}}{{flag}}",
     "timedOut": "等了 {{seconds}} 秒，隊列還是空的。",
     "defaultAction": "  {{ref}} 的預設動作：選項 {{key}} —— {{label}}",
     "noDefaultAction": "  {{ref}} 沒寫預設動作",
@@ -318,9 +318,9 @@
     "irreversible": "（不可逆——再確認一次再做）"
   },
   "push": {
-    "whichOne": "哪一個？例如 `decs push 313 2`",
+    "whichOne": "哪一個？例如 `nod push 313 2`",
     "humanOrAgentOnly": "--human 和 --agent 只能給一個",
-    "noSubQuestions": "{{ref}} 沒有子問題；直接寫選項編號，例如 decs push {{id}} 2",
+    "noSubQuestions": "{{ref}} 沒有子問題；直接寫選項編號，例如 nod push {{id}} 2",
     "unanswered": "{{keys}} 沒答。全部寫出來，或者加 --defaults 讓沒寫的按預設（{{defaults}}）",
     "answered": "{{ref}} 已答{{what}} · 等 {{author}} 取走"
   },
@@ -338,8 +338,8 @@
     "historyVersion": "歷史版本 {{n}}",
     "fileGone": "檔案不在了：{{path}}",
     "referencedBy": "被 {{refs}} 引用",
-    "openHint": "decs open {{id}} {{n}} 用系統看圖",
-    "whichOne": "哪一個？例如 `decs get 313`"
+    "openHint": "nod open {{id}} {{n}} 用系統看圖",
+    "whichOne": "哪一個？例如 `nod get 313`"
   },
   "show": {
     "unknownScope": "不認識的範圍「{{scope}}」",
@@ -350,7 +350,7 @@
     "noneMatching": "沒有匹配的節點。"
   },
   "config": {
-    "help": "decs config                      所有設定、各自的值從哪來，以及這個專案的字母\ndecs config <設定>                一項設定的值和來源\ndecs config <設定> <值>            為你設定（存在 ~/.decs/config.json）\ndecs config <設定> --off          刪除，回到預設值\ndecs config letter [W]           這個專案的字母（存在 decisions/decs.json）\n\n設定（有環境變數的，環境變數優先於存下的值）：\n{{settings}}\n\n看板裡也有同樣的設定：按 , 開啟。\n\nlang —— {{languages}}。順序：任何指令上的 --lang，然後 DECS_LANG，然後\ndecs config lang，然後系統語言（LC_ALL / LC_MESSAGES / LANG，或作業系統語言），\n最後是英文。\n\n專案字母讓多個專案一起開看板時分得清楚：web 設 W，它的 305 就顯示成 W305。\n檔名不變（305-….md，舊的 D305-….md 也照常讀取）。沒設字母的專案顯示成 {{defaultLetter}}305。\n引用時 305、W305、D305（舊寫法）、W:305、web:305 都可以。",
+    "help": "nod config                      所有設定、各自的值從哪來，以及這個專案的字母\nnod config <設定>                一項設定的值和來源\nnod config <設定> <值>            為你設定（存在 ~/.decs/config.json）\nnod config <設定> --off          刪除，回到預設值\nnod config letter [W]           這個專案的字母（存在 decisions/decs.json）\n\n設定（有環境變數的，環境變數優先於存下的值）：\n{{settings}}\n\n看板裡也有同樣的設定：按 , 開啟。\n\nlang —— {{languages}}。順序：任何指令上的 --lang，然後 DECS_LANG，然後\nnod config lang，然後系統語言（LC_ALL / LC_MESSAGES / LANG，或作業系統語言），\n最後是英文。\n\n專案字母讓多個專案一起開看板時分得清楚：web 設 W，它的 305 就顯示成 W305。\n檔名不變（305-….md，舊的 D305-….md 也照常讀取）。沒設字母的專案顯示成 {{defaultLetter}}305。\n引用時 305、W305、D305（舊寫法）、W:305、web:305 都可以。",
     "unknownKey": "無法辨識的設定「{{key}}」——目前有：{{keys}}",
     "letterUnset": "{{letter}}（未設定）",
     "letterSet": "專案字母 {{letter}}：這個專案的節點顯示為 {{letter}}<編號>",
@@ -359,7 +359,7 @@
     "cleared": "已刪除 {{key}}——回到預設值  {{path}}"
   },
   "setup": {
-    "heading": "decs setup —— {{dir}}",
+    "heading": "nod setup —— {{dir}}",
     "skipped": "{{agent}}：沒裝，跳過",
     "created": "{{agent}}：接好了（{{detail}}）",
     "wouldCreate": "{{agent}}：會接上（{{detail}}）",

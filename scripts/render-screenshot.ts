@@ -9,7 +9,7 @@ import { SCENARIOS } from './screenshot-scenario.ts'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const repo = resolve(here, '..')
-const BIN = join(repo, 'bin', 'decs.ts')
+const BIN = join(repo, 'bin', 'nod.ts')
 
 const argv = process.argv.slice(2)
 const flag = (name: string, dflt: string) => {
@@ -159,7 +159,7 @@ out.push(`<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${hei
 out.push(`<rect width="${width}" height="${height}" rx="12" fill="${THEME.bg}"/>`)
 out.push(`<path d="M0 12a12 12 0 0 1 12-12h${width - 24}a12 12 0 0 1 12 12v${BAR - 12}h-${width}z" fill="${THEME.chrome}"/>`)
 for (const [i, c] of ['#ff5f57', '#febc2e', '#28c840'].entries()) out.push(`<circle cx="${22 + i * 20}" cy="${BAR / 2}" r="6" fill="${c}"/>`)
-out.push(`<text x="${width / 2}" y="${BAR / 2 + 5}" fill="${THEME.dim}" font-family="Menlo, monospace" font-size="13" text-anchor="middle">decs bench</text>`)
+out.push(`<text x="${width / 2}" y="${BAR / 2 + 5}" fill="${THEME.dim}" font-family="Menlo, monospace" font-size="13" text-anchor="middle">nod bench</text>`)
 out.push(`<g font-family="'JetBrains Mono', 'SF Mono', Menlo, Consolas, ${CJK_FONT}, 'SF Arabic', 'Noto Sans Arabic', monospace" font-size="${FONT}">`)
 
 const ARABIC = /[؀-ۿݐ-ݿﭐ-﷿ﹰ-﻿]/

@@ -24,12 +24,12 @@ async function run(args: string[], cwd?: string): Promise<RunOutput> {
 
 async function ok(args: string[], cwd?: string): Promise<string> {
   const out = await run(args, cwd)
-  if (out.code !== 0) throw new DecsError((out.stderr || out.stdout).replace(/^decs [a-z]+: /, '').trim())
+  if (out.code !== 0) throw new DecsError((out.stderr || out.stdout).replace(/^nod [a-z]+: /, '').trim())
   return out.stdout
 }
 
 export async function shellEnv(refresh = false): Promise<ShellEnv> {
-  if (!inDesktop) return { path: '', node: '/usr/local/bin/node', node_version: 'v22.18.0', npm: '/usr/local/bin/npm', decs: '/usr/local/bin/decs', decs_version: '0.1.0' }
+  if (!inDesktop) return { path: '', node: '/usr/local/bin/node', node_version: 'v22.18.0', npm: '/usr/local/bin/npm', decs: '/usr/local/bin/nod', decs_version: '0.1.0' }
   return invoke<ShellEnv>('shell_env', { refresh })
 }
 
@@ -92,7 +92,7 @@ export async function setupAgents(dir: string, agents: Agent[], dryRun = false):
   try {
     return JSON.parse(out.stdout) as SetupResult
   } catch {
-    throw new DecsError((out.stderr || out.stdout).replace(/^decs [a-z]+: /, '').trim())
+    throw new DecsError((out.stderr || out.stdout).replace(/^nod [a-z]+: /, '').trim())
   }
 }
 

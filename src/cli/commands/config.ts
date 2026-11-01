@@ -42,14 +42,14 @@ export function run(args: Args): number {
   return 0
 }
 
-/** One setting's value and where it comes from: `Français (fr), from decs config lang`. */
+/** One setting's value and where it comes from: `Français (fr), from nod config lang`. */
 function current(s: Setting): string {
   if (s.key === 'lang') {
     const { lang, source } = resolveLangSource({ flag: langFlag() })
     return t('common.lang.current', { name: LANGUAGE_NAMES[lang], code: lang, source: t(`common.lang.source.${source}`) })
   }
   const { value, source } = settingValue(s.key)
-  const from = source === 'env' ? s.env! : source === 'config' ? `decs config ${s.key}` : t('common.lang.source.default')
+  const from = source === 'env' ? s.env! : source === 'config' ? `nod config ${s.key}` : t('common.lang.source.default')
   return t('cli.config.current', { value: showValue(s, value), source: from })
 }
 

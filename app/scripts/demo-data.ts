@@ -10,7 +10,7 @@ import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const here = fileURLToPath(new URL('.', import.meta.url))
-const BIN = join(here, '../../bin/decs.ts')
+const BIN = join(here, '../../bin/nod.ts')
 const OUT = join(here, '../public/demo')
 const SHOT = join(here, 'signin-preview.png')
 const OLD_SHOT = join(here, 'signin-old.png')

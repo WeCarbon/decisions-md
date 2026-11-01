@@ -1,5 +1,5 @@
 #!/bin/sh
-# Builds decs.app and packs it into a dmg — signed and notarised when this Mac can, unsigned otherwise.
+# Builds Noddit.app and packs it into a dmg — signed and notarised when this Mac can, unsigned otherwise.
 #
 #   sh scripts/dmg.sh                 sign if a "Developer ID Application" identity is in the keychain,
 #                                     notarise with the keychain profile below, staple the ticket
@@ -8,11 +8,11 @@
 #
 # Environment:
 #   APPLE_SIGNING_IDENTITY   which identity to sign with (default: the first Developer ID Application found)
-#   NOTARY_PROFILE           notarytool keychain profile (default: decs-notary), see SIGNING.md
+#   NOTARY_PROFILE           notarytool keychain profile (default: noddit-notary), see SIGNING.md
 #   APPLE_API_KEY_PATH, APPLE_API_KEY, APPLE_API_ISSUER
 #                            an App Store Connect API key instead of the keychain profile
 #
-# Output: src-tauri/target/release/bundle/dmg/decs_<version>_<arch>.dmg
+# Output: src-tauri/target/release/bundle/dmg/noddit_<version>_<arch>.dmg
 set -eu
 cd "$(dirname "$0")/.."
 
@@ -39,13 +39,13 @@ env -u APPLE_ID -u APPLE_PASSWORD -u APPLE_TEAM_ID -u APPLE_API_KEY -u APPLE_API
 
 version=$(node -p "require('./src-tauri/tauri.conf.json').version")
 arch=$(uname -m | sed 's/arm64/aarch64/')
-app=src-tauri/target/release/bundle/macos/decs.app
+app=src-tauri/target/release/bundle/macos/Noddit.app
 out=src-tauri/target/release/bundle/dmg
-dmg="$out/decs_${version}_${arch}.dmg"
+dmg="$out/noddit_${version}_${arch}.dmg"
 
 if [ -n "$identity" ]; then
   codesign --verify --deep --strict "$app"
-  codesign -dv "$app" 2>&1 | grep -q 'flags=.*runtime' || { echo "decs.app is not signed with the hardened runtime" >&2; exit 1; }
+  codesign -dv "$app" 2>&1 | grep -q 'flags=.*runtime' || { echo "Noddit.app is not signed with the hardened runtime" >&2; exit 1; }
 fi
 
 stage=$(mktemp -d)
@@ -54,7 +54,7 @@ cp -R "$app" "$stage/"
 ln -s /Applications "$stage/Applications"
 mkdir -p "$out"
 rm -f "$dmg"
-hdiutil create -quiet -volname decs -srcfolder "$stage" -fs HFS+ -format UDZO -imagekey zlib-level=9 "$dmg"
+hdiutil create -quiet -volname Noddit -srcfolder "$stage" -fs HFS+ -format UDZO -imagekey zlib-level=9 "$dmg"
 
 if [ -n "$identity" ]; then
   codesign --sign "$identity" --timestamp "$dmg"
@@ -64,7 +64,7 @@ if [ "$notarize" = yes ]; then
   if [ -n "${APPLE_API_KEY_PATH:-}" ]; then
     auth="--key $APPLE_API_KEY_PATH --key-id ${APPLE_API_KEY:?APPLE_API_KEY} --issuer ${APPLE_API_ISSUER:?APPLE_API_ISSUER}"
   else
-    auth="--keychain-profile ${NOTARY_PROFILE:-decs-notary}"
+    auth="--keychain-profile ${NOTARY_PROFILE:-noddit-notary}"
   fi
   echo "Submitting to Apple's notary service (usually a few minutes)…"
   # shellcheck disable=SC2086

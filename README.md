@@ -1,20 +1,20 @@
 **English** · [Simplified Chinese](README.zh-Hans.md) · [Traditional Chinese](README.zh-Hant.md) · [French](README.fr.md) · [Arabic](README.ar.md)
 
-# decisions-md
+# Noddit
 
 You give an agent a two-hour job — or five agents, one each — and walk away.
 An hour later, three of them have been sitting on a question in chats you
 weren't watching, and you can't tell which one is still working.
 
-**decs gives your agents one place to put their work and their questions, and
+**Noddit gives your agents one place to put their work and their questions, and
 gives you one screen to watch it all. Agents ask; you answer with one keypress;
 the agent hears about it and carries on — while it's still running.**
 
-![Demo: the decs bench opens on a tree of running work; read a pending decision, answer it with a keystroke, then an agent picks up the answer with decs read](https://raw.githubusercontent.com/WeCarbon/decisions-md/main/docs/demo.gif)
+![Demo: the nod bench opens on a tree of running work; read a pending decision, answer it with a keystroke, then an agent picks up the answer with nod read](https://raw.githubusercontent.com/WeCarbon/noddit/main/docs/demo.gif)
 
 ## Why
 
-| Without decs | With decs |
+| Without Noddit | With Noddit |
 |---|---|
 | An agent asks "A or B?" in chat. You miss it; it waits for an hour. | Every open question is on one screen, the ones blocking an agent first. |
 | You answer, the answer scrolls away, the next session never sees it. | The question and your answer are a markdown file in git, for good. |
@@ -30,10 +30,10 @@ you: its question reaches you, your answer reaches it, and both are kept.
 1. Your agent hits a choice. Instead of asking in chat, it runs:
 
    ```sh
-   decs ask W4 -o 1="Keep current CDN" 2="Switch to Fastly" --default 1
+   nod ask W4 -o 1="Keep current CDN" 2="Switch to Fastly" --default 1
    ```
 
-2. You run `decs` in any terminal. W4 is at the top, marked ◆ Decide, with
+2. You run `nod` in any terminal. W4 is at the top, marked ◆ Decide, with
    both options and what each one costs.
 
 3. You press `2`.
@@ -44,19 +44,20 @@ you: its question reaches you, your answer reaches it, and both are kept.
 ## Quickstart (Claude Code)
 
 ```sh
-npm i -g @wecarbon/decisions-md
-cd your-project && decs init
+npm i -g @wecarbon/noddit
+cd your-project && nod init
 ```
 
 Then, inside Claude Code:
 
 ```
-/plugin marketplace add wecarbon/decisions-md
+/plugin marketplace add wecarbon/noddit
 /plugin install decs@decisions-md
 ```
 
 That's it. Give your agent a task as usual. It logs its work and asks its
-questions through decs on its own. Run `decs` in another terminal to watch.
+questions through nod on its own. Run `nod` in another terminal to watch.
+(`decs` still works as an alias, for every command on this page.)
 
 Using a different agent? Paste [`AGENTS.md`](AGENTS.md) into its instructions —
 the rules are plain CLI calls, so any agent with a shell can follow them.
@@ -65,7 +66,7 @@ the rules are plain CLI calls, so any agent with a shell can follow them.
 
 - **Node** — one thing an agent is doing. One markdown file.
 - **Decide** — a node that needs your answer. It shows up with options; press a number.
-- **Bench** — the screen you get when you run `decs`. Everything, live.
+- **Bench** — the screen you get when you run `nod`. Everything, live.
 
 That's all you need to start. The rest of this page is how it works underneath.
 
@@ -97,7 +98,7 @@ get history, diffs, review and grep for free.
 
 ## What you get
 
-**For the human — the bench.** `decs bench` is a live terminal UI over every
+**For the human — the bench.** `nod bench` is a live terminal UI over every
 project you've registered. Five tabs:
 
 | tab | shows |
@@ -118,26 +119,26 @@ render inline in the terminal (iTerm2, kitty, Ghostty, WezTerm).
 child nodes, report progress, ask questions, and get notified of your answers:
 
 ```sh
-decs add "Ship v2.4" --task --author "lead · release"          # → W12
-decs add "Run full test suite" --task --parent W12 --after W14
-decs start W13
-pytest | decs progress --parse pytest                           # bar moves by itself
+nod add "Ship v2.4" --task --author "lead · release"          # → W12
+nod add "Run full test suite" --task --parent W12 --after W14
+nod start W13
+pytest | nod progress --parse pytest                           # bar moves by itself
 
-decs ask W15 -o 1="Short & playful" 2="Plain & direct" --default 2 <<'EOF'
+nod ask W15 -o 1="Short & playful" 2="Plain & direct" --default 2 <<'EOF'
 **What.** The first screen new users see after sign-up …
 EOF
 ```
 
-**Notifications without polling.** `decs monitor` prints one line per thing an
+**Notifications without polling.** `nod monitor` prints one line per thing an
 agent must act on — an owner answer, a reply, a new item from an external
 source, an answer nobody has picked up for five minutes — and remembers where
 each session left off. The Claude Code plugin starts it for the whole session
-(`decs monitor --here`, watching the current project); it goes offline by itself
+(`nod monitor --here`, watching the current project); it goes offline by itself
 after two quiet hours with a `DECS-IDLE` line. Sub-agents, or a session after
 `DECS-IDLE`, arm it with Claude Code's Monitor tool:
 
 ```
-Monitor({ command: "decs monitor --mine", description: "decs", timeout_ms: 1800000 })
+Monitor({ command: "nod monitor --mine", description: "nod", timeout_ms: 1800000 })
 ```
 
 **Dependencies and order.** `--after W13` holds a node back until W13 is done.
@@ -154,8 +155,8 @@ Sources github-issues ✗ unhandled 2 W7 1   support-inbox ✓ clear
 ```
 
 **Approval gates for anything that leaves the building.** Attach a draft with
-`--approval-content`; decs records its sha256. Before sending, the agent runs
-`decs approved W20 --check draft.html` — it fails unless *you* picked the
+`--approval-content`; nod records its sha256. Before sending, the agent runs
+`nod approved W20 --check draft.html` — it fails unless *you* picked the
 approving option *for exactly that content*. An agent relaying "send it" from
 the chat can't approve on your behalf.
 
@@ -168,45 +169,45 @@ until you lift it.
 Requires Node 22.18+.
 
 ```sh
-npm i -g @wecarbon/decisions-md
+npm i -g @wecarbon/noddit
 
 cd ~/code/your-project
-decs init --letter W                  # creates decisions/, registers the project
-decs add "Try decs" --task --author "me · kicking the tyres"
-decs                                  # the bench (same as decs bench); q to quit
+nod init --letter W                  # creates decisions/, registers the project
+nod add "Try nod" --task --author "me · kicking the tyres"
+nod                                  # the bench (same as nod bench); q to quit
 ```
 
-No install: `npx @wecarbon/decisions-md init --letter W` works the same way, one command at a time.
+No install: `npx @wecarbon/noddit init --letter W` works the same way, one command at a time.
 
 ### From source
 
 TypeScript runs directly; there is no build step.
 
 ```sh
-git clone https://github.com/wecarbon/decisions-md.git
-cd decisions-md && npm install
+git clone https://github.com/wecarbon/noddit.git
+cd noddit && npm install
 export PATH="$PWD/bin:$PATH"          # add to your shell profile
 
 cd ~/code/your-project
-decs init --letter W
-decs add "Try decs" --task --author "me · kicking the tyres"
-decs
+nod init --letter W
+nod add "Try nod" --task --author "me · kicking the tyres"
+nod
 ```
 
 ### With Claude Code
 
 The repo is also a Claude Code plugin marketplace. The plugin injects the usage
 rules at the start of every session (plus the project's open nodes, so a
-resumed session picks its work back up), starts `decs monitor` for the session
+resumed session picks its work back up), starts `nod monitor` for the session
 so your answers reach the agent without it polling, and reminds the agent to
 record what you say about a node in chat before replying.
 
 ```
-/plugin marketplace add wecarbon/decisions-md
+/plugin marketplace add wecarbon/noddit
 /plugin install decs@decisions-md
 ```
 
-(`/plugin marketplace add /path/to/decisions-md` works for a local clone.)
+(`/plugin marketplace add /path/to/noddit` works for a local clone.)
 
 The full agent guide is [`AGENTS.md`](AGENTS.md) — paste it into your own
 `AGENTS.md` / `CLAUDE.md` if you use a different agent harness. The rules are
@@ -214,20 +215,20 @@ CLI calls, so any agent with a shell can follow them.
 
 ## Language
 
-`decs` picks the UI language in this order:
+`nod` picks the UI language in this order:
 
-1. `--lang <code>` on any command, e.g. `decs bench --lang fr`
+1. `--lang <code>` on any command, e.g. `nod bench --lang fr`
 2. the `DECS_LANG` environment variable
-3. `decs config lang <code>` — stored per user in `~/.decs/config.json`
-   (`$DECS_HOME/config.json`). `decs config lang` alone shows the current
-   language and where it comes from; `decs config lang --off` removes it.
+3. `nod config lang <code>` — stored per user in `~/.decs/config.json`
+   (`$DECS_HOME/config.json`). `nod config lang` alone shows the current
+   language and where it comes from; `nod config lang --off` removes it.
 4. the system locale (`LC_ALL` / `LC_MESSAGES` / `LANG`, `C` / `POSIX`
    ignored): `zh_CN` → `zh-Hans`, `zh_TW` / `zh_HK` → `zh-Hant`, `fr_*` →
    `fr`, `ar_*` → `ar`
 5. the OS display language, when none of those locale variables are set —
-   plain Windows terminals (cmd, PowerShell) have none, so decs reads it the
+   plain Windows terminals (cmd, PowerShell) have none, so nod reads it the
    way Node's `Intl` reports it
-6. otherwise, English — also where a locale decs has no translation for
+6. otherwise, English — also where a locale nod has no translation for
    ends up
 
 Codes: `en`, `zh-Hans`, `zh-Hant`, `fr`, `ar`. The plugin's
@@ -235,10 +236,10 @@ session-start rules and prompt reminder follow the same resolution
 (`plugin/rules.<code>.md`).
 
 Arabic is laid out right to left. `DECS_BIDI=visual|terminal` (or
-`decs config bidi visual|terminal`, `--off` to remove) picks how: `visual`
-(the default) has decs reorder each line itself with the Unicode
+`nod config bidi visual|terminal`, `--off` to remove) picks how: `visual`
+(the default) has nod reorder each line itself with the Unicode
 Bidirectional Algorithm, for terminals that draw strictly left to right
-(e.g. macOS Terminal); `terminal` has decs write logical order and wrap
+(e.g. macOS Terminal); `terminal` has nod write logical order and wrap
 embedded left-to-right runs (refs like W12, numbers, commands, English
 titles) in Unicode isolates, for terminals that apply bidi themselves
 (iTerm2 with bidi enabled, kitty, VTE-based terminals). In Arabic the bench
@@ -246,21 +247,21 @@ also mirrors: the list sits on the right, details on the left. Output to
 pipes and `--json` always stays in logical order, so scripts and agents
 read it unchanged. Relative times ("3 days ago") follow the language too.
 
-The on-disk file format never changes with the language: `decs` always
+The on-disk file format never changes with the language: `nod` always
 writes one fixed set of section headings, so a repo stays readable by every
 teammate whatever language their CLI speaks. When you write a file by hand,
 `## Options`, `## Attachments` and `## Questions` are accepted. See [The file format](#the-file-format) below.
 
 ## How a session goes
 
-1. You give the lead agent a goal. It runs `decs add "Ship v2.4" --task`, starts
+1. You give the lead agent a goal. It runs `nod add "Ship v2.4" --task`, starts
    it, and splits it into child nodes with `--after` dependencies.
 2. It hands lanes (sub-agents) their own nodes. Each lane pipes its long
-   commands into `decs progress`; the bench bars move on their own.
-3. A lane hits a fork in the road. It runs `decs ask <id> -o …` with options,
+   commands into `nod progress`; the bench bars move on their own.
+3. A lane hits a fork in the road. It runs `nod ask <id> -o …` with options,
    costs and a default. The node turns yellow `◆` in your bench.
-4. You press `2`. `decs monitor` wakes the lane; it runs `decs read`, carries on,
-   and finally `decs done <id> --note "412/412 passing"`.
+4. You press `2`. `nod monitor` wakes the lane; it runs `nod read`, carries on,
+   and finally `nod done <id> --note "412/412 passing"`.
 5. You never had to ask "where are we?" — and next week, the whole story is
    still in `decisions/archived/`.
 
@@ -268,31 +269,31 @@ teammate whatever language their CLI speaks. When you write a file by hand,
 
 | | |
 |---|---|
-| `decs init [--letter W]` | create `decisions/` here and register the project |
-| `decs add <title> [--task] [-o 1=… 2=…]` | new node; with options it needs a decision. Body from stdin |
-| `decs add <title> --parent W12 --after W13` | child node, ordered after another |
-| `decs start / done / close <id>` | To do → In progress → Done / Closed (`--reason obsolete\|superseded\|merged-into:W15`) |
-| `decs ask <id> -o 1=… 2=…` | a running node needs the owner |
-| `decs hold <id> --on "Carol: icon set"` | waiting on someone outside; not counted as stuck |
-| `decs progress <pct> "msg"` · `… \| decs progress --parse pytest` | report progress (or let a pipe report it) |
-| `decs steps <id> "a" "b" "c"` · `decs step <id> 2` | multi-step work, percent computed for you |
-| `decs note <id> "…"` | append a record (agent by default; `--human` for the owner) |
-| `decs push <id> 2 [--note …]` | record an answer |
-| `decs monitor [--mine] [--here] [--idle-exit 2h]` | the agent's notification stream |
-| `decs read <id>` · `decs queue` | collect answers / see what's uncollected |
-| `decs attach <id> file [--approval-content --approve-on 1]` | attach a file; gate it on approval |
-| `decs approved <id> --check <file>` | exit 0 only if exactly this content was approved |
-| `decs defer <id>` · `decs undefer <id>` | put off / bring back |
-| `decs show [open\|active\|deferred\|…] [--stale]` · `decs tree` · `decs get <id>` | read the store |
-| `decs search <words> [--all]` | titles, bodies, notes, attachment names |
-| `decs source register/sync/push/list/items/ack` | external sources |
-| `decs changes --since <t>` | everything after a cursor, for catching up |
-| `decs bench [.\|<dir>…] [--view decide]` | the live screen |
-| `decs` | on a terminal, the same as `decs bench`; piped or in a script, prints the usage |
-| `decs config [<setting> [<value>\|--off]]` | your settings: lang, bidi, view, images, mouse, idle-exit, unclaimed-after (also in the bench: `,`) |
+| `nod init [--letter W]` | create `decisions/` here and register the project |
+| `nod add <title> [--task] [-o 1=… 2=…]` | new node; with options it needs a decision. Body from stdin |
+| `nod add <title> --parent W12 --after W13` | child node, ordered after another |
+| `nod start / done / close <id>` | To do → In progress → Done / Closed (`--reason obsolete\|superseded\|merged-into:W15`) |
+| `nod ask <id> -o 1=… 2=…` | a running node needs the owner |
+| `nod hold <id> --on "Carol: icon set"` | waiting on someone outside; not counted as stuck |
+| `nod progress <pct> "msg"` · `… \| nod progress --parse pytest` | report progress (or let a pipe report it) |
+| `nod steps <id> "a" "b" "c"` · `nod step <id> 2` | multi-step work, percent computed for you |
+| `nod note <id> "…"` | append a record (agent by default; `--human` for the owner) |
+| `nod push <id> 2 [--note …]` | record an answer |
+| `nod monitor [--mine] [--here] [--idle-exit 2h]` | the agent's notification stream |
+| `nod read <id>` · `nod queue` | collect answers / see what's uncollected |
+| `nod attach <id> file [--approval-content --approve-on 1]` | attach a file; gate it on approval |
+| `nod approved <id> --check <file>` | exit 0 only if exactly this content was approved |
+| `nod defer <id>` · `nod undefer <id>` | put off / bring back |
+| `nod show [open\|active\|deferred\|…] [--stale]` · `nod tree` · `nod get <id>` | read the store |
+| `nod search <words> [--all]` | titles, bodies, notes, attachment names |
+| `nod source register/sync/push/list/items/ack` | external sources |
+| `nod changes --since <t>` | everything after a cursor, for catching up |
+| `nod bench [.\|<dir>…] [--view decide]` | the live screen |
+| `nod` | on a terminal, the same as `nod bench`; piped or in a script, prints the usage |
+| `nod config [<setting> [<value>\|--off]]` | your settings: lang, bidi, view, images, mouse, idle-exit, unclaimed-after (also in the bench: `,`) |
 
 Ids are `305`, `W305` (project letter), `web:305` (project name), or legacy
-`D305`. `decs <command> --help` has the rest.
+`D305`. `nod <command> --help` has the rest.
 
 ## Bench keys
 
@@ -358,7 +359,7 @@ reference still holds.
 ## Design principles
 
 - **Files, not a service.** Everything is in `decisions/`, versioned with your
-  code, readable without decs installed.
+  code, readable without nod installed.
 - **The filesystem is the lock.** Ids come from `O_EXCL` files; each write
   re-reads the node under its own lock and lands via write-then-rename. Two dozen
   concurrent writers get consecutive ids and lose nothing — there's a test for it.
@@ -380,15 +381,15 @@ Code plugin adds session-start rules and uses `CLAUDECODE` /
 Elsewhere, set `DECS_ROLE=agent` and `DECS_SESSION`.
 
 **Does it work with git worktrees?**
-Yes. `decs` always resolves to the main checkout's `decisions/`, so lanes in
+Yes. `nod` always resolves to the main checkout's `decisions/`, so lanes in
 worktrees share one store.
 
 **Several repos at once?**
-`decs init` registers each project; `decs bench` with no arguments opens all of
+`nod init` registers each project; `nod bench` with no arguments opens all of
 them, grouped by project letter.
 
 **What if nobody answers?**
-Every question carries a default and an `--if-no-answer`. `decs wait --timeout`
+Every question carries a default and an `--if-no-answer`. `nod wait --timeout`
 exits with code 2 and prints the default — the moment to proceed with it.
 
 **Can I edit the files by hand?**
@@ -396,7 +397,7 @@ You can read them freely. For writes, use the CLI: it keeps ids, locks, the
 answer queue and attachment history consistent.
 
 **I have an old `DECISIONS.md`.**
-`decs migrate --dir <project> --dry-run`, then without `--dry-run`.
+`nod migrate --dir <project> --dry-run`, then without `--dry-run`.
 
 ## Development
 

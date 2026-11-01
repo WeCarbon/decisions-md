@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <!--
-  Hardened runtime with no exceptions. What decs does needs none:
-  - running node / decs: child processes run under their own signatures;
+  Hardened runtime with no exceptions. What Noddit does needs none:
+  - running node / nod: child processes run under their own signatures;
   - the global hotkey: Carbon RegisterEventHotKey, no entitlement or permission;
   - notifications: the user grants them on first use;
   - the web view: WebKit's JIT runs in its own process, not in this one.
-  Not sandboxed: the app reads project folders anywhere and runs the decs CLI.
+  Not sandboxed: the app reads project folders anywhere and runs the nod CLI.
 -->
 <plist version="1.0">
 <dict/>

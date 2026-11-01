@@ -7,7 +7,7 @@ export interface CommandModule {
   run(args: Args, name: string): Promise<number> | number
 }
 
-/** Commands load on demand, so `decs get` doesn't pay for the TUI or migrator. */
+/** Commands load on demand, so `nod get` doesn't pay for the TUI or migrator. */
 const COMMANDS: Record<string, () => Promise<CommandModule>> = {
   init: () => import('./commands/init.ts'),
   setup: () => import('./commands/setup.ts'),
@@ -61,7 +61,7 @@ const COMMANDS: Record<string, () => Promise<CommandModule>> = {
 const usage = () => t('cli.usage')
 
 /**
- * What to run: a bare `decs` on a terminal opens the bench; piped or
+ * What to run: a bare `nod` on a terminal opens the bench; piped or
  * scripted, it prints the usage instead, as `--help` does.
  */
 export function commandFor(given: string | undefined, isTTY: boolean): string {
@@ -73,7 +73,7 @@ export async function main(input: string[]): Promise<number> {
   const { argv, lang: flag } = takeLangFlag(input)
   if (flag !== undefined && !normalizeLang(flag)) {
     initLang()
-    console.error(`decs: ${t('common.lang.unknown', { code: flag, codes: LANGUAGES.join(' ') })}`)
+    console.error(`nod: ${t('common.lang.unknown', { code: flag, codes: LANGUAGES.join(' ') })}`)
     return 2
   }
   initLang(flag)
@@ -85,7 +85,7 @@ export async function main(input: string[]): Promise<number> {
     return 0
   }
   if (name === '--version' || name === '-v') {
-    console.log('decs 0.1.0')
+    console.log('nod 0.1.0')
     return 0
   }
   const load = COMMANDS[name]
@@ -97,7 +97,7 @@ export async function main(input: string[]): Promise<number> {
     const mod = await load()
     return await mod.run(parseArgs(rest), name)
   } catch (e) {
-    console.error(`decs ${name}: ${(e as Error).message}`)
+    console.error(`nod ${name}: ${(e as Error).message}`)
     return 1
   }
 }

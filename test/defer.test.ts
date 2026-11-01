@@ -217,7 +217,7 @@ test('decs monitor tells the lane "owner Deferred", and nothing is queued', asyn
     for (const end = Date.now() + 10_000; !ok(); await new Promise((r) => setTimeout(r, 50)))
       if (Date.now() > end) throw new Error(`timed out waiting for ${what}: ${out}${err}`)
   }
-  await until(() => err.includes('decs monitor: watching'), 'the monitor to start')
+  await until(() => err.includes('nod monitor: watching'), 'the monitor to start')
   // The cursor is set before that line is printed, so the defer is after it.
   decs(root, ['defer', '1', '--human'])
   await until(() => out.includes('owner Deferred'), 'the Deferred line')

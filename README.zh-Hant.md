@@ -1,19 +1,19 @@
 [English](README.md) · [简体中文](README.zh-Hans.md) · **繁體中文** · [Français](README.fr.md) · [العربية](README.ar.md)
 
-# decisions-md
+# Noddit
 
 你把一件兩小時的工作交給一個 AI 代理——或者五個 AI 代理，各管一塊——然後就不
 管了。一小時後，其中三個卡在一個問題上，等在你沒盯著的對話視窗裡，你連哪個
 還在跑都分不清。
 
-**decs 給你的 AI 代理一個地方放工作和問題，給你一個畫面看著全部。AI 代理
+**Noddit 給你的 AI 代理一個地方放工作和問題，給你一個畫面看著全部。AI 代理
 發問，你按一個鍵回覆，AI 代理當場收到通知，接著往下做。**
 
-![示範：decs 看板一打開就是一棵進行中的任務樹；讀一個待決策問題，按一個鍵回覆，然後 agent 用 decs read 取走回覆](docs/demo.gif)
+![示範：nod 看板一打開就是一棵進行中的任務樹；讀一個待決策問題，按一個鍵回覆，然後 agent 用 nod read 取走回覆](docs/demo.gif)
 
 ## 為什麼
 
-| 沒有 decs | 有了 decs |
+| 沒有 Noddit | 有了 Noddit |
 |---|---|
 | AI 代理在對話裡問「A 還是 B？」，你沒看到，它就等一個小時。 | 所有待決問題都在一個畫面上，卡住 AI 代理的排在最前面。 |
 | 你答了，答案捲走了，下一個工作階段根本沒看到。 | 問題和你的回覆是 git 裡的一個 markdown 檔案，永久留著。 |
@@ -29,10 +29,10 @@
 1. AI 代理碰到一個選擇。它不在對話裡問，而是執行：
 
    ```sh
-   decs ask W4 -o 1="Keep current CDN" 2="Switch to Fastly" --default 1
+   nod ask W4 -o 1="Keep current CDN" 2="Switch to Fastly" --default 1
    ```
 
-2. 你在任意終端機執行 `decs`。W4 排在最上面，標著 ◆ 待決，帶著兩個選項和
+2. 你在任意終端機執行 `nod`。W4 排在最上面，標著 ◆ 待決，帶著兩個選項和
    各自的代價。
 
 3. 你按 `2`。
@@ -43,19 +43,19 @@
 ## 快速開始（Claude Code）
 
 ```sh
-npm i -g @wecarbon/decisions-md
-cd your-project && decs init
+npm i -g @wecarbon/noddit
+cd your-project && nod init
 ```
 
 然後，在 Claude Code 裡：
 
 ```
-/plugin marketplace add wecarbon/decisions-md
+/plugin marketplace add wecarbon/noddit
 /plugin install decs@decisions-md
 ```
 
-就這樣。照常給 AI 代理派任務。它會自己用 decs 記錄工作、提出問題。在另一個
-終端機執行 `decs` 看著就行。
+就這樣。照常給 AI 代理派任務。它會自己用 nod 記錄工作、提出問題。在另一個
+終端機執行 `nod` 看著就行。
 
 用別的 AI 代理？把 [`AGENTS.md`](AGENTS.md) 貼進它的指令——這些規則都是普通的
 CLI 呼叫，任何能執行終端機的 AI 代理都能照著做。
@@ -64,7 +64,7 @@ CLI 呼叫，任何能執行終端機的 AI 代理都能照著做。
 
 - **節點** —— AI 代理正在做的一件事。一個 markdown 檔案。
 - **待決** —— 一個需要你回覆的節點。它帶著選項出現；按一個數字就行。
-- **看板** —— 執行 `decs` 看到的那個畫面。全部內容，即時的。
+- **看板** —— 執行 `nod` 看到的那個畫面。全部內容，即時的。
 
 這就是開始要知道的全部。剩下的內容講的是它底層怎麼運作。
 
@@ -94,7 +94,7 @@ decisions/
 
 ## 你會得到什麼
 
-**給人用的——看板。** `decs bench` 是一個涵蓋你註冊過的所有專案的即時終端
+**給人用的——看板。** `nod bench` 是一個涵蓋你註冊過的所有專案的即時終端
 UI。五個分頁：
 
 | 分頁 | 顯示什麼 |
@@ -114,24 +114,24 @@ UI。五個分頁：
 問問題，也會收到你回覆的通知：
 
 ```sh
-decs add "Ship v2.4" --task --author "lead · release"          # → W12
-decs add "Run full test suite" --task --parent W12 --after W14
-decs start W13
-pytest | decs progress --parse pytest                           # 進度條自己走
-decs ask W15 -o 1="Short & playful" 2="Plain & direct" --default 2 <<'EOF'
+nod add "Ship v2.4" --task --author "lead · release"          # → W12
+nod add "Run full test suite" --task --parent W12 --after W14
+nod start W13
+pytest | nod progress --parse pytest                           # 進度條自己走
+nod ask W15 -o 1="Short & playful" 2="Plain & direct" --default 2 <<'EOF'
 **What.** The first screen new users see after sign-up …
 EOF
 ```
 
-**不用輪詢的通知。** `decs monitor` 每行印出一件 AI 代理要處理的事——負責人的
+**不用輪詢的通知。** `nod monitor` 每行印出一件 AI 代理要處理的事——負責人的
 回答、一則回覆、外部來源的新項目、五分鐘沒人收走的答案——而且記得每個
 工作階段看到哪裡了。Claude Code 外掛會在整個工作階段期間自動啟動一個
-（`decs monitor --here`，只盯目前的專案）；連續兩小時沒事件會自己下線，印出
+（`nod monitor --here`，只盯目前的專案）；連續兩小時沒事件會自己下線，印出
 一行 `DECS-IDLE`。子 AI 代理，或是 `DECS-IDLE` 之後的工作階段，用 Claude Code
 的 Monitor 工具自己掛一個：
 
 ```
-Monitor({ command: "decs monitor --mine", description: "decs", timeout_ms: 1800000 })
+Monitor({ command: "nod monitor --mine", description: "nod", timeout_ms: 1800000 })
 ```
 
 **依賴與順序。** `--after W13` 會把一個節點擋住，直到 W13 完成。你還是可以
@@ -146,7 +146,7 @@ Monitor({ command: "decs monitor --mine", description: "decs", timeout_ms: 18000
 ```
 
 **替任何要發出去的東西加上核准關卡。** 用 `--approval-content` 附上一份草稿，
-decs 會記下它的 sha256。送出前，AI 代理跑 `decs approved W20 --check draft.html`
+nod 會記下它的 sha256。送出前，AI 代理跑 `nod approved W20 --check draft.html`
 ——除非*你*專門為*這份內容*選過核准選項，否則就不會通過。AI 代理把對話裡的
 「發吧」當成你的核准是行不通的。
 
@@ -158,29 +158,29 @@ decs 會記下它的 sha256。送出前，AI 代理跑 `decs approved W20 --chec
 需要 Node 22.18+（TypeScript 直接執行，沒有建置步驟）。
 
 ```sh
-git clone https://github.com/wecarbon/decisions-md.git
-cd decisions-md && npm install
+git clone https://github.com/wecarbon/noddit.git
+cd noddit && npm install
 export PATH="$PWD/bin:$PATH"          # add to your shell profile
 
 cd ~/code/your-project
-decs init --letter W                  # creates decisions/, registers the project
-decs add "Try decs" --task --author "me · kicking the tyres"
-decs                                  # the bench (same as decs bench); q to quit
+nod init --letter W                  # creates decisions/, registers the project
+nod add "Try nod" --task --author "me · kicking the tyres"
+nod                                  # the bench (same as nod bench); q to quit
 ```
 
 ### 搭配 Claude Code
 
 這個專案同時是一個 Claude Code 外掛市集。外掛會在每個工作階段開頭注入使用
 規則（外加專案裡還開著的節點，讓恢復的工作階段能接著自己的工作做下去），
-替整個工作階段啟動一個 `decs monitor`，讓你的回覆不用輪詢就能傳到 AI 代理，
+替整個工作階段啟動一個 `nod monitor`，讓你的回覆不用輪詢就能傳到 AI 代理，
 還會提醒 AI 代理在回覆之前，先把你在對話裡說的話記到對應節點上。
 
 ```
-/plugin marketplace add wecarbon/decisions-md
+/plugin marketplace add wecarbon/noddit
 /plugin install decs@decisions-md
 ```
 
-（`/plugin marketplace add /path/to/decisions-md` 對本機的複本也適用。）
+（`/plugin marketplace add /path/to/noddit` 對本機的複本也適用。）
 
 完整的 AI 代理用法在 [`AGENTS.md`](AGENTS.md)——如果你用別的 AI 代理框架，直接
 把它貼進你自己的 `AGENTS.md` / `CLAUDE.md`。這些規則都是 CLI 呼叫，任何能跑
@@ -188,34 +188,34 @@ decs                                  # the bench (same as decs bench); q to qui
 
 ## 語言
 
-`decs` 按下面的順序選介面語言：
+`nod` 按下面的順序選介面語言：
 
-1. 任何指令上的 `--lang <code>`，比如 `decs bench --lang fr`
+1. 任何指令上的 `--lang <code>`，比如 `nod bench --lang fr`
 2. `DECS_LANG` 環境變數
-3. `decs config lang <code>`——按使用者存在 `~/.decs/config.json`（也就是
-   `$DECS_HOME/config.json`）。單獨跑 `decs config lang` 會顯示目前的語言和
-   它從哪裡來；`decs config lang --off` 會移除這項設定。
+3. `nod config lang <code>`——按使用者存在 `~/.decs/config.json`（也就是
+   `$DECS_HOME/config.json`）。單獨跑 `nod config lang` 會顯示目前的語言和
+   它從哪裡來；`nod config lang --off` 會移除這項設定。
 4. 系統語言設定（`LC_ALL` / `LC_MESSAGES` / `LANG`，忽略 `C` / `POSIX`）：
    `zh_CN` → `zh-Hans`，`zh_TW` / `zh_HK` → `zh-Hant`，`fr_*` → `fr`，
    `ar_*` → `ar`
 5. 這些環境變數都沒設的時候，用作業系統的顯示語言——純 Windows 終端（cmd、
-   PowerShell）就沒有這些變數，decs 會依 Node 的 `Intl` 讀到的結果來決定
-6. 否則就是英語——decs 沒有對應翻譯的語言，也會落到英語
+   PowerShell）就沒有這些變數，nod 會依 Node 的 `Intl` 讀到的結果來決定
+6. 否則就是英語——nod 沒有對應翻譯的語言，也會落到英語
 
 可用代碼：`en`、`zh-Hans`、`zh-Hant`、`fr`、`ar`。外掛在工作階段
 開頭注入的規則和提示提醒，遵循同一套解析邏輯（`plugin/rules.<code>.md`）。
 
 阿拉伯語是從右往左排的。`DECS_BIDI=visual|terminal`（或
-`decs config bidi visual|terminal`，`--off` 移除）決定怎麼排：`visual`
-（預設）是 decs 自己用 Unicode 雙向演算法重新排每一行，給那些只會嚴格從左往右
-畫面的終端用（例如 macOS 內建的 Terminal）；`terminal` 是 decs 按邏輯順序寫，
+`nod config bidi visual|terminal`，`--off` 移除）決定怎麼排：`visual`
+（預設）是 nod 自己用 Unicode 雙向演算法重新排每一行，給那些只會嚴格從左往右
+畫面的終端用（例如 macOS 內建的 Terminal）；`terminal` 是 nod 按邏輯順序寫，
 把嵌在裡面的從左到右片段（像 W12 這樣的參照、數字、指令、英文標題）包進
 Unicode 隔離符，給自己處理雙向排版的終端用（開了 bidi 的 iTerm2、kitty、
 基於 VTE 的終端）。阿拉伯語下看板本身也會鏡像：清單在右邊，詳情在左邊。
 輸出到管線和 `--json` 永遠是邏輯順序，腳本和 AI 代理讀到的不受影響。相對時間
 （「3 天前」這種）也跟著語言走。
 
-磁碟上的檔案格式不會跟著語言變：decs 永遠寫同一批標題和詞（`## 选项`、
+磁碟上的檔案格式不會跟著語言變：nod 永遠寫同一批標題和詞（`## 选项`、
 `### 1 · …`、`## 已答（…）`、`## 回复（…）`、`## 补充（…）`、`## 附件`、
 `## 子问题`、`验收通过`……），這樣不管團隊裡每個人的 CLI 說什麼語言，專案都能
 讀。手動寫檔案時，剖析器也認得 `## Options`、`## Attachments`、`## Questions`
@@ -223,45 +223,45 @@ Unicode 隔離符，給自己處理雙向排版的終端用（開了 bidi 的 iT
 
 ## 一次工作階段是怎樣的
 
-1. 你給主控工作階段一個目標。它跑 `decs add "Ship v2.4" --task`，啟動它，再拆成
+1. 你給主控工作階段一個目標。它跑 `nod add "Ship v2.4" --task`，啟動它，再拆成
    帶 `--after` 依賴關係的子節點。
 2. 它把各條工作線（子 AI 代理）分出去，各帶自己的節點。每條工作線把長指令接進
-   `decs progress`，看板上的進度條自己走。
-3. 一條工作線走到分岔口。它跑 `decs ask <id> -o …`，帶著選項、代價和預設值。
+   `nod progress`，看板上的進度條自己走。
+3. 一條工作線走到分岔口。它跑 `nod ask <id> -o …`，帶著選項、代價和預設值。
    節點在你的看板上變成黃色的 `◆`。
-4. 你按 `2`。`decs monitor` 叫醒那條工作線，它跑 `decs read`，接著做，最後
-   `decs done <id> --note "412/412 passing"`。
+4. 你按 `2`。`nod monitor` 叫醒那條工作線，它跑 `nod read`，接著做，最後
+   `nod done <id> --note "412/412 passing"`。
 5. 你從來不用問「現在到哪了」——下週，整個故事還在 `decisions/archived/` 裡。
 
 ## CLI 速查表
 
 | | |
 |---|---|
-| `decs init [--letter W]` | 在這裡建 `decisions/` 並註冊專案 |
-| `decs add <title> [--task] [-o 1=… 2=…]` | 新建節點；帶選項就是待決策。正文來自 stdin |
-| `decs add <title> --parent W12 --after W13` | 子節點，排在另一個之後 |
-| `decs start / done / close <id>` | 待開始 → 執行中 → 已完成 / 已關閉（`--reason obsolete\|superseded\|merged-into:W15`） |
-| `decs ask <id> -o 1=… 2=…` | 執行中的節點需要負責人拍板 |
-| `decs hold <id> --on "Carol: icon set"` | 卡在外部某人身上；不算卡住 |
-| `decs progress <pct> "msg"` · `… \| decs progress --parse pytest` | 回報進度（或者讓管線自己回報） |
-| `decs steps <id> "a" "b" "c"` · `decs step <id> 2` | 多步驟的工作，百分比幫你算好 |
-| `decs note <id> "…"` | 追加一筆記錄（預設是 AI 代理；`--human` 給負責人用） |
-| `decs push <id> 2 [--note …]` | 記一筆回答 |
-| `decs monitor [--mine] [--here] [--idle-exit 2h]` | AI 代理的通知串流 |
-| `decs read <id>` · `decs queue` | 收走回答 / 看還有哪些沒收 |
-| `decs attach <id> file [--approval-content --approve-on 1]` | 附上一個檔案；可以掛上核准關卡 |
-| `decs approved <id> --check <file>` | 只有這份內容被核准過才會退出 0 |
-| `decs defer <id>` · `decs undefer <id>` | 延後 / 解除延後 |
-| `decs show [open\|active\|deferred\|…] [--stale]` · `decs tree` · `decs get <id>` | 讀這個儲存區 |
-| `decs search <words> [--all]` | 標題、正文、記錄、附件名稱 |
-| `decs source register/sync/push/list/items/ack` | 外部來源 |
-| `decs changes --since <t>` | 游標之後的一切，方便接上進度 |
-| `decs bench [.\|<dir>…] [--view decide]` | 即時畫面 |
-| `decs` | 在終端機裡等於 `decs bench`；接管線或在腳本裡時印出用法 |
-| `decs config [<設定> [<值>\|--off]]` | 你的設定：lang、bidi、view、images、mouse、idle-exit、unclaimed-after（看板裡按 `,` 也能改） |
+| `nod init [--letter W]` | 在這裡建 `decisions/` 並註冊專案 |
+| `nod add <title> [--task] [-o 1=… 2=…]` | 新建節點；帶選項就是待決策。正文來自 stdin |
+| `nod add <title> --parent W12 --after W13` | 子節點，排在另一個之後 |
+| `nod start / done / close <id>` | 待開始 → 執行中 → 已完成 / 已關閉（`--reason obsolete\|superseded\|merged-into:W15`） |
+| `nod ask <id> -o 1=… 2=…` | 執行中的節點需要負責人拍板 |
+| `nod hold <id> --on "Carol: icon set"` | 卡在外部某人身上；不算卡住 |
+| `nod progress <pct> "msg"` · `… \| nod progress --parse pytest` | 回報進度（或者讓管線自己回報） |
+| `nod steps <id> "a" "b" "c"` · `nod step <id> 2` | 多步驟的工作，百分比幫你算好 |
+| `nod note <id> "…"` | 追加一筆記錄（預設是 AI 代理；`--human` 給負責人用） |
+| `nod push <id> 2 [--note …]` | 記一筆回答 |
+| `nod monitor [--mine] [--here] [--idle-exit 2h]` | AI 代理的通知串流 |
+| `nod read <id>` · `nod queue` | 收走回答 / 看還有哪些沒收 |
+| `nod attach <id> file [--approval-content --approve-on 1]` | 附上一個檔案；可以掛上核准關卡 |
+| `nod approved <id> --check <file>` | 只有這份內容被核准過才會退出 0 |
+| `nod defer <id>` · `nod undefer <id>` | 延後 / 解除延後 |
+| `nod show [open\|active\|deferred\|…] [--stale]` · `nod tree` · `nod get <id>` | 讀這個儲存區 |
+| `nod search <words> [--all]` | 標題、正文、記錄、附件名稱 |
+| `nod source register/sync/push/list/items/ack` | 外部來源 |
+| `nod changes --since <t>` | 游標之後的一切，方便接上進度 |
+| `nod bench [.\|<dir>…] [--view decide]` | 即時畫面 |
+| `nod` | 在終端機裡等於 `nod bench`；接管線或在腳本裡時印出用法 |
+| `nod config [<設定> [<值>\|--off]]` | 你的設定：lang、bidi、view、images、mouse、idle-exit、unclaimed-after（看板裡按 `,` 也能改） |
 
 編號可以寫成 `305`、`W305`（專案字母）、`web:305`（專案名稱），或是舊式的
-`D305`。`decs <command> --help` 有其他細節。
+`D305`。`nod <command> --help` 有其他細節。
 
 ## 看板快捷鍵
 
@@ -328,7 +328,7 @@ Measured again: 1.9 s p95 from Singapore.
 ## 設計原則
 
 - **是檔案，不是服務。** 一切都在 `decisions/` 裡，跟你的程式碼一起進版本
-  控制，不裝 decs 也能讀。
+  控制，不裝 nod 也能讀。
 - **檔案系統就是鎖。** 編號來自 `O_EXCL` 檔案；每次寫入都在自己的鎖下重新讀
   節點，透過先寫入再改名落地。二十幾個並發寫入者會拿到連續的編號，誰都不會
   丟——這點有測試保證。
@@ -349,22 +349,22 @@ Measured again: 1.9 s p95 from Singapore.
 和 `DECS_SESSION`。
 
 **能用 git worktree 嗎？**
-能。`decs` 永遠解析到主要工作目錄的 `decisions/`，所以各條工作線的 worktree
+能。`nod` 永遠解析到主要工作目錄的 `decisions/`，所以各條工作線的 worktree
 共用同一個儲存區。
 
 **同時管理好幾個專案？**
-`decs init` 替每個專案註冊一下；不帶參數的 `decs bench` 會按專案字母分組，
+`nod init` 替每個專案註冊一下；不帶參數的 `nod bench` 會按專案字母分組，
 開啟全部專案。
 
 **沒人回答怎麼辦？**
-每個問題都帶一個預設值和一個 `--if-no-answer`。`decs wait --timeout` 會以
+每個問題都帶一個預設值和一個 `--if-no-answer`。`nod wait --timeout` 會以
 退出碼 2 結束並印出預設值——這就是該照它繼續的時候。
 
 **可以手動改檔案嗎？**
 讀是自由的。要寫，用 CLI：它負責保持編號、鎖、回答佇列和附件歷史的一致性。
 
 **我有一份舊的 `DECISIONS.md`。**
-`decs migrate --dir <project> --dry-run`，確認沒問題後拿掉 `--dry-run` 再跑
+`nod migrate --dir <project> --dry-run`，確認沒問題後拿掉 `--dry-run` 再跑
 一次。
 
 ## 開發

@@ -72,7 +72,7 @@ function repoRoot(): string {
     if (up === dir) break
     dir = up
   }
-  throw new Error('decs: could not find plugin/rules.md relative to src/core/agents.ts')
+  throw new Error('nod: could not find plugin/rules.md relative to src/core/agents.ts')
 }
 
 /** The short rules Claude's plugin injects every session, for the language in use — same text other harnesses get in their `AGENTS.md`. */
@@ -138,7 +138,7 @@ export function setupViaAgentsMd(dir: string, lng: Lang, opts: { dryRun?: boolea
 // can run non-interactively; otherwise the two lines a person types instead.
 // ---------------------------------------------------------------------------
 
-export const CLAUDE_MARKETPLACE = 'wecarbon/decisions-md'
+export const CLAUDE_MARKETPLACE = 'wecarbon/noddit'
 export const CLAUDE_PLUGIN = 'decs@decisions-md'
 export const CLAUDE_MANUAL_LINES = [`/plugin marketplace add ${CLAUDE_MARKETPLACE}`, `/plugin install ${CLAUDE_PLUGIN}`] as const
 

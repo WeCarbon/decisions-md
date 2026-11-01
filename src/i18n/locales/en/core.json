@@ -47,10 +47,10 @@
     "titleRequired": "a title is required",
     "questionsAndOptionsMixed": "sub-questions and plain options can't be mixed: with --question, the node's own options are generated automatically",
     "taskOrFyiNoQuestions": "a task or fyi has no questions",
-    "taskNoOptions": "a task has no options — use decs ask later if it needs a decision",
+    "taskNoOptions": "a task has no options — use nod ask later if it needs a decision",
     "fyiNoOptions": "an fyi has no options",
     "parentInAnotherProject": "{{ref}} is in another project",
-    "parentTreeArchived": "{{ref}}'s tree is already archived; first decs archive {{id}} --undo",
+    "parentTreeArchived": "{{ref}}'s tree is already archived; first nod archive {{id}} --undo",
     "fyiIsRoot": "an fyi is a root node; it has no parent",
     "bodyHasQuestionsSection": "body already has a ## 子问题 section — drop it, --question writes it",
     "questionsBlockMismatch": "the 子问题 block did not read back as written — a label probably contains a heading marker",
@@ -73,7 +73,7 @@
     "closeNeedsReason": "closing needs a reason: superseded | obsolete | merged-into:<ref> | free text",
     "multipleOptionsBlocks": "the text has more than one ## 选项 block — keep one",
     "askTextOptionsMismatch": "the text's ## 选项 block does not match -o: {{diff}} — drop the block, or make it match -o exactly",
-    "askNoOptions": "this node has no options left to ask about: decs ask needs -o 1=\"…\" 2=\"…\"",
+    "askNoOptions": "this node has no options left to ask about: nod ask needs -o 1=\"…\" 2=\"…\"",
     "optionsDidNotRoundTrip": "{{ref}}: the new options did not read back as written — check the body by hand",
     "alreadyArchived": "{{ref}} is already archived",
     "notArchived": "{{ref}} is not archived",
@@ -118,7 +118,7 @@
     "defaultNotAnOption": "{{key}}'s default {{default}} is not one of its options ({{keys}})"
   },
   "steps": {
-    "noneYet": "there are no steps yet — set them first with decs steps <id> \"a\" \"b\" …",
+    "noneYet": "there are no steps yet — set them first with nod steps <id> \"a\" \"b\" …",
     "onlyNSteps_one": "there is only {{count}} step",
     "onlyNSteps_other": "there are only {{count}} steps"
   },
@@ -131,13 +131,13 @@
     "none": "(none)",
     "numberedOptions": "numbered-list options → ### headings",
     "dropStaleDefault": "drop stale default \"{{default}}\" (finished, no options to point at)",
-    "optionsNotRecognised": "options not recognised — fix by hand with decs ask (default \"{{default}}\")"
+    "optionsNotRecognised": "options not recognised — fix by hand with nod ask (default \"{{default}}\")"
   },
   "sources": {
     "badName": "source name \"{{name}}\" is not valid — only letters/digits/._- , and it can't start with a symbol",
     "badDuration": "\"{{value}}\" is not a valid duration, use a format like 30s / 15m / 2h / 1d",
-    "notRegistered": "source \"{{name}}\" is not registered yet — first `decs source register {{name}} --title \"...\"`",
-    "ackNeedsIds": "which ids? `decs source ack <name> <id>...`",
+    "notRegistered": "source \"{{name}}\" is not registered yet — first `nod source register {{name}} --title \"...\"`",
+    "ackNeedsIds": "which ids? `nod source ack <name> <id>...`",
     "noSuchIds": "source \"{{name}}\" has no such ids: {{ids}}",
     "badJsonLine": "line {{line}} is not valid JSON: {{message}}",
     "notAJsonObject": "line {{line}} is not a JSON object",

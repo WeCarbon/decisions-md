@@ -140,7 +140,7 @@ test('decs config lang stores the language per user and keeps the folder registr
   const cfg = JSON.parse(readFileSync(join(home, 'config.json'), 'utf8'))
   assert.equal(cfg.lang, 'zh-Hant')
   assert.equal(cfg.projects[0].name, 'web')
-  assert.match(decs(home, ['config', 'lang'], env), /來自 decs config lang/)
+  assert.match(decs(home, ['config', 'lang'], env), /來自 nod config lang/)
   decs(home, ['config', 'lang', '--off'], env)
   assert.equal(JSON.parse(readFileSync(join(home, 'config.json'), 'utf8')).lang, undefined)
   assert.equal(decsResult(home, ['config', 'lang', 'klingon'], env).code, 1)
@@ -162,7 +162,7 @@ for (const lng of LANGUAGES) {
   test(`the prompt-refs hook reminds in ${lng}`, () => {
     const text = hook('prompt-refs.mjs', JSON.stringify({ prompt: 'about W305', cwd: '/nonexistent' }), { DECS_LANG: lng })
     assert.match(text, /W305/)
-    assert.match(text, /decs note <id> --human/)
+    assert.match(text, /nod note <id> --human/)
     assert.doesNotMatch(text, /\{\{|plugin\.promptRefs/)
   })
 
@@ -192,14 +192,14 @@ function codeless(value: string): string {
   return (
     value
       .split('\n')
-      // a synopsis line ("decs add <title> …") or a value lined up before its description ("open      …")
-      .map((line) => line.replace(/^\s*decs\b(?: [a-z<>[\]|.…0-9=" -]+?)?(?=\s{2,}|$)|^\s*[\w<>.]+(?:\s*\|\s*[\w<>.]+)*(?=\s{2,})/, ''))
+      // a synopsis line ("nod add <title> …") or a value lined up before its description ("open      …")
+      .map((line) => line.replace(/^\s*(?:decs|nod)\b(?: [a-z<>[\]|.…0-9=" -]+?)?(?=\s{2,}|$)|^\s*[\w<>.]+(?:\s*\|\s*[\w<>.]+)*(?=\s{2,})/, ''))
       .join('\n')
       .replace(/\{\{[^}]*\}\}|`[^`]*`|<[^>\n]*>|\[[^\]\n]*\]/g, ' ')
       .replace(/(?:^|\s)--?[\w-]+/g, ' ')
       .replace(/\b[A-Z][A-Z0-9_-]{1,}\b|\b\w*\d\w*\b|\S*[/.~:=]\S*/g, ' ')
-      // a command named inline: "… run decs monitor", "decs show fyi"
-      .replace(/\bdecs\s+[a-z][a-z-]*/gi, ' ')
+      // a command named inline: "… run nod monitor", "decs show fyi"
+      .replace(/\b(?:decs|nod)\s+[a-z][a-z-]*/gi, ' ')
       // the Monitor tool's name; the lowercase noun stays checkable
       .replace(/\bMonitor\b/g, ' ')
       // a list of literal values: tree|owner|running
@@ -211,7 +211,7 @@ function codeless(value: string): string {
 
 /** `codeless`, also without the literal words commands and their arguments use. */
 function prose(value: string): string {
-  return codeless(value).replace(/\b(?:decs|register|sync|push|heartbeat|list|items|ack|wait|events|top|bottom|off|superseded|obsolete|merged-into|markdown|id|ids|en|fr|ar|zh-Hans|zh-Hant)\b/gi, ' ')
+  return codeless(value).replace(/\b(?:decs|nod|register|sync|push|heartbeat|list|items|ack|wait|events|top|bottom|off|superseded|obsolete|merged-into|markdown|id|ids|en|fr|ar|zh-Hans|zh-Hant)\b/gi, ' ')
 }
 
 /** Words French shares with English, which a translation may keep as they are. */

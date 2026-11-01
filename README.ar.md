@@ -2,21 +2,21 @@
 
 <div dir="rtl">
 
-# decisions-md
+# Noddit
 
 تسلّم وكيلاً مهمة تستغرق ساعتين — أو خمسة وكلاء، كل واحد بمهمته الخاصة — ثم
 تمضي في طريقك. بعد ساعة، يكون ثلاثة منهم قد توقفوا عند سؤال في محادثات لم
 تكن تراقبها، ولا يمكنك معرفة أيّهم ما زال يعمل.
 
-**يمنح decs وكلاءك مكانًا واحدًا لوضع عملهم وأسئلتهم، ويمنحك شاشة واحدة
+**يمنح Noddit وكلاءك مكانًا واحدًا لوضع عملهم وأسئلتهم، ويمنحك شاشة واحدة
 لمراقبة كل ذلك. يسأل الوكيل؛ تُجيب بضغطة مفتاح واحدة؛ يعلم الوكيل بالأمر
 فورًا ويستمر — وهو لا يزال يعمل.**
 
-![عرض توضيحي: تُفتح لوحة decs على شجرة العمل الجاري؛ قراءة قرار معلّق والإجابة عنه بضغطة مفتاح، ثم يستلم وكيلٌ الإجابة عبر decs read](docs/demo.gif)
+![عرض توضيحي: تُفتح لوحة nod على شجرة العمل الجاري؛ قراءة قرار معلّق والإجابة عنه بضغطة مفتاح، ثم يستلم وكيلٌ الإجابة عبر nod read](docs/demo.gif)
 
 ## لماذا
 
-| بدون decs | مع decs |
+| بدون Noddit | مع Noddit |
 |---|---|
 | يسأل وكيل "A أو B؟" في المحادثة. لا تراه، فينتظر ساعة. | كل سؤال مفتوح على شاشة واحدة، وأوّلها ما يعطّل وكيلًا. |
 | تُجيب، فتنزلق الإجابة مع التمرير، ولا تراها الجلسة التالية أبدًا. | السؤال وإجابتك ملف markdown في git، إلى الأبد. |
@@ -32,10 +32,10 @@
 1. يصطدم وكيلك بخيار. فبدل أن يسأل في المحادثة، يشغّل:
 
    ```sh
-   decs ask W4 -o 1="Keep current CDN" 2="Switch to Fastly" --default 1
+   nod ask W4 -o 1="Keep current CDN" 2="Switch to Fastly" --default 1
    ```
 
-2. تشغّل `decs` في أي طرفية. يظهر W4 في الأعلى، معلَّمًا بـ ◆ بانتظار قرار،
+2. تشغّل `nod` في أي طرفية. يظهر W4 في الأعلى، معلَّمًا بـ ◆ بانتظار قرار،
    مع كلا الخيارين وتكلفة كل واحد.
 
 3. تضغط `2`.
@@ -46,19 +46,19 @@
 ## البدء السريع (Claude Code)
 
 ```sh
-npm i -g @wecarbon/decisions-md
-cd your-project && decs init
+npm i -g @wecarbon/noddit
+cd your-project && nod init
 ```
 
 ثم، داخل Claude Code:
 
 ```
-/plugin marketplace add wecarbon/decisions-md
+/plugin marketplace add wecarbon/noddit
 /plugin install decs@decisions-md
 ```
 
-هذا كل ما يلزم. أعطِ وكيلك مهمة كالعادة. سيسجّل عمله ويطرح أسئلته عبر decs
-من تلقاء نفسه. شغّل `decs` في طرفية أخرى لتتابع ذلك.
+هذا كل ما يلزم. أعطِ وكيلك مهمة كالعادة. سيسجّل عمله ويطرح أسئلته عبر nod
+من تلقاء نفسه. شغّل `nod` في طرفية أخرى لتتابع ذلك.
 
 تستخدم وكيلًا آخر؟ ألصِق [`AGENTS.md`](AGENTS.md) في تعليماته — القواعد مجرد
 استدعاءات CLI عادية، وأي وكيل يملك طرفية يمكنه اتباعها.
@@ -67,7 +67,7 @@ cd your-project && decs init
 
 - **عقدة** — شيء واحد يقوم به وكيل. ملف markdown واحد.
 - **بانتظار قرار** — عقدة تنتظر إجابتك. تظهر مع خياراتها؛ اضغط رقمًا.
-- **اللوحة** — الشاشة التي تحصل عليها عند تشغيل `decs`. كل شيء، مباشرة.
+- **اللوحة** — الشاشة التي تحصل عليها عند تشغيل `nod`. كل شيء، مباشرة.
 
 هذا كل ما تحتاج معرفته للبدء. بقية هذه الصفحة تشرح كيف يعمل الأمر تحت السطح.
 
@@ -99,7 +99,7 @@ decisions/
 
 ## ما الذي تحصل عليه
 
-**للإنسان — اللوحة.** `decs bench` واجهة طرفية مباشرة على كل المشاريع التي
+**للإنسان — اللوحة.** `nod bench` واجهة طرفية مباشرة على كل المشاريع التي
 سجّلتها. خمس تبويبات:
 
 | التبويب | يعرض |
@@ -120,25 +120,25 @@ decisions/
 بالتقدّم، وتطرح الأسئلة، وتصلها إشعارات بإجاباتك:
 
 ```sh
-decs add "Ship v2.4" --task --author "lead · release"          # → W12
-decs add "Run full test suite" --task --parent W12 --after W14
-decs start W13
-pytest | decs progress --parse pytest                           # bar moves by itself
+nod add "Ship v2.4" --task --author "lead · release"          # → W12
+nod add "Run full test suite" --task --parent W12 --after W14
+nod start W13
+pytest | nod progress --parse pytest                           # bar moves by itself
 
-decs ask W15 -o 1="Short & playful" 2="Plain & direct" --default 2 <<'EOF'
+nod ask W15 -o 1="Short & playful" 2="Plain & direct" --default 2 <<'EOF'
 **What.** The first screen new users see after sign-up …
 EOF
 ```
 
-**إشعارات بلا استقصاء متكرر.** يطبع `decs monitor` سطرًا واحدًا لكل شيء على
+**إشعارات بلا استقصاء متكرر.** يطبع `nod monitor` سطرًا واحدًا لكل شيء على
 وكيل أن يتصرّف حياله — إجابة من المسؤول، ردّ، عنصر جديد من مصدر خارجي، إجابة
 لم يأخذها أحد منذ خمس دقائق — ويتذكّر أين توقّفت كل جلسة. تشغّله إضافة
-Claude Code طوال الجلسة (`decs monitor --here`، يراقب المشروع الحالي)؛
+Claude Code طوال الجلسة (`nod monitor --here`، يراقب المشروع الحالي)؛
 ويتوقّف من نفسه بعد ساعتين من الهدوء بسطر `DECS-IDLE`. الوكلاء الفرعيون،
 أو جلسة بعد `DECS-IDLE`، يُشغّلونه بأداة Monitor في Claude Code:
 
 ```
-Monitor({ command: "decs monitor --mine", description: "decs", timeout_ms: 1800000 })
+Monitor({ command: "nod monitor --mine", description: "nod", timeout_ms: 1800000 })
 ```
 
 **التبعيات والترتيب.** يُبقي `--after W13` عقدة معلّقة حتى تنتهي W13. ما زال
@@ -155,8 +155,8 @@ Monitor({ command: "decs monitor --mine", description: "decs", timeout_ms: 18000
 ```
 
 **بوّابات موافقة لكل ما يخرج من المستودع.** أرفق مسودّة بـ
-`--approval-content`؛ يسجّل decs قيمة sha256 لها. قبل الإرسال، يشغّل الوكيل
-`decs approved W20 --check draft.html` — ويفشل إلا إذا اخترت *أنت* خيار
+`--approval-content`؛ يسجّل nod قيمة sha256 لها. قبل الإرسال، يشغّل الوكيل
+`nod approved W20 --check draft.html` — ويفشل إلا إذا اخترت *أنت* خيار
 الموافقة *لهذا المحتوى بالضبط*. لا يمكن لوكيل ينقل "أرسله" من المحادثة أن
 يوافق بالنيابة عنك.
 
@@ -169,30 +169,30 @@ Monitor({ command: "decs monitor --mine", description: "decs", timeout_ms: 18000
 يتطلّب Node 22.18+‏ (TypeScript يعمل مباشرة؛ لا خطوة بناء).
 
 ```sh
-git clone https://github.com/wecarbon/decisions-md.git
-cd decisions-md && npm install
+git clone https://github.com/wecarbon/noddit.git
+cd noddit && npm install
 export PATH="$PWD/bin:$PATH"          # add to your shell profile
 
 cd ~/code/your-project
-decs init --letter W                  # creates decisions/, registers the project
-decs add "Try decs" --task --author "me · kicking the tyres"
-decs                                  # the bench (same as decs bench); q to quit
+nod init --letter W                  # creates decisions/, registers the project
+nod add "Try nod" --task --author "me · kicking the tyres"
+nod                                  # the bench (same as nod bench); q to quit
 ```
 
 ### مع Claude Code
 
 المستودع أيضًا سوق إضافات لـ Claude Code. تحقن الإضافة قواعد الاستخدام في
 بداية كل جلسة (بالإضافة إلى عقد المشروع المفتوحة، لتستعيد الجلسة المستأنفة
-عملها الخاص)، وتشغّل `decs monitor` طوال الجلسة حتى تصل إجاباتك إلى الوكيل
+عملها الخاص)، وتشغّل `nod monitor` طوال الجلسة حتى تصل إجاباتك إلى الوكيل
 دون استقصاء متكرر، وتذكّر الوكيل بتسجيل ما تقوله عن عقدة في المحادثة قبل
 الردّ.
 
 ```
-/plugin marketplace add wecarbon/decisions-md
+/plugin marketplace add wecarbon/noddit
 /plugin install decs@decisions-md
 ```
 
-(يعمل `/plugin marketplace add /path/to/decisions-md` أيضًا مع نسخة محلية.)
+(يعمل `/plugin marketplace add /path/to/noddit` أيضًا مع نسخة محلية.)
 
 دليل الوكلاء الكامل في [`AGENTS.md`](AGENTS.md) — الصقه في ملفّك
 `AGENTS.md` / `CLAUDE.md` إن كنت تستخدم أداة وكيل مختلفة. القواعد
@@ -200,31 +200,31 @@ decs                                  # the bench (same as decs bench); q to qui
 
 ## اللغة
 
-يختار `decs` لغة الواجهة بهذا الترتيب:
+يختار `nod` لغة الواجهة بهذا الترتيب:
 
-1. `--lang <code>` على أي أمر، مثل `decs bench --lang fr`
+1. `--lang <code>` على أي أمر، مثل `nod bench --lang fr`
 2. متغيّر البيئة `DECS_LANG`
-3. `decs config lang <code>` — يُخزَّن لكل مستخدم في `~/.decs/config.json`
-   (أي `$DECS_HOME/config.json`). يعرض `decs config lang` وحدها اللغة
-   الحالية ومصدرها؛ و`decs config lang --off` يحذف هذا الإعداد.
+3. `nod config lang <code>` — يُخزَّن لكل مستخدم في `~/.decs/config.json`
+   (أي `$DECS_HOME/config.json`). يعرض `nod config lang` وحدها اللغة
+   الحالية ومصدرها؛ و`nod config lang --off` يحذف هذا الإعداد.
 4. لغة النظام (`LC_ALL` / `LC_MESSAGES` / `LANG`، مع تجاهل `C` / `POSIX`):
    `zh_CN` → `zh-Hans`، و`zh_TW` / `zh_HK` → `zh-Hant`، و`fr_*` → `fr`،
    و`ar_*` → `ar`
 5. لغة عرض النظام، حين لا يكون أيّ من هذه المتغيّرات مضبوطًا — الطرفيات
-   العادية في Windows (cmd، PowerShell) لا تملك أيًا منها، فيقرأها decs
+   العادية في Windows (cmd، PowerShell) لا تملك أيًا منها، فيقرأها nod
    كما يُبلّغ بها `Intl` في Node
 6. وإلا، فالإنجليزية — وهي أيضًا ما تنتهي إليه أي لغة لا تتوفّر لها ترجمة
-   في decs
+   في nod
 
 الرموز: `en`، `zh-Hans`، `zh-Hant`، `fr`، `ar`. تتبع قواعد بداية الجلسة
 وتذكير الموجّه في الإضافة نفس هذا الترتيب
 (`plugin/rules.<code>.md`).
 
 العربية تُكتب من اليمين إلى اليسار. يحدّد `DECS_BIDI=visual|terminal` (أو
-`decs config bidi visual|terminal`، و`--off` للإزالة) الطريقة: `visual`
-(الافتراضي) يجعل decs يعيد ترتيب كل سطر بنفسه بخوارزمية Unicode ثنائية
+`nod config bidi visual|terminal`، و`--off` للإزالة) الطريقة: `visual`
+(الافتراضي) يجعل nod يعيد ترتيب كل سطر بنفسه بخوارزمية Unicode ثنائية
 الاتجاه، للطرفيات التي ترسم بصرامة من اليسار إلى اليمين (مثل Terminal في
-macOS)؛ و`terminal` يجعل decs يكتب بالترتيب المنطقي ويُحيط المقاطع
+macOS)؛ و`terminal` يجعل nod يكتب بالترتيب المنطقي ويُحيط المقاطع
 المضمّنة من اليسار إلى اليمين (مراجع مثل W12، أرقام، أوامر، عناوين
 إنجليزية) بعلامات عزل Unicode، للطرفيات التي تطبّق ثنائية الاتجاه بنفسها
 (iTerm2 مع تفعيل bidi، وkitty، والطرفيات القائمة على VTE). في العربية
@@ -232,7 +232,7 @@ macOS)؛ و`terminal` يجعل decs يكتب بالترتيب المنطقي و�
 إلى الأنابيب و`--json` دائمًا بالترتيب المنطقي، فتقرؤه السكربتات والوكلاء
 دون تغيير. الأوقات النسبية ("منذ 3 أيام") تتبع اللغة أيضًا.
 
-تنسيق الملف على القرص لا يتغيّر مع اللغة أبدًا: يكتب decs دائمًا نفس
+تنسيق الملف على القرص لا يتغيّر مع اللغة أبدًا: يكتب nod دائمًا نفس
 العناوين والرموز (`## 选项`، `### 1 · …`، `## 已答（…）`، `## 回复（…）`،
 `## 补充（…）`، `## 附件`، `## 子问题`، `验收通过`، …)، لذا يبقى المستودع
 مقروءًا لكل زميل بغضّ النظر عن لغة CLI عنده. يتقبّل المحلِّل أيضًا
@@ -241,14 +241,14 @@ macOS)؛ و`terminal` يجعل decs يكتب بالترتيب المنطقي و�
 
 ## كيف تسير الجلسة
 
-1. تعطي الوكيل الرئيسي هدفًا. يشغّل `decs add "Ship v2.4" --task`، ويبدأه،
+1. تعطي الوكيل الرئيسي هدفًا. يشغّل `nod add "Ship v2.4" --task`، ويبدأه،
    ويقسّمه إلى عقد فرعية باعتماديات `--after`.
 2. يوزّع مسارات (وكلاء فرعيين) كلٌّ بعقدته. يوصل كل مسار أوامره الطويلة
-   بـ `decs progress`؛ فتتحرّك أشرطة اللوحة من نفسها.
-3. يصل مسار إلى مفترق طرق. يشغّل `decs ask <id> -o …` بخيارات وتكاليف
+   بـ `nod progress`؛ فتتحرّك أشرطة اللوحة من نفسها.
+3. يصل مسار إلى مفترق طرق. يشغّل `nod ask <id> -o …` بخيارات وتكاليف
    وقيمة افتراضية. تتحوّل العقدة إلى `◆` أصفر في اللوحة عندك.
-4. تضغط `2`. يُنبّه `decs monitor` المسار؛ فيشغّل `decs read`، ويستمرّ،
-   وينتهي بـ `decs done <id> --note "412/412 passing"`.
+4. تضغط `2`. يُنبّه `nod monitor` المسار؛ فيشغّل `nod read`، ويستمرّ،
+   وينتهي بـ `nod done <id> --note "412/412 passing"`.
 5. لم تحتج أبدًا أن تسأل "أين أصبحنا؟" — وفي الأسبوع التالي، تبقى القصّة
    كاملة في `decisions/archived/`.
 
@@ -256,31 +256,31 @@ macOS)؛ و`terminal` يجعل decs يكتب بالترتيب المنطقي و�
 
 | | |
 |---|---|
-| `decs init [--letter W]` | يُنشئ `decisions/` هنا ويسجّل المشروع |
-| `decs add <title> [--task] [-o 1=… 2=…]` | عقدة جديدة؛ بالخيارات تصبح بانتظار قرار. النص من stdin |
-| `decs add <title> --parent W12 --after W13` | عقدة فرعية، مرتَّبة بعد أخرى |
-| `decs start / done / close <id>` | لم يبدأ → قيد التنفيذ → مكتمل / مغلق (`--reason obsolete\|superseded\|merged-into:W15`) |
-| `decs ask <id> -o 1=… 2=…` | عقدة جارية تحتاج المسؤول |
-| `decs hold <id> --on "Carol: icon set"` | متعثّرة بانتظار شخص خارجي؛ لا تُحسب متعثّرة |
-| `decs progress <pct> "msg"` · `… \| decs progress --parse pytest` | أبلِغ عن التقدّم (أو اترك أنبوبًا يبلّغ عنه) |
-| `decs steps <id> "a" "b" "c"` · `decs step <id> 2` | عمل متعدّد الخطوات، تُحسب النسبة لك |
-| `decs note <id> "…"` | يضيف سجلًّا (وكيل افتراضيًا؛ `--human` للمسؤول) |
-| `decs push <id> 2 [--note …]` | يسجّل إجابة |
-| `decs monitor [--mine] [--here] [--idle-exit 2h]` | تدفّق إشعارات الوكيل |
-| `decs read <id>` · `decs queue` | يجمع الإجابات / يرى ما لم يُجمع بعد |
-| `decs attach <id> file [--approval-content --approve-on 1]` | يُرفق ملفًا؛ يربطه بموافقة |
-| `decs approved <id> --check <file>` | يخرج بـ 0 فقط إذا وافق على هذا المحتوى بالضبط |
-| `decs defer <id>` · `decs undefer <id>` | أجّل / أعد |
-| `decs show [open\|active\|deferred\|…] [--stale]` · `decs tree` · `decs get <id>` | اقرأ المخزن |
-| `decs search <words> [--all]` | العناوين، النصوص، السجلات، أسماء المرفقات |
-| `decs source register/sync/push/list/items/ack` | المصادر الخارجية |
-| `decs changes --since <t>` | كل ما بعد المؤشر، لمتابعة المستجدّات |
-| `decs bench [.\|<dir>…] [--view decide]` | الشاشة المباشرة |
-| `decs` | في الطرفية يماثل `decs bench`؛ وعبر أنبوب أو في سكربت يطبع طريقة الاستخدام |
-| `decs config [<الإعداد> [<القيمة>\|--off]]` | إعداداتك: lang وbidi وview وimages وmouse وidle-exit وunclaimed-after (وأيضًا في اللوحة: `,`) |
+| `nod init [--letter W]` | يُنشئ `decisions/` هنا ويسجّل المشروع |
+| `nod add <title> [--task] [-o 1=… 2=…]` | عقدة جديدة؛ بالخيارات تصبح بانتظار قرار. النص من stdin |
+| `nod add <title> --parent W12 --after W13` | عقدة فرعية، مرتَّبة بعد أخرى |
+| `nod start / done / close <id>` | لم يبدأ → قيد التنفيذ → مكتمل / مغلق (`--reason obsolete\|superseded\|merged-into:W15`) |
+| `nod ask <id> -o 1=… 2=…` | عقدة جارية تحتاج المسؤول |
+| `nod hold <id> --on "Carol: icon set"` | متعثّرة بانتظار شخص خارجي؛ لا تُحسب متعثّرة |
+| `nod progress <pct> "msg"` · `… \| nod progress --parse pytest` | أبلِغ عن التقدّم (أو اترك أنبوبًا يبلّغ عنه) |
+| `nod steps <id> "a" "b" "c"` · `nod step <id> 2` | عمل متعدّد الخطوات، تُحسب النسبة لك |
+| `nod note <id> "…"` | يضيف سجلًّا (وكيل افتراضيًا؛ `--human` للمسؤول) |
+| `nod push <id> 2 [--note …]` | يسجّل إجابة |
+| `nod monitor [--mine] [--here] [--idle-exit 2h]` | تدفّق إشعارات الوكيل |
+| `nod read <id>` · `nod queue` | يجمع الإجابات / يرى ما لم يُجمع بعد |
+| `nod attach <id> file [--approval-content --approve-on 1]` | يُرفق ملفًا؛ يربطه بموافقة |
+| `nod approved <id> --check <file>` | يخرج بـ 0 فقط إذا وافق على هذا المحتوى بالضبط |
+| `nod defer <id>` · `nod undefer <id>` | أجّل / أعد |
+| `nod show [open\|active\|deferred\|…] [--stale]` · `nod tree` · `nod get <id>` | اقرأ المخزن |
+| `nod search <words> [--all]` | العناوين، النصوص، السجلات، أسماء المرفقات |
+| `nod source register/sync/push/list/items/ack` | المصادر الخارجية |
+| `nod changes --since <t>` | كل ما بعد المؤشر، لمتابعة المستجدّات |
+| `nod bench [.\|<dir>…] [--view decide]` | الشاشة المباشرة |
+| `nod` | في الطرفية يماثل `nod bench`؛ وعبر أنبوب أو في سكربت يطبع طريقة الاستخدام |
+| `nod config [<الإعداد> [<القيمة>\|--off]]` | إعداداتك: lang وbidi وview وimages وmouse وidle-exit وunclaimed-after (وأيضًا في اللوحة: `,`) |
 
 تُكتب الأرقام كـ `305`، و`W305` (حرف المشروع)، و`web:305` (اسم المشروع)، أو
-القديم `D305`. يحوي `decs <command> --help` الباقي.
+القديم `D305`. يحوي `nod <command> --help` الباقي.
 
 ## مفاتيح اللوحة
 
@@ -349,7 +349,7 @@ Measured again: 1.9 s p95 from Singapore.
 ## مبادئ التصميم
 
 - **ملفّات، لا خدمة.** كل شيء في `decisions/`، يُصان مع الكود، ويُقرأ دون
-  تثبيت decs.
+  تثبيت nod.
 - **نظام الملفّات هو القفل.** تأتي الأرقام من ملفّات `O_EXCL`؛ كل كتابة
   تعيد قراءة العقدة تحت قفلها الخاص وتثبّت بالكتابة ثم إعادة التسمية.
   عشرات الكاتبين المتزامنين يحصلون على أرقام متتالية ولا يضيع شيء — هناك
@@ -372,15 +372,15 @@ Measured again: 1.9 s p95 from Singapore.
 ماذا. في غير ذلك، اضبط `DECS_ROLE=agent` و`DECS_SESSION`.
 
 **هل يعمل مع git worktrees؟**
-نعم. يُحلّل `decs` دائمًا إلى `decisions/` في النسخة الأصلية، فتتشارك
+نعم. يُحلّل `nod` دائمًا إلى `decisions/` في النسخة الأصلية، فتتشارك
 مسارات العمل في الـ worktrees مخزنًا واحدًا.
 
 **عدّة مستودعات في آنٍ واحد؟**
-يسجّل `decs init` كل مشروع؛ يفتح `decs bench` بلا معطيات كل المشاريع،
+يسجّل `nod init` كل مشروع؛ يفتح `nod bench` بلا معطيات كل المشاريع،
 مجمّعة بحرف المشروع.
 
 **ماذا لو لم يُجب أحد؟**
-يحمل كل سؤال قيمة افتراضية و`--if-no-answer`. يخرج `decs wait --timeout`
+يحمل كل سؤال قيمة افتراضية و`--if-no-answer`. يخرج `nod wait --timeout`
 برمز 2 ويطبع القيمة الافتراضية — وتلك هي لحظة المضيّ بها.
 
 **هل يمكنني تعديل الملفّات باليد؟**
@@ -388,7 +388,7 @@ Measured again: 1.9 s p95 from Singapore.
 والأقفال وطابور الإجابات وتاريخ المرفقات.
 
 **لديّ `DECISIONS.md` قديم.**
-`decs migrate --dir <project> --dry-run`، ثم بدون `--dry-run`.
+`nod migrate --dir <project> --dry-run`، ثم بدون `--dry-run`.
 
 ## التطوير
 

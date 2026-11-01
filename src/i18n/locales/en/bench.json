@@ -1,7 +1,7 @@
 {
-  "help": "decs bench [<dir>...] [--view available|active|decide|all|waiting|deferred]\n\n  decs bench          opens every folder registered with decs projects, from anywhere\n  decs bench .        opens only the project the current directory is in\n  decs bench ~/Code/a ~/Code/b   opens only these (--dir also works)\n  decs bench --json   everything bench shows — each view's rows, every node's detail — as one JSON object, for a window that draws it\n  decs bench --json --node <id>   one node's detail, archived ones included\n\n\nTabs across the top: Available N / Active N / Decide N / All / Waiting N (⇥ to switch, opens on Available).\n  Available  what is moving now: running, waiting outside, startable, needing a decision, answered and awaiting an AI (tree, ancestors shown dim)\n  Active     running and needing a decision (tree)\n  Decide     what you must rule on, grouped by project, AI-stuck ones first\n  All        every node; finished ones fold into \"✓ Completed N\" / \"✓ Finished N\", +/- expands\n  Waiting    held up outside\n             the last row, \"Deferred N\", is what you put off with d (or decs defer), + expands; the state doesn't change,\n             it and its subtree are out of Available/Active/Decide. --view deferred opens Waiting with it expanded.\nOld --view tree|owner|running|timeline|done still works (maps to the nearest view).\nWhen there are external sources, a line under the tabs says whether they're clear. Left is nodes, right is the current one.\n↑↓ picks a node, ←→ / +- fold/unfold, digits answer, Enter takes the default, w jumps to the next decision, g jumps by number, d defers/undefers, ? shows every key, , opens Settings.\nMouse works too: click a tab name, a node, an option, an attachment; the wheel scrolls whichever pane it's over.\nPress o to view a screenshot right in the terminal (iTerm2 / kitty family; tmux swallows it,\nset DECS_IMAGES=iterm with passthrough enabled).\nRegister folders with: decs projects add <dir> (decs init does this automatically); stored in ~/.decs/config.json.\nWith nothing registered, it falls back to walking up from the current directory for a decisions/ folder.",
+  "help": "nod bench [<dir>...] [--view available|active|decide|all|waiting|deferred]\n\n  nod bench          opens every folder registered with nod projects, from anywhere\n  nod bench .        opens only the project the current directory is in\n  nod bench ~/Code/a ~/Code/b   opens only these (--dir also works)\n  nod bench --json   everything bench shows — each view's rows, every node's detail — as one JSON object, for a window that draws it\n  nod bench --json --node <id>   one node's detail, archived ones included\n\n\nTabs across the top: Available N / Active N / Decide N / All / Waiting N (⇥ to switch, opens on Available).\n  Available  what is moving now: running, waiting outside, startable, needing a decision, answered and awaiting an AI (tree, ancestors shown dim)\n  Active     running and needing a decision (tree)\n  Decide     what you must rule on, grouped by project, AI-stuck ones first\n  All        every node; finished ones fold into \"✓ Completed N\" / \"✓ Finished N\", +/- expands\n  Waiting    held up outside\n             the last row, \"Deferred N\", is what you put off with d (or nod defer), + expands; the state doesn't change,\n             it and its subtree are out of Available/Active/Decide. --view deferred opens Waiting with it expanded.\nOld --view tree|owner|running|timeline|done still works (maps to the nearest view).\nWhen there are external sources, a line under the tabs says whether they're clear. Left is nodes, right is the current one.\n↑↓ picks a node, ←→ / +- fold/unfold, digits answer, Enter takes the default, w jumps to the next decision, g jumps by number, d defers/undefers, ? shows every key, , opens Settings.\nMouse works too: click a tab name, a node, an option, an attachment; the wheel scrolls whichever pane it's over.\nPress o to view a screenshot right in the terminal (iTerm2 / kitty family; tmux swallows it,\nset DECS_IMAGES=iterm with passthrough enabled).\nRegister folders with: nod projects add <dir> (nod init does this automatically); stored in ~/.decs/config.json.\nWith nothing registered, it falls back to walking up from the current directory for a decisions/ folder.",
   "cli": {
-    "needsTty": "decs bench needs a terminal. For scripts, see decs show / decs queue.",
+    "needsTty": "nod bench needs a terminal. For scripts, see nod show / nod queue.",
     "noActiveDir": "{{root}} has no decisions/active, skipping"
   },
   "tabs": {
@@ -112,12 +112,12 @@
     "noHeartbeat": " !adapter {{age}} with no heartbeat",
     "noHeartbeatEver": " !adapter has never had a heartbeat",
     "sources": " Sources ",
-    "sourcesNone": "none registered (decs source register)",
+    "sourcesNone": "none registered (nod source register)",
     "sourcesAllClear": "all clear ",
     "working": " Working ",
     "workingNone": "nothing running",
     "workingNoneUpNext": "nothing running; up next ",
-    "cycle": " dependency cycle: {{chain}}{{more}} (decs check)",
+    "cycle": " dependency cycle: {{chain}}{{more}} (nod check)",
     "cycleMore": " and {{count}} more",
     "colon": ": ",
     "extraSeparator": ", ",
@@ -171,7 +171,7 @@
     "cannotDeferTerminal": "A finished node doesn’t need deferring",
     "undeferred": "{{ref}} resumed · {{status}}",
     "deferred": "{{ref}} deferred (undo it in Waiting → Deferred)",
-    "dismissed": "{{ref}} archived (decs archive {{id}} --undo brings it back)",
+    "dismissed": "{{ref}} archived (nod archive {{id}} --undo brings it back)",
     "nowNeedsDecision": "{{refs}} now needs a decision",
     "onlyAttachments_one": "Only {{count}} attachment",
     "onlyAttachments_other": "Only {{count}} attachments",

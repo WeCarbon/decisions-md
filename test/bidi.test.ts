@@ -69,7 +69,7 @@ test('pipes get logical order even in Arabic, and decs config bidi is stored per
   decs(home, ['config', 'bidi', 'terminal'], env)
   assert.equal(JSON.parse(readFileSync(join(home, 'config.json'), 'utf8')).bidi, 'terminal')
   const shown = decs(home, ['config', 'bidi'], env)
-  assert.match(shown, /^terminal، من decs config bidi/)
+  assert.match(shown, /^terminal، من nod config bidi/)
   assert.doesNotMatch(shown, /[⁦-⁩]/)
   assert.match(decs(home, ['config', 'bidi'], { ...env, DECS_BIDI: 'visual' }), /^visual، من DECS_BIDI/)
 })
