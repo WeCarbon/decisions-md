@@ -165,4 +165,13 @@ export const zhHans: Strings = {
   copiedRef: '已复制 {{text}}',
   copiedShort: '已复制',
   moreActions: '更多操作',
+  urgentShort: '紧急',
+  afterLabel: '排在这些之后',
+  blockingLabel: '卡住了这些',
+  ifNoAnswer: '你不回的话',
+  reversible: '可以撤回',
+  irreversible: '不能撤回',
+  stepAsk: 'AI 一边干活一边在项目里提问',
+  stepAnswer: '你在这里答，一个决定一个键',
+  stepKeep: '一切都以 markdown 留在仓库里',
 }

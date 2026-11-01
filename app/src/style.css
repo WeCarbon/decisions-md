@@ -1676,10 +1676,16 @@ button:focus-visible { outline: 2px solid var(--sel-ring); outline-offset: 2px; 
   margin-top: 8px;
 }
 
-/* A narrow detail pane keeps the dock on one line: secondary actions drop their key hint. */
-@container (max-width: 640px) {
-  .quiet kbd { display: none; }
+/* A narrow detail pane keeps the dock on one line: key hints go (they are in the tooltips and on ?). */
+@container (max-width: 780px) {
+  .actions kbd { display: none; }
   .quiet { padding: 0 5px; }
+  .actions .ghost { padding: 0 10px; }
+}
+
+/* Narrower still: the secondary actions keep only their icons. */
+@container (max-width: 560px) {
+  .quiet .ql { display: none; }
 }
 
 /* The caret glyph mirrors by itself in right-to-left text; only the open turn differs. */

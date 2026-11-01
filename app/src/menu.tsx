@@ -1,7 +1,8 @@
+import type { ComponentChildren } from 'preact'
 import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks'
 
 export type MenuItem =
-  | { kind?: 'item'; label: string; shortcut?: string; run?: () => void; sub?: MenuItem[]; danger?: boolean; checked?: boolean; disabled?: boolean }
+  | { kind?: 'item'; label: string; icon?: ComponentChildren; shortcut?: string; run?: () => void; sub?: MenuItem[]; danger?: boolean; checked?: boolean; disabled?: boolean }
   | { kind: 'separator' }
   | { kind: 'header'; label: string }
 
@@ -116,7 +117,7 @@ export function ContextMenu({ state, onClose, onDone, nested = false }: { state:
               }}
               onClick={() => run(n)}
             >
-              <span class="ctx-check">{item.checked ? '✓' : ''}</span>
+              <span class="ctx-check">{item.checked ? '✓' : item.icon}</span>
               <span class="ctx-label" dir="auto">
                 {item.label}
               </span>

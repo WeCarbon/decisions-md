@@ -163,6 +163,15 @@ export const en = {
   copiedRef: 'Copied {{text}}',
   copiedShort: 'Copied',
   moreActions: 'More actions',
+  urgentShort: 'Urgent',
+  afterLabel: 'Waits for',
+  blockingLabel: 'Holds up',
+  ifNoAnswer: 'If you don’t answer',
+  reversible: 'Can be undone',
+  irreversible: 'Cannot be undone',
+  stepAsk: 'Agents ask in the project, as they work',
+  stepAnswer: 'You answer here — one key per decision',
+  stepKeep: 'Everything stays as markdown in the repo',
 }
 
 export type Strings = Record<keyof typeof en, string>

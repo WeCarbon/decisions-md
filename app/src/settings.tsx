@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'preact/hooks'
+import { Info } from 'lucide-preact'
 import * as api from './backend.ts'
 import { s } from './strings.ts'
 
@@ -87,9 +88,8 @@ export function Settings({ onClose }: { onClose: () => void }) {
             {styles.map((o) => (
               <button key={o.id} class={`s-choice ${st.notify === o.id ? 'on' : ''}`} onClick={() => void save({ ...st, notify: o.id })}>
                 <span class="s-radio" />
-                <span>
-                  <span class="s-choice-label">{o.label}</span>
-                  <span class="s-hint">{o.hint}</span>
+                <span class="s-choice-label" title={o.hint}>
+                  {o.label}
                 </span>
               </button>
             ))}
@@ -97,7 +97,12 @@ export function Settings({ onClose }: { onClose: () => void }) {
         </section>
 
         <section>
-          <div class="s-label">{s('hotkey')}</div>
+          <div class="s-label">
+            {s('hotkey')}
+            <span class="s-info" title={s('hotkeyHint')}>
+              <Info size={13} strokeWidth={1.75} />
+            </span>
+          </div>
           <div class="s-row">
             <button class={`s-hotkey ${recording ? 'recording' : ''}`} onClick={() => setRecording(!recording)}>
               {recording ? s('hotkeyRecord') : st.hotkey ? prettyHotkey(st.hotkey) : s('hotkeyNone')}
@@ -113,7 +118,6 @@ export function Settings({ onClose }: { onClose: () => void }) {
               </button>
             )}
           </div>
-          <p class="s-hint">{s('hotkeyHint')}</p>
           {view.ctrlSpaceTaken && <p class="s-note">{s('ctrlSpaceNote')}</p>}
           {(error || view.hotkeyError) && <p class="s-error">{error ?? s('hotkeyTaken')}</p>}
         </section>
@@ -122,9 +126,8 @@ export function Settings({ onClose }: { onClose: () => void }) {
           <label class="s-toggle">
             <input type="checkbox" checked={st.keepInTray} onChange={() => void save({ ...st, keepInTray: !st.keepInTray })} />
             <span class="s-switch" />
-            <span>
-              <span class="s-choice-label">{s('keepInTray')}</span>
-              <span class="s-hint">{s('keepInTrayHint')}</span>
+            <span class="s-choice-label" title={s('keepInTrayHint')}>
+              {s('keepInTray')}
             </span>
           </label>
         </section>

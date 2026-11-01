@@ -8,6 +8,7 @@ import { s, setLanguage, whenLanguageSet } from './strings.ts'
 import type { Bench as BenchData, ShellEnv } from './types.ts'
 import './style.css'
 import './panels.css'
+import './header.css'
 
 const params = new URLSearchParams(location.search)
 const forcedTheme = params.get('theme')

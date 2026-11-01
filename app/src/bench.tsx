@@ -1,6 +1,15 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks'
 import * as api from './backend.ts'
 import { Body } from './body.tsx'
+import { NodeHeader } from './header.tsx'
+import {
+  ArrowDownToLine, ArrowRight, Ban, CaseUpper, CheckCheck, ChevronsDownUp, ChevronsUpDown, CircleCheck, Copy, CornerLeftUp, ExternalLink, Eye, FileText,
+  FolderSearch, Hash, Inbox, Keyboard, ListChecks, Lock, Maximize2, MessageSquareReply, Paperclip, PenLine, Pin, PinOff, Play, Plus, RotateCcw,
+  Settings as SettingsIcon, Timer, TimerOff, Unlink, type LucideIcon,
+} from 'lucide-preact'
+
+/** One size and stroke for every icon in a menu. */
+const I = (Icon: LucideIcon) => <Icon size={14} strokeWidth={1.75} />
 import { Bar, Glyph, Segs } from './segs.tsx'
 import { hiddenCount, isSelectable, nodeCollapsed, reveal, visibleRows, type Folds } from './rows.ts'
 import { ContextMenu, type MenuItem, type MenuState } from './menu.tsx'
@@ -236,10 +245,11 @@ export function Bench(props: {
     }
     const items: MenuItem[] = []
     if (n && !n.terminal) {
-      if (n.questions.length) items.push({ label: s('ctxSubQuestions'), run: () => detailRef.current?.querySelector<HTMLButtonElement>('.question .pick')?.focus() })
+      if (n.questions.length) items.push({ label: s('ctxSubQuestions'), icon: I(ListChecks), run: () => detailRef.current?.querySelector<HTMLButtonElement>('.question .pick')?.focus() })
       else if (n.options.length)
         items.push({
           label: s('ctxAnswer'),
+          icon: I(CheckCheck),
           sub: n.options.map((o) => ({
             label: `${o.key} · ${o.label}${n.default === o.key ? `  (${s('defaultOption')})` : ''}`,
             shortcut: n.default === o.key ? '⏎' : /^[1-9]$/.test(o.key) ? o.key : undefined,
@@ -247,36 +257,36 @@ export function Bench(props: {
             run: () => L().startAnswer(o.key),
           })),
         })
-      else if (n.status === 'needs_decision') items.push({ label: s('ctxAnswer'), shortcut: '⏎', run: () => L().setComposer({ kind: 'free' }) })
+      else if (n.status === 'needs_decision') items.push({ label: s('ctxAnswer'), icon: I(PenLine), shortcut: '⏎', run: () => L().setComposer({ kind: 'free' }) })
     }
-    if (n) items.push({ label: s('ctxReplyMenu'), shortcut: 'N', run: () => L().setComposer({ kind: 'reply' }) })
+    if (n) items.push({ label: s('ctxReplyMenu'), icon: I(MessageSquareReply), shortcut: 'N', run: () => L().setComposer({ kind: 'reply' }) })
     if (n?.can_pin) {
       items.push({ kind: 'separator' })
-      if (n.pin) items.push({ label: s('unpin'), shortcut: 'U', run: () => L().pin('off') })
-      else items.push({ label: s('pinTop'), shortcut: 'T', run: () => L().pin('top') }, { label: s('pinBottom'), shortcut: 'B', run: () => L().pin('bottom') })
+      if (n.pin) items.push({ label: s('unpin'), icon: I(PinOff), shortcut: 'U', run: () => L().pin('off') })
+      else items.push({ label: s('pinTop'), icon: I(Pin), shortcut: 'T', run: () => L().pin('top') }, { label: s('pinBottom'), icon: I(ArrowDownToLine), shortcut: 'B', run: () => L().pin('bottom') })
     }
     if (n && !n.terminal) {
       items.push({ kind: 'separator' })
-      if (n.status === 'not_started') items.push({ label: s('ctxStart'), run: () => L().markStart() })
-      if (n.status === 'in_progress' || n.status === 'waiting') items.push({ label: s('ctxDone'), run: () => L().markDone() })
-      items.push({ label: n.deferred_at ? s('undefer') : s('defer'), shortcut: 'D', run: () => L().toggleDefer() })
-      items.push({ label: s('seen'), shortcut: 'A', run: () => L().seen() })
-      items.push({ label: s('ctxCloseMenu'), shortcut: 'X', danger: true, run: () => L().startClose() })
+      if (n.status === 'not_started') items.push({ label: s('ctxStart'), icon: I(Play), run: () => L().markStart() })
+      if (n.status === 'in_progress' || n.status === 'waiting') items.push({ label: s('ctxDone'), icon: I(CircleCheck), run: () => L().markDone() })
+      items.push({ label: n.deferred_at ? s('undefer') : s('defer'), icon: n.deferred_at ? I(TimerOff) : I(Timer), shortcut: 'D', run: () => L().toggleDefer() })
+      items.push({ label: s('seen'), icon: I(Eye), shortcut: 'A', run: () => L().seen() })
+      items.push({ label: s('ctxCloseMenu'), icon: I(Ban), shortcut: 'X', danger: true, run: () => L().startClose() })
     }
     items.push({ kind: 'separator' })
-    if (n?.parent != null) items.push({ label: s('ctxGoParent'), shortcut: '←', run: () => L().goParent() })
-    items.push({ label: s('ctxCopyRef', { ref: r.ref ?? '' }), run: () => copy(r.ref ?? '') })
-    items.push({ label: s('ctxCopyTitle'), run: () => copy(r.title ?? '') })
+    if (n?.parent != null) items.push({ label: s('ctxGoParent'), icon: I(CornerLeftUp), shortcut: '←', run: () => L().goParent() })
+    items.push({ label: s('ctxCopyRef', { ref: r.ref ?? '' }), icon: I(Hash), run: () => copy(r.ref ?? '') })
+    items.push({ label: s('ctxCopyTitle'), icon: I(Copy), run: () => copy(r.title ?? '') })
     if (n?.file) {
       items.push({ kind: 'separator' })
-      items.push({ label: revealLabel, run: () => void api.reveal(n.file) })
-      items.push({ label: s('ctxOpenEditor'), run: () => void api.openPath(n.file) })
+      items.push({ label: revealLabel, icon: I(FolderSearch), run: () => void api.reveal(n.file) })
+      items.push({ label: s('ctxOpenEditor'), icon: I(FileText), run: () => void api.openPath(n.file) })
     }
     return items
   }
 
   const viewMenu = (v: View): MenuItem[] => {
-    const items: MenuItem[] = [{ label: s('ctxOpen'), run: () => switchView(v.view) }]
+    const items: MenuItem[] = [{ label: s('ctxOpen'), icon: I(ArrowRight), run: () => switchView(v.view) }]
     const tree = v.rows.some((r) => r.has_kids || r.kind === 'fold')
     if (tree) {
       const all = (open: boolean) => {
@@ -288,30 +298,30 @@ export function Bench(props: {
         }
         setPrefs({ view: v.view, folds: { nodes, groups } })
       }
-      items.push({ kind: 'separator' }, { label: s('ctxExpandAll'), run: () => all(true) }, { label: s('ctxCollapseAll'), run: () => all(false) })
+      items.push({ kind: 'separator' }, { label: s('ctxExpandAll'), icon: I(ChevronsUpDown), run: () => all(true) }, { label: s('ctxCollapseAll'), icon: I(ChevronsDownUp), run: () => all(false) })
     }
     return items
   }
 
   const projectMenu = (p: Project): MenuItem[] => [
-    { label: s('ctxRename'), run: () => setRenaming(p.root) },
-    { label: s('ctxChangeLetter'), run: () => (setDialogError(null), setLetterFor(p)) },
-    { label: s('ctxUnlink'), danger: true, run: () => (setDialogError(null), setUnlinkFor(p)) },
+    { label: s('ctxRename'), icon: I(PenLine), run: () => setRenaming(p.root) },
+    { label: s('ctxChangeLetter'), icon: I(CaseUpper), run: () => (setDialogError(null), setLetterFor(p)) },
+    { label: s('ctxUnlink'), icon: I(Unlink), danger: true, run: () => (setDialogError(null), setUnlinkFor(p)) },
     { kind: 'separator' },
-    { label: revealLabel, run: () => void api.reveal(p.root) },
-    { label: s('ctxCopyPath'), run: () => copy(p.root, p.root) },
+    { label: revealLabel, icon: I(FolderSearch), run: () => void api.reveal(p.root) },
+    { label: s('ctxCopyPath'), icon: I(Copy), run: () => copy(p.root, p.root) },
   ]
 
   const fileMenu = (path: string, view?: () => void): MenuItem[] => [
-    ...(view ? [{ label: s('ctxOpen'), run: view } as MenuItem] : []),
-    { label: view ? s('ctxOpenEditor') : s('ctxOpen'), run: () => void api.openPath(path) },
-    { label: revealLabel, run: () => void api.reveal(path) },
-    { label: s('ctxCopyPath'), run: () => copy(path, path) },
+    ...(view ? [{ label: s('ctxOpen'), icon: I(Maximize2), run: view } as MenuItem] : []),
+    { label: view ? s('ctxOpenEditor') : s('ctxOpen'), icon: I(ExternalLink), run: () => void api.openPath(path) },
+    { label: revealLabel, icon: I(FolderSearch), run: () => void api.reveal(path) },
+    { label: s('ctxCopyPath'), icon: I(Copy), run: () => copy(path, path) },
   ]
 
   const noteMenu = (text: string): MenuItem[] => [
-    { label: s('ctxCopyText'), run: () => copy(text, text) },
-    ...(node ? [{ label: s('ctxReplyMenu'), shortcut: 'N', run: () => setComposer({ kind: 'reply' }) } as MenuItem] : []),
+    { label: s('ctxCopyText'), icon: I(Copy), run: () => copy(text, text) },
+    ...(node ? [{ label: s('ctxReplyMenu'), icon: I(MessageSquareReply), shortcut: 'N', run: () => setComposer({ kind: 'reply' }) } as MenuItem] : []),
   ]
 
   /** What the element under the pointer (or the selected row, from the keyboard) offers. */
@@ -583,9 +593,7 @@ export function Bench(props: {
             </div>
           ))}
           <button class="nav-item add" onClick={props.onAddProject}>
-            <svg viewBox="0 0 16 16" class="ico">
-              <path d="M7.25 3h1.5v4.25H13v1.5H8.75V13h-1.5V8.75H3v-1.5h4.25z" />
-            </svg>
+            <Plus size={15} strokeWidth={1.75} class="ico" />
             <span class="label">{s('addProject')}</span>
           </button>
         </nav>
@@ -596,12 +604,10 @@ export function Bench(props: {
           </span>
           <span class="foot-buttons">
             <button class="kbd-hint" onClick={() => setSettingsOpen(true)} title={`${s('settingsTitle')} (⌘,)`}>
-              <svg viewBox="0 0 16 16" class="ico">
-                <path d="M6.9 1.5h2.2l.4 1.8 1.2.6 1.6-1 1.6 1.6-1 1.6.5 1.2 1.8.4v2.2l-1.8.4-.5 1.2 1 1.6-1.6 1.6-1.6-1-1.2.5-.4 1.8H6.9l-.4-1.8-1.2-.5-1.6 1-1.6-1.6 1-1.6-.5-1.2-1.8-.4V6.9l1.8-.4.5-1.2-1-1.6 1.6-1.6 1.6 1 1.2-.5zM8 5.6a2.4 2.4 0 1 0 0 4.8 2.4 2.4 0 0 0 0-4.8z" />
-              </svg>
+              <SettingsIcon size={15} strokeWidth={1.75} class="ico" />
             </button>
-            <button class="kbd-hint" onClick={() => setHelp(true)}>
-              <kbd>?</kbd> {s('shortcuts')}
+            <button class="kbd-hint" onClick={() => setHelp(true)} title={`${s('shortcuts')} (?)`}>
+              <Keyboard size={15} strokeWidth={1.75} class="ico" />
             </button>
           </span>
         </footer>
@@ -613,7 +619,12 @@ export function Bench(props: {
           {view.count !== null && <span class="head-count">{view.count}</span>}
         </header>
         <div class="list" ref={listRef} role="listbox">
-          {!rows.length && <div class="empty">{view.empty}</div>}
+          {!rows.length && (
+            <div class="empty">
+              <Inbox size={28} strokeWidth={1.25} />
+              <span>{view.empty}</span>
+            </div>
+          )}
           {rows.map((r) => (
             <ListRow
               key={r.key}
@@ -801,36 +812,15 @@ function Detail(p: {
   const n = p.node
   const files = n.attachments.filter((a) => !a.image)
   const chosen = n.answer?.choice
-  const progressShown = n.meta.some((line) => line.some((s) => /^[█░]+$/.test(s.text)))
+  const waitsForAnswer = !n.terminal && n.status === 'needs_decision'
   return (
     <>
     <div class="detail" ref={p.scrollRef}>
       <div class="detail-inner">
-        <div class="status-line">
-          <span class="ref-pill">{n.ref}</span>
-          <Segs segs={n.status_line} trim />
-          {n.pin && <span class="chip pin">{n.pin === 'top' ? s('pinnedTop') : s('pinnedBottom')}</span>}
-        </div>
-        <h2 class="node-title">{n.title}</h2>
-        <div class="meta">
-          {n.meta
-            .filter((line) => !line.every((s) => /^[\s┄]*$/.test(s.text)))
-            .map((line, i) => (
-              <div key={i} class="meta-line">
-                <Segs segs={line} trim />
-              </div>
-            ))}
-          {!progressShown && n.progress != null && n.progress > 0 && (
-            <div class="meta-line">
-              <Bar pct={n.progress} />
-              <span> {n.progress}%</span>
-            </div>
-          )}
-        </div>
+        <NodeHeader n={n} onJump={p.onJump} />
 
         {n.options.length > 0 && !n.questions.length && (
           <section class="decide">
-            <div class="section-title">{s('options')}</div>
             <div class="options">
               {n.options.map((o) => {
                 const isDefault = n.default === o.key
@@ -847,7 +837,15 @@ function Detail(p: {
                     <span class="opt-main">
                       <span class="opt-label">
                         {o.label}
-                        {isDefault && <span class="chip">{s('defaultOption')} ⏎</span>}
+                        {isDefault && (
+                          <span class="chip def" title={waitsForAnswer && n.if_no_answer ? `${s('ifNoAnswer')}: ${n.if_no_answer}` : s('defaultOption')}>
+                            {waitsForAnswer && n.if_no_answer ? <Timer size={11} strokeWidth={2} /> : null}
+                            {s('defaultOption')} ⏎
+                            {waitsForAnswer && n.reversible !== null && n.if_no_answer ? (
+                              n.reversible ? <RotateCcw size={11} strokeWidth={2} aria-label={s('reversible')} /> : <Lock size={11} strokeWidth={2} aria-label={s('irreversible')} />
+                            ) : null}
+                          </span>
+                        )}
                         {isChosen && <span class="chip ok">✓ {s('answered')}</span>}
                       </span>
                       {o.body && (
@@ -880,10 +878,9 @@ function Detail(p: {
 
         {files.length > 0 && (
           <section class="files">
-            <div class="section-title">{s('attachments')}</div>
             {files.map((a, i) => (
-              <button key={i} class="file" data-ctx="file" data-path={a.path} onClick={() => api.openPath(a.path)}>
-                <span class="file-ico">↗</span>
+              <button key={i} class="file" data-ctx="file" data-path={a.path} onClick={() => api.openPath(a.path)} title={s('attachments')}>
+                <Paperclip size={14} strokeWidth={1.75} />
                 <span>{a.label}</span>
                 {a.caption && <span class="d"> — {a.caption}</span>}
               </button>
@@ -905,24 +902,29 @@ function Detail(p: {
         ) : (
           <div class="actions">
             <button class="ghost" onClick={p.onReply}>
+              <MessageSquareReply size={15} strokeWidth={1.75} />
               {s('reply')} <kbd>N</kbd>
             </button>
             {!n.terminal && (
               <button class="ghost" onClick={p.onDefer}>
+                {n.deferred_at ? <TimerOff size={15} strokeWidth={1.75} /> : <Timer size={15} strokeWidth={1.75} />}
                 {n.deferred_at ? s('undefer') : s('defer')} <kbd>D</kbd>
               </button>
             )}
             {n.can_pin &&
               (n.pin ? (
                 <button class="quiet" onClick={() => p.onPin('off')} title={s('unpin')}>
+                  <PinOff size={14} strokeWidth={1.75} />
                   <span class="ql">{s('unpin')}</span> <kbd>U</kbd>
                 </button>
               ) : (
                 <>
                   <button class="quiet" onClick={() => p.onPin('top')} title={`${s('pinTop')} — ${s('pinTopHint')}`}>
+                    <Pin size={14} strokeWidth={1.75} />
                     <span class="ql">{s('pinShort')}</span> <kbd>T</kbd>
                   </button>
                   <button class="quiet" onClick={() => p.onPin('bottom')} title={`${s('pinBottom')} — ${s('pinBottomHint')}`}>
+                    <ArrowDownToLine size={14} strokeWidth={1.75} />
                     <span class="ql">{s('parkShort')}</span> <kbd>B</kbd>
                   </button>
                 </>
@@ -931,9 +933,11 @@ function Detail(p: {
             {!n.terminal && (
               <>
                 <button class="quiet" onClick={p.onSeen} title={`${s('seen')} — ${s('seenHint')}`}>
+                  <Eye size={14} strokeWidth={1.75} />
                   <span class="ql">{s('seenShort')}</span> <kbd>A</kbd>
                 </button>
                 <button class="quiet danger" onClick={p.onClose} title={s('closeNode')}>
+                  <Ban size={14} strokeWidth={1.75} />
                   <span class="ql">{s('closeNode')}</span> <kbd>X</kbd>
                 </button>
               </>

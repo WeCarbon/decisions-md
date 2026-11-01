@@ -1,0 +1,330 @@
+/* The node header: chips, pills and a timeline instead of sentences. */
+
+.nhead {
+  padding-bottom: 18px;
+  margin-bottom: 22px;
+  border-bottom: 1px solid var(--line);
+}
+
+.nhead-top {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.nhead .node-title {
+  margin: 10px 0 12px;
+}
+
+.spill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 10px 0 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  background: color-mix(in srgb, currentColor 11%, transparent);
+}
+
+.spill .glyph {
+  width: auto;
+}
+
+.spill-detail {
+  font-weight: 400;
+  opacity: 0.8;
+}
+
+.spill-detail::before {
+  content: '·';
+  margin-inline-end: 6px;
+}
+
+.mchips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 14px;
+  font-size: 12px;
+  color: var(--text-2);
+}
+
+.mchip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  max-width: 100%;
+  color: var(--text-2);
+}
+
+.nhead-top .mchip {
+  height: 24px;
+  padding: 0 9px;
+  border-radius: 999px;
+  background: var(--code-bg);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.mchip svg,
+.pills-icon svg {
+  flex: none;
+  color: var(--text-3);
+}
+
+.mchip.c-red,
+.mchip.c-red svg {
+  color: var(--red);
+}
+
+.mchip-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pills {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.pills-icon {
+  display: inline-flex;
+}
+
+.npill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 22px;
+  padding: 0 8px 0 6px;
+  border-radius: 6px;
+  background: var(--code-bg);
+  font-size: 12px;
+  color: var(--text-2);
+  max-width: 280px;
+  transition: background 100ms ease, color 100ms ease;
+}
+
+.npill:hover {
+  background: var(--sel);
+  color: var(--text);
+}
+
+.npill .glyph {
+  width: auto;
+  font-size: 10px;
+}
+
+.npill-ref {
+  font: 500 11px var(--mono);
+}
+
+.npill-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.npill.missing {
+  color: var(--red);
+}
+
+.nprogress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  font-size: 12px;
+  color: var(--text-2);
+}
+
+.nprogress .bar {
+  width: 160px;
+  height: 5px;
+}
+
+.np-pct {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.np-msg {
+  color: var(--text-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.steps-list {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 6px;
+  font-size: 12px;
+}
+
+.steps-list li {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 24px;
+  padding: 0 9px 0 7px;
+  border-radius: 6px;
+  box-shadow: inset 0 0 0 1px var(--line);
+  color: var(--text-3);
+}
+
+.steps-list li.done {
+  text-decoration: line-through;
+  text-decoration-color: var(--line-strong);
+}
+
+.steps-list li.done .st-mark {
+  color: var(--green);
+}
+
+.steps-list li.next {
+  color: var(--text);
+  box-shadow: inset 0 0 0 1px var(--sel-ring);
+  background: var(--sel);
+}
+
+.steps-list li.next .st-mark {
+  color: var(--cyan);
+}
+
+.timeline {
+  display: flex;
+  align-items: center;
+  margin-top: 14px;
+}
+
+.tl-dot {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--panel);
+  box-shadow: inset 0 0 0 1px var(--line-strong);
+  color: var(--text-3);
+  position: relative;
+  flex: none;
+}
+
+.tl-dot + .tl-dot {
+  margin-inline-start: 14px;
+}
+
+.tl-dot + .tl-dot::before {
+  content: '';
+  position: absolute;
+  inset-inline-end: 100%;
+  top: 50%;
+  width: 14px;
+  height: 1px;
+  background: var(--line-strong);
+}
+
+.tl-human {
+  color: var(--magenta);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--magenta) 45%, transparent);
+}
+
+.tl-agent {
+  color: var(--blue);
+}
+
+.tl-answer {
+  color: var(--green);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--green) 45%, transparent);
+}
+
+.tl-last {
+  margin-inline-start: 10px;
+  font-size: 12px;
+  color: var(--text-3);
+}
+
+.chip.def {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ghost svg,
+.quiet svg {
+  flex: none;
+  opacity: 0.85;
+}
+
+.file {
+  gap: 8px;
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.empty svg {
+  opacity: 0.5;
+}
+
+.ctx-check svg {
+  display: block;
+  opacity: 0.75;
+}
+
+/* onboarding: three steps with icons instead of a paragraph */
+
+.how {
+  list-style: none;
+  padding: 0;
+  margin: 4px 0 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-align: start;
+}
+
+.how li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  color: var(--text-2);
+}
+
+.how .how-ico {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  background: var(--code-bg);
+  color: var(--accent);
+  flex: none;
+}
+
+/* settings: hints live in tooltips behind a small info mark */
+
+.s-info {
+  display: inline-flex;
+  vertical-align: -2px;
+  margin-inline-start: 6px;
+  color: var(--text-3);
+}

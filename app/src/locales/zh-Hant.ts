@@ -165,4 +165,13 @@ export const zhHant: Strings = {
   copiedRef: '已複製 {{text}}',
   copiedShort: '已複製',
   moreActions: '更多操作',
+  urgentShort: '緊急',
+  afterLabel: '排在這些之後',
+  blockingLabel: '卡住了這些',
+  ifNoAnswer: '你不回的話',
+  reversible: '可以撤回',
+  irreversible: '不能撤回',
+  stepAsk: 'AI 一邊工作一邊在專案裡提問',
+  stepAnswer: '你在這裡回答，一個決定一個鍵',
+  stepKeep: '一切都以 markdown 留在儲存庫裡',
 }

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'preact/hooks'
+import { Bot, FileText, FolderOpen, Keyboard } from 'lucide-preact'
 import * as api from './backend.ts'
 import { s } from './strings.ts'
 import type { ShellEnv } from './types.ts'
@@ -132,14 +133,26 @@ export function Onboarding(props: { env: ShellEnv | null; startAt?: Step; onEnv:
               <span />
             </div>
             <h1>{s('welcomeTitle')}</h1>
-            <p class="lede">{s('welcomeBody')}</p>
-            <div class="glyph-strip">
-              <span class="c-cyan">◐</span>
-              <span class="c-yellow b">◆</span>
-              <span class="c-green">◆</span>
-              <span class="c-magenta">⏸</span>
-              <span class="c-green d">✓</span>
-            </div>
+            <ul class="how">
+              <li>
+                <span class="how-ico">
+                  <Bot size={17} strokeWidth={1.75} />
+                </span>
+                {s('stepAsk')}
+              </li>
+              <li>
+                <span class="how-ico">
+                  <Keyboard size={17} strokeWidth={1.75} />
+                </span>
+                {s('stepAnswer')}
+              </li>
+              <li>
+                <span class="how-ico">
+                  <FileText size={17} strokeWidth={1.75} />
+                </span>
+                {s('stepKeep')}
+              </li>
+            </ul>
             <button class="primary big" autoFocus onClick={() => setStep(envReady(env) ? 'add' : 'check')}>
               {s('getStarted')}
             </button>
@@ -195,12 +208,10 @@ export function Onboarding(props: { env: ShellEnv | null; startAt?: Step; onEnv:
         {step === 'add' && (
           <>
             <h1>{s('addTitle')}</h1>
-            <p class="lede">{s('addBody')}</p>
             <button class="drop" disabled={busy} onClick={choose} autoFocus>
-              <svg viewBox="0 0 24 24">
-                <path d="M3 6.5A1.5 1.5 0 0 1 4.5 5h4.6l2 2h8.4A1.5 1.5 0 0 1 21 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5z" />
-              </svg>
+              <FolderOpen size={30} strokeWidth={1.4} />
               <span>{busy ? s('settingUp') : s('chooseFolder')}</span>
+              <span class="hint">{s('addBody')}</span>
             </button>
             {error && <pre class="error">{error}</pre>}
           </>

@@ -166,4 +166,13 @@ export const fr: Strings = {
   copiedRef: '{{text}} copié',
   copiedShort: 'Copié',
   moreActions: 'Plus d’actions',
+  urgentShort: 'Urgent',
+  afterLabel: 'Attend',
+  blockingLabel: 'Bloque',
+  ifNoAnswer: 'Sans réponse de votre part',
+  reversible: 'Réversible',
+  irreversible: 'Irréversible',
+  stepAsk: 'Les IA posent leurs questions dans le projet, en travaillant',
+  stepAnswer: 'Vous répondez ici — une touche par décision',
+  stepKeep: 'Tout reste en markdown dans le dépôt',
 }

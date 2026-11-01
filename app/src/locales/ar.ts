@@ -165,4 +165,13 @@ export const ar: Strings = {
   copiedRef: 'نُسخ {{text}}',
   copiedShort: 'نُسخ',
   moreActions: 'إجراءات أخرى',
+  urgentShort: 'عاجل',
+  afterLabel: 'ينتظر',
+  blockingLabel: 'يعطّل',
+  ifNoAnswer: 'إن لم تُجب',
+  reversible: 'يمكن التراجع عنه',
+  irreversible: 'لا يمكن التراجع عنه',
+  stepAsk: 'يسأل الوكلاء داخل المشروع أثناء عملهم',
+  stepAnswer: 'تجيب هنا — مفتاح واحد لكل قرار',
+  stepKeep: 'يبقى كل شيء بصيغة markdown في المستودع',
 }

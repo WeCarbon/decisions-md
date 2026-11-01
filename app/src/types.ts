@@ -111,7 +111,35 @@ export interface Node {
   terminal: boolean
   backlinks: string[]
   progress: number | null
+  progress_msg: string | null
+  steps: unknown
+  created: string
+  updated_at: string | null
+  due: string | null
+  if_no_answer: string | null
+  reversible: boolean | null
+  notes: Note[]
+  staleness: 'fresh' | 'stale' | 'very_stale'
+  parent_node: NodePill | null
+  after_nodes: NodePill[]
+  blocking_nodes: NodePill[]
   archived: boolean
+}
+
+export interface NodePill {
+  key: string | null
+  ref: string
+  title: string | null
+  state: string | null
+  glyph: Seg | null
+}
+
+export interface Note {
+  kind: string
+  role: 'human' | 'agent'
+  author: string
+  at: string
+  text: string
 }
 
 export interface Project {
