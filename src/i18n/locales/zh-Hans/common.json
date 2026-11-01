@@ -21,7 +21,9 @@
     "undeferred": "解除延迟",
     "completed": "完成",
     "superseded": "被取代",
-    "newQuestion": "新问题"
+    "newQuestion": "新问题",
+    "original": "原话",
+    "claimed": "接活"
   },
   "lang": {
     "unknown": "不认识的语言「{{code}}」——可用：{{codes}}",

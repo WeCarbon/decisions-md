@@ -5,6 +5,7 @@ import { deferHidden } from './status.ts'
 import { isStale, isVeryStale, minutesSince } from './staleness.ts'
 import { listSources, type SourceSummary } from './sources.ts'
 import type { Store } from './store.ts'
+import { projectSessions } from './listeners.ts'
 import type { Decision as Item } from './types.ts'
 
 export type { SourceSummary }
@@ -52,9 +53,13 @@ export interface Overview {
   sources: SourceSummary[]
   /** `after` dependency cycles — `decs check` reports the same list as errors. */
   cycles: Cycle[][]
+  /** Per project: is a session's `nod monitor` running there (see core/listeners.ts)? */
+  sessions: ProjectSessions[]
 }
 
-export function buildOverview(items: Item[], now = Date.now(), sources: SourceSummary[] = []): Overview {
+export type ProjectSessions = ReturnType<typeof projectSessions>[number]
+
+export function buildOverview(items: Item[], now = Date.now(), sources: SourceSummary[] = [], sessions: ProjectSessions[] = []): Overview {
   // 延迟 nodes (and their subtrees) are put off: not asked of the owner, not "running".
   const hidden = deferHidden(items)
   const needsOwner = items
@@ -90,10 +95,11 @@ export function buildOverview(items: Item[], now = Date.now(), sources: SourceSu
     decidedNotCollected: items.filter((i) => i.state === 'decided').length,
     sources,
     cycles: findCycles(items),
+    sessions,
   }
 }
 
 /** The whole store's overview, sources included — what bench renders. */
 export function overviewOf(store: Store, now = Date.now()): Overview {
-  return buildOverview(store.all(), now, listSources(store, now))
+  return buildOverview(store.all(), now, listSources(store, now), projectSessions(store, now))
 }

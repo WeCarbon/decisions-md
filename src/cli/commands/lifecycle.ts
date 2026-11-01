@@ -37,15 +37,20 @@ export async function run(args: Args, verb = ''): Promise<number> {
     const { options, default: def } = optionsAndDefault(args)
     const text = one(args, 'text') ?? ((await readStdin()).trim() || undefined)
     const next = store.ask(d, { options, default: def, text, author: resolveAuthor(args) })
-    warnOtherAuthor(next.author, refOf(next))
+    warnOtherAuthor(next.author, refOf(next), next.claimedBy)
     report(args, next, t('cli.lifecycle.waitingOnOwner', { count: next.options.length }))
     return 0
   }
 
   for (const ref of args._) {
     const d = requireDecision(store, ref, args)
-    guardOtherAuthor(store, d, args)
-    if (verb === 'start') report(args, store.start(d, { force }), t('cli.lifecycle.started'))
+    // Starting a brief goes through `claim`, which settles (and says) who has it.
+    if (!(verb === 'start' && d.intake)) guardOtherAuthor(store, d, args)
+    if (verb === 'start') {
+      // Starting a brief is taking it: the same atomic claim as `nod claim`.
+      const node = d.intake ? store.claim(d, resolveAuthor(args), { force }).node : d
+      report(args, store.start(node, { force }), t('cli.lifecycle.started'))
+    }
     else if (verb === 'hold') {
       const on = one(args, 'on')
       if (!on || on === 'true') throw new Error(`${t('cli.lifecycle.needOn')}\n\n${help('hold')}`)

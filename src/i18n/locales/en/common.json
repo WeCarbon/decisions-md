@@ -21,7 +21,9 @@
     "undeferred": "Resumed",
     "completed": "Completed",
     "superseded": "Superseded",
-    "newQuestion": "New question"
+    "newQuestion": "New question",
+    "original": "Original words",
+    "claimed": "Picked up"
   },
   "lang": {
     "unknown": "unknown language \"{{code}}\" — use one of: {{codes}}",

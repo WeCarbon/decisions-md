@@ -141,9 +141,11 @@ export function readStdin(firstChunkTimeoutMs = 1500): Promise<string> {
  * A node signed by another agent is invisible to this shell's
  * `decs monitor --mine`; say so once, on stderr.
  */
-export function warnOtherAuthor(nodeAuthor: string, ref: string): void {
+export function warnOtherAuthor(nodeAuthor: string, ref: string, claimedBy?: string): void {
   const me = process.env.DECS_AUTHOR
   if (!me || sameAgent(nodeAuthor, me) || sameAgent(me, nodeAuthor)) return
+  // A brief this agent claimed reaches its --mine monitor (see `ownedBy`).
+  if (claimedBy && (sameAgent(claimedBy, me) || sameAgent(me, claimedBy))) return
   const name = nodeAuthor.split(/[ \t]*·[ \t]*/)[0]
   process.stderr.write(`${t('cli.context.otherAuthor', { ref, author: name, me: me.split(/[ \t]*·[ \t]*/)[0] })}\n`)
 }
@@ -158,7 +160,8 @@ export function guardOtherAuthor(store: Store, d: Decision, args: Args, env: Nod
   const me = one(args, 'author') ?? env.DECS_AUTHOR
   if (bool(args, 'force') || !me || shellRole(env) !== 'agent') return
   const mine = (author: string | undefined) => sameAgent(author, me) || (author !== undefined && sameAgent(me, author))
-  if (mine(d.author)) return
+  // A claimed brief is the claimer's.
+  if (mine(d.author) || mine(d.claimedBy)) return
   const all = store.all()
   for (let p = d.parent; p !== undefined; ) {
     const up = all.find((x) => x.project === d.project && x.id === p)

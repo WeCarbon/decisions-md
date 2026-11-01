@@ -1,15 +1,18 @@
-import { execSync } from 'node:child_process'
+import { execSync, spawn } from 'node:child_process'
 import { readFileSync } from 'node:fs'
 import { bool, many, one, oneLine, optionsAndDefault, questionsFromArgs, type Args } from '../args.ts'
-import { readStdin, resolveAuthor, resolveStore, warnOtherAuthor } from '../context.ts'
+import { readStdin, resolveAuthor, resolveStore, shellRole, warnOtherAuthor } from '../context.ts'
+import { briefTitle } from '../../core/intake.ts'
+import { isListening } from '../../core/listeners.ts'
 import { parseDuration } from '../../core/duration.ts'
 import { URGENCIES } from '../../core/order.ts'
-import { splitFrontMatter } from '../../core/parse.ts'
+import { parseOptions, splitFrontMatter } from '../../core/parse.ts'
 import { refOf } from '../../core/ref.ts'
 import { dim, toJSON } from '../../core/render.ts'
 import { nowStamp } from '../../core/store.ts'
 import { TITLE_MAX_COLS, assertTitleFits } from '../../core/title.ts'
 import type { Decision, NewDecision, Urgency } from '../../core/types.ts'
+import type { Layout } from '../../core/paths.ts'
 import { t } from '../../i18n/index.ts'
 
 function urgencyArg(raw: string | undefined): Urgency | undefined {
@@ -42,18 +45,20 @@ export async function run(args: Args): Promise<number> {
     one(args, 'body') ?? (bodyFile ? readFileSync(bodyFile, 'utf8') : await readStdin())
   const piped = fromPiped(raw)
 
-  const title = args._.join(' ').trim() || piped.title
-  if (!title) throw new Error(`${t('cli.send.titleRequired')}\n\n${help()}`)
-  assertTitleFits(oneLine(title))
-
+  const words = args._.join(' ').trim()
   const meta = piped.meta
   const { options: cliOptions, default: cliDefault } = optionsAndDefault(args)
   const questions = questionsFromArgs(args)
+  const brief = isBrief(args, { options: cliOptions.length > 0, questions: questions.length > 0, meta, body: piped.body })
+
+  const title = brief && words ? briefTitle(words) : words || piped.title
+  if (!title) throw new Error(`${t('cli.send.titleRequired')}\n\n${help()}`)
+  if (!brief) assertTitleFits(oneLine(title))
 
   const input: NewDecision = {
     title: oneLine(title),
-    author: one(args, 'author', 'a') ?? (meta.author ? String(meta.author) : resolveAuthor(args)),
-    body: piped.body,
+    author: one(args, 'author', 'a') ?? (meta.author ? String(meta.author) : brief && shellRole() === 'human' ? 'owner' : resolveAuthor(args)),
+    body: brief ? [words, piped.body].filter(Boolean).join('\n\n') : piped.body,
     options: cliOptions,
     questions,
     default: cliDefault ?? (meta.default !== undefined ? String(meta.default) : undefined),
@@ -63,7 +68,8 @@ export async function run(args: Args): Promise<number> {
     ifNoAnswer: one(args, 'if-no-answer') ?? (meta.if_no_answer !== undefined ? String(meta.if_no_answer) : undefined),
     reversible: yesNo(one(args, 'reversible') ?? (meta.reversible !== undefined ? String(meta.reversible) : undefined), 'reversible'),
     kind: bool(args, 'fyi') || meta.kind === 'fyi' ? 'fyi' : undefined,
-    task: bool(args, 'task'),
+    task: brief || bool(args, 'task'),
+    intake: brief || undefined,
     parent: one(args, 'parent'),
     after: many(args, 'after').flatMap((s) => s.split(/[,\s]+/)).filter(Boolean),
     est: one(args, 'est'),
@@ -77,10 +83,74 @@ export async function run(args: Args): Promise<number> {
   const d = store.create(input)
   warnOtherAuthor(d.author, refOf(d))
 
+  if (brief) {
+    const root = store.layoutOf(d).projectRoot
+    const listening = isListening(root)
+    const hook = listening ? 'none' : runBriefHook(d, root)
+    if (bool(args, 'json')) console.log(JSON.stringify({ ...toJSON(d), listening, hook }))
+    else {
+      console.log(`${refOf(d)}  ${d.file}`)
+      console.error(dim(listening ? t('cli.send.briefListening', { ref: refOf(d) }) : t('cli.send.briefNobody', { ref: refOf(d) })))
+      if (!listening && hook !== 'ran' && process.stdin.isTTY && process.stderr.isTTY) await offerSession(store.layoutOf(d), d.project)
+    }
+    return 0
+  }
   if (bool(args, 'json')) console.log(JSON.stringify(toJSON(d)))
   else console.log(`${refOf(d)}  ${d.file}`)
   if (bool(args, 'notify')) notify(d)
   return 0
+}
+
+/**
+ * 派活: `--brief`, or a bare `nod add "a few words"` from the owner's own
+ * terminal (or the app) — no options, no --task/--fyi, no explicit author.
+ * `--no-brief` opts out.
+ */
+function isBrief(args: Args, given: { options: boolean; questions: boolean; meta: Record<string, unknown>; body: string }): boolean {
+  if (bool(args, 'brief')) {
+    if (given.options || given.questions || bool(args, 'fyi')) throw new Error(t('cli.send.briefNoOptions'))
+    return true
+  }
+  if (bool(args, 'no-brief') || shellRole() !== 'human') return false
+  if (given.options || given.questions || bool(args, 'task') || bool(args, 'fyi')) return false
+  if (one(args, 'author', 'a') || given.meta.author || given.meta.kind || parseOptions(given.body).length) return false
+  return true
+}
+
+/**
+ * N111's hook point: nobody is listening in this project, so run
+ * `$DECS_BRIEF_CMD` (detached — `nod add` returns at once) with the brief in
+ * its environment. Unset, nothing runs; what it does (notify, start an agent) is the owner's call.
+ */
+function runBriefHook(d: Decision, root: string): 'ran' | 'unset' | 'failed' {
+  const cmd = process.env.DECS_BRIEF_CMD
+  if (!cmd) return 'unset'
+  try {
+    const child = spawn(cmd, {
+      shell: true,
+      cwd: root,
+      detached: true,
+      stdio: 'ignore',
+      env: { ...process.env, DECS_ID: String(d.id), DECS_REF: refOf(d), DECS_TITLE: d.title, DECS_PROJECT: d.project, DECS_PROJECT_ROOT: root, DECS_FILE: d.file },
+    })
+    child.on('error', () => {})
+    child.unref()
+    return 'ran'
+  } catch {
+    return 'failed'
+  }
+}
+
+/** Nobody is listening and the owner is at a terminal: ask once whether to open a session. */
+async function offerSession(layout: Layout, project: string): Promise<void> {
+  const { createInterface } = await import('node:readline/promises')
+  const rl = createInterface({ input: process.stdin, output: process.stderr })
+  const reply = (await rl.question(`${t('cli.send.startSession', { project })} `)).trim().toLowerCase()
+  rl.close()
+  if (!/^(y|yes|是|好|o|oui|نعم)/.test(reply)) return
+  const { agentArg, describeStart, startSession } = await import('./session.ts')
+  const r = startSession(layout, agentArg(undefined))
+  console.error(describeStart(r, project))
 }
 
 /** `yes`/`no` and friends, because that is what people type for a flag like this. */

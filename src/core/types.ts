@@ -184,6 +184,11 @@ export interface Decision {
   steps?: unknown
   /** Which lane runs it; defaults to `author`. */
   ownerAgent?: string
+  /** 派活: the owner filed a few words for an AI to pick up and expand (see core/intake.ts). */
+  intake?: boolean
+  /** Who picked the brief up, and when — set once, under the node's lock (`Store.claim`). */
+  claimedBy?: string
+  claimedAt?: string
   /** The node this one refines. Not stored — it's where the file sits (`listEntryFiles`). */
   parent?: number
   /** Direct children's ids. Filled in by `Store.all()`; absent on a single reread. */
@@ -249,6 +254,8 @@ export interface NewDecision {
   est?: string
   when?: string
   staleAfter?: string
+  /** 派活: a brief for an AI to expand. The owner's words go under `## 原话`, verbatim. */
+  intake?: boolean
 }
 
 /** Tasks and decisions are one entity; this is its name in new code. */

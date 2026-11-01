@@ -294,7 +294,7 @@ const KNOWN_KEYS = new Set([
   'urgency', 'due', 'if_no_answer', 'reversible', 'kind', 'session', 'superseded_by', 'supersedes',
   'close_reason', 'waiting_on', 'deferred_at', 'deferred_by', 'answer', 'answered_by', 'answered_at', 'archived_at', 'reopened_at', 'tags',
   'question_defaults', 'progress', 'progress_msg', 'after', 'est', 'when', 'stale_after', 'steps', 'owner_agent',
-  'approvals',
+  'approvals', 'intake', 'claimed_by', 'claimed_at',
 ])
 
 function strMap(v: unknown): Record<string, string> | undefined {
@@ -352,6 +352,9 @@ export function parseDecision(
     staleAfter: str(data.stale_after),
     steps: data.steps ?? undefined,
     ownerAgent: str(data.owner_agent),
+    intake: data.intake === true || undefined,
+    claimedBy: str(data.claimed_by),
+    claimedAt: str(data.claimed_at),
     extra: Object.keys(extra).length ? extra : undefined,
     default: str(data.default),
     pin: data.pin === 'top' || data.pin === 'bottom' ? data.pin : undefined,

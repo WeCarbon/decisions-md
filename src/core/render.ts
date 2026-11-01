@@ -2,6 +2,7 @@ import { isRtl, t as i18n } from '../i18n/index.ts'
 import { durationText, elapsed, fromNow } from '../i18n/time.ts'
 import { stringWidth } from '../tui/width.ts'
 import { parseNoteHeading } from './parse.ts'
+import { briefState, originalWords } from './intake.ts'
 import { overdue } from './order.ts'
 import { formatRef, refOf } from './ref.ts'
 import { minutesSince, stalenessOf } from './staleness.ts'
@@ -180,6 +181,12 @@ export function toJSON(d: Decision): Record<string, unknown> {
     staleness: stalenessOf(d),
     steps: d.steps ?? null,
     owner_agent: d.ownerAgent ?? d.author,
+    intake: Boolean(d.intake),
+    /** 派活: `unclaimed` (waiting for an AI), `claimed`, or null — see core/intake.ts. */
+    brief: briefState(d),
+    claimed_by: d.claimedBy ?? null,
+    claimed_at: d.claimedAt ?? null,
+    original: originalWords(d) ?? null,
     parent: d.parent ?? null,
     parent_ref: d.parent !== undefined ? formatRef(d.parent, d.letter) : null,
     children: d.children ?? [],

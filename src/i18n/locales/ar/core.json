@@ -105,7 +105,10 @@
     "optionsCountWord_two": "خياران",
     "optionsCountWord_few": "{{count}} خيارات",
     "optionsCountWord_many": "{{count}} خيارًا",
-    "optionsCountWord_other": "{{count}} خيار"
+    "optionsCountWord_other": "{{count}} خيار",
+    "briefIsTask": "المهمة المُسنَدة مهمة: بلا خيارات وبلا --fyi",
+    "claimFinished": "{{ref}} حالته {{state}}، لم يبقَ شيء لاستلامه",
+    "alreadyClaimed": "استلم {{by}} العقدة {{ref}} في {{at}}، اتركها له (--force للاستيلاء عليها)"
   },
   "duration": {
     "notADuration": "\"{{value}}\" ليست مدة — مثل 90s أو 30m أو 1h أو 2d"

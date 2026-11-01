@@ -6,6 +6,7 @@ import type { Segment } from './model.ts'
 import { GLYPH, STALE_COLOR, ago, agoSpan, bar, ownerQueue, progressOf } from './views.ts'
 import { minutesSince, stalenessOf } from '../core/staleness.ts'
 import { refOf } from '../core/ref.ts'
+import { isUnclaimedBrief } from '../core/intake.ts'
 import { fit, stringWidth } from './width.ts'
 
 /**
@@ -146,9 +147,34 @@ export function cyclesLine(ov: Overview): Line | null {
  * The whole strip. On a short terminal only the first line survives — it is
  * the one question the owner opens bench to answer.
  */
+/**
+ * 「有没有 AI 在线」: one mark per project — ● a lead session's monitor is
+ * running there, ○ none. Shown once anyone is connected or a brief waits,
+ * since that is when it changes what the owner does next.
+ */
+function sessionsLine(ov: Overview, items: Item[], now: number): Line | null {
+  const waiting = items.filter(isUnclaimedBrief)
+  if (!ov.sessions.some((p) => p.sessions.length) && !waiting.length) return null
+  const out: Line = []
+  for (const p of ov.sessions) {
+    if (out.length) out.push({ text: '   ' })
+    const lead = p.sessions.find((s) => s.role === 'lead')
+    const briefs = waiting.filter((d) => d.project === p.project).length
+    const label = ov.sessions.length > 1 ? `${p.letter} ${p.project} ` : ''
+    if (lead) {
+      const who = lead.author?.split(/[ \t]*·[ \t]*/)[0] || lead.harness || t('bench.sessions.lead')
+      out.push({ text: '● ', color: 'green' }, { text: `${label}${who} · ${agoSpan(minutesSince({ updatedAt: lead.started_at, created: lead.started_at }, now))}`, dim: true })
+    } else out.push({ text: '○ ', color: briefs ? 'yellow' : undefined, dim: !briefs }, { text: `${label}${t('bench.sessions.none')}`, dim: !briefs, color: briefs ? 'yellow' : undefined })
+    if (briefs) out.push({ text: ` · ${t('bench.sessions.briefs', { count: briefs })}`, color: 'blue' })
+  }
+  return out
+}
+
 export function summaryLines(ov: Overview, items: Item[], width: number, height: number, now: number): Line[] {
   // The tabs already cover owner/running counts; add only what they can't.
   const lines: Line[] = []
+  const live = height >= 8 ? sessionsLine(ov, items, now) : null
+  if (live) lines.push(live)
   if (ov.sources.length && height >= 12) lines.push(sourcesLine(ov, width))
   const cyc = cyclesLine(ov)
   if (cyc && height >= 12) lines.push(cyc)

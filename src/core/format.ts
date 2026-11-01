@@ -30,6 +30,8 @@ export const NOTE_KIND = {
   completed: '完成',
   superseded: '被取代',
   newQuestion: '新问题',
+  original: '原话',
+  claimed: '接活',
 } as const
 
 export type NoteKindKey = keyof typeof NOTE_KIND
@@ -74,6 +76,7 @@ export const NOTE_TEXT = {
   dependencyDone: (ref: string) => `${ref} 已完成，这个节点的决定早已取走，开始执行。`,
   supersededBy: (ref: string, title: string) => `被 ${ref} 取代：${title}`,
   declinedTextOnly: '只写了文字，没选选项',
+  claimed: '接了。展开、拆成子节点后请负责人确认，确认前不开工。',
 } as const
 
 /** `<!-- /分组 -->` — ends an attachment group; invisible in a markdown viewer. */

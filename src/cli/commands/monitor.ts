@@ -8,9 +8,12 @@ import { resolveAuthor, resolveStore } from '../context.ts'
 import { parseDuration, parseSince } from '../../core/duration.ts'
 import { findLayout } from '../../core/paths.ts'
 import { listSources, sourceEventsSince } from '../../core/sources.ts'
-import { nowStamp, sameAgent, type ChangeEvent } from '../../core/store.ts'
+import { nowStamp, ownedBy, sameAgent, type ChangeEvent } from '../../core/store.ts'
+import { isUnclaimedBrief, originalWords } from '../../core/intake.ts'
+import { HEARTBEAT_MS, harnessOf, removeHeartbeat, writeHeartbeat } from '../../core/listeners.ts'
+import type { Decision } from '../../core/types.ts'
 import { refOf as refOfNode } from '../../core/ref.ts'
-import { noteKindKey } from '../../core/format.ts'
+import { NOTE_KIND, noteKindKey } from '../../core/format.ts'
 import { settingValue } from '../../core/settings.ts'
 import { durationText } from '../../i18n/time.ts'
 import { t } from '../../i18n/index.ts'
@@ -223,6 +226,52 @@ export async function run(args: Args): Promise<number> {
     process.stdout.write(asJson ? `${JSON.stringify({ event: 'updated', refs: changed, gone, at: nowStamp(new Date(), { ms: true }) })}\n` : `DECS-UPDATED ${changed.join(' ')}\n`)
   }
 
+  /**
+   * 派活: each unclaimed brief goes out once as DECS-BRIEF (all of them on
+   * start), and once more if it is still unclaimed after --unclaimed-after.
+   * A lead hears every brief; a --mine/teammate monitor only those filed under its own nodes.
+   */
+  const briefSeen = new Set<string>()
+  const reportBriefs = (first: boolean) => {
+    const items = store.all()
+    const byKey = new Map(items.map((d) => [`${d.project}#${d.id}`, d]))
+    const underMine = (d: Decision) => {
+      for (let p = d.parent, n = 0; p !== undefined && n < 50; n++) {
+        const up = byKey.get(`${d.project}#${p}`)
+        if (!up) return false
+        if (ownedBy(up, author!)) return true
+        p = up.parent
+      }
+      return false
+    }
+    for (const d of items) {
+      if (!isUnclaimedBrief(d) || (author && !underMine(d))) continue
+      const base = `${d.project}|${d.id}`
+      const age = Date.now() - Date.parse(d.created)
+      const words = originalWords(d)
+      const extra = words && flat(words) !== d.title ? ` —— ${flat(words)}` : ''
+      const json = { event: 'brief', ref: refOfNode(d), id: d.id, project: d.project, title: d.title, text: words ?? d.title, parent_ref: d.parent !== undefined ? refOfNode({ ...d, id: d.parent }) : null, since: cursor }
+      if (!briefSeen.has(`b|${base}`)) {
+        briefSeen.add(`b|${base}`)
+        if (first || !(age >= unclaimedMs)) {
+          if (age >= unclaimedMs) briefSeen.add(`r|${base}`)
+          lastEventAt = Date.now()
+          process.stdout.write(asJson ? `${JSON.stringify({ ...json, reminder: false })}\n` : `DECS-BRIEF ${t('cli.monitor.brief', { ref: refOfNode(d), title: d.title, extra })}  since=${cursor}\n`)
+          continue
+        }
+      }
+      if (age >= unclaimedMs && !briefSeen.has(`r|${base}`)) {
+        briefSeen.add(`r|${base}`)
+        lastEventAt = Date.now()
+        process.stdout.write(
+          asJson
+            ? `${JSON.stringify({ ...json, reminder: true, minutes: Math.round(age / 60_000) })}\n`
+            : `DECS-BRIEF ${t('cli.monitor.briefUnclaimed', { ref: refOfNode(d), title: d.title, duration: durationText(age) })}\n`,
+        )
+      }
+    }
+  }
+
   const pass = (first = false) => {
     const startedAt = nowStamp(new Date(), { ms: true })
     if (updates) {
@@ -235,6 +284,8 @@ export async function run(args: Args): Promise<number> {
     try {
       for (const e of store.changes(cursor, { author, role: 'human' })) {
         if (e.event === 'created' || e.event === 'completed' || e.event === 'closed') continue
+        // A brief's 原话 is reported once, as DECS-BRIEF below.
+        if (e.kind === NOTE_KIND.original) continue
         emit(`n|${e.project}|${e.id}|${e.event}|${e.at}`, e.at, nodeLine(e), { ...e, since: e.at })
       }
       if (withSources) {
@@ -273,6 +324,11 @@ export async function run(args: Args): Promise<number> {
     } catch (err) {
       process.stdout.write(`DECS-ERROR ${flat((err as Error).message)}\n`)
     }
+    try {
+      reportBriefs(first)
+    } catch (err) {
+      process.stdout.write(`DECS-ERROR ${flat((err as Error).message)}\n`)
+    }
     cursor = startedAt
     saveCursor(stateFile, cursor)
     const keep = Date.parse(cursor) - 120_000
@@ -294,9 +350,29 @@ export async function run(args: Args): Promise<number> {
   } catch (err) {
     process.stdout.write(`DECS-ERROR ${flat((err as Error).message)}\n`)
   }
+  const listenerKey = createHash('sha1').update(`${process.pid}|${stateFile}`).digest('hex').slice(0, 16)
+  const startedListening = nowStamp(new Date(), { ms: true })
+  const beat = () =>
+    writeHeartbeat(listenerKey, {
+      pid: process.pid,
+      roots: store.layouts.map((l) => l.projectRoot),
+      author: author ?? process.env.DECS_AUTHOR ?? null,
+      harness: harnessOf(),
+      role: author ? 'teammate' : 'lead',
+      started_at: startedListening,
+      last_seen: nowStamp(new Date(), { ms: true }),
+    })
+  beat()
+  process.on('exit', () => removeHeartbeat(listenerKey))
+  for (const sig of ['SIGINT', 'SIGTERM', 'SIGHUP'] as const) process.once(sig, () => process.exit(0))
+  let lastBeat = Date.now()
   pass(true)
   const parent = Number(one(args, 'with-parent') ?? 0)
   setInterval(() => {
+    if (Date.now() - lastBeat >= HEARTBEAT_MS) {
+      lastBeat = Date.now()
+      beat()
+    }
     // A window that started this monitor and then died (or was killed) takes it along.
     if (parent > 0 && !alive(parent)) process.exit(0)
     pass()

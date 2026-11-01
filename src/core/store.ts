@@ -11,6 +11,7 @@ import { dequeue, enqueue, readQueue } from './queue.ts'
 import { DEFAULT_MARK, HEADING, NOTE_KIND, NOTE_TEXT, isAnswerKind, optionsHeading } from './format.ts'
 import { OPTIONS_HEADING_RE, parseDecision, parseNoteHeading, parseOptions } from './parse.ts'
 import { findRef, isStartable, isTerminal, statusLabel } from './status.ts'
+import { withDescription } from './intake.ts'
 import { list, t } from '../i18n/index.ts'
 import {
   checkQuestions,
@@ -186,7 +187,7 @@ export class Store {
     return this.all()
       .filter(keep)
       .filter((d) => (archived === 'all' ? true : d.archived === archived))
-      .filter((d) => (filter.author ? sameAgent(d.author, filter.author) : true))
+      .filter((d) => (filter.author ? ownedBy(d, filter.author) : true))
       .filter((d) => (filter.project ? d.project === this.projectKey(filter.project) : true))
       .sort(benchOrder)
   }
@@ -240,6 +241,12 @@ export class Store {
     const dir = parent ? childDirOf(parent.file) : isTerminal(state) ? layout.archivedDir : layout.activeDir
 
     let body = (input.body ?? '').trim()
+    const created = nowStamp()
+    if (input.intake) {
+      if (!bare || !input.task) throw new Error(t('core.store.briefIsTask'))
+      // The owner's words are the record; the description an agent writes goes above them.
+      body = `## ${noteHeading(NOTE_KIND.original, roleOf(input.author.trim()), input.author.trim(), created)}\n\n${body || input.title.trim()}`
+    }
     if (questions.length) {
       // Must read back exactly as written, like the options block below.
       if (parseQuestions(body).length) throw new Error(t('core.store.bodyHasQuestionsSection'))
@@ -266,7 +273,6 @@ export class Store {
     // Take the id only after validation, so a failed create doesn't burn a number.
     const id = this.reserveId(layout)
     const file = join(dir, entryFileName(id, slug))
-    const created = nowStamp()
     const d: Decision = {
       id,
       title: input.title.trim(),
@@ -286,6 +292,7 @@ export class Store {
       ifNoAnswer: input.ifNoAnswer?.trim() || undefined,
       reversible: input.reversible,
       session: input.session,
+      intake: input.intake || undefined,
       tags: input.tags ?? [],
       body: body + '\n',
       options,
@@ -549,7 +556,7 @@ export class Store {
         if (!f) continue
         try {
           const d = this.load(f.path, f.archived, l)
-          if (filter.author && !sameAgent(d.author, filter.author)) continue
+          if (filter.author && !ownedBy(d, filter.author)) continue
           out.push(onQueue(d))
         } catch {
           /* decs check reports unparseable entries */
@@ -574,7 +581,7 @@ export class Store {
     }
     for (const d of this.all()) {
       if (filter.project && d.project !== this.projectKey(filter.project)) continue
-      if (filter.author && !sameAgent(d.author, filter.author)) continue
+      if (filter.author && !ownedBy(d, filter.author)) continue
       const base = { id: d.id, ref: refOf(d), project: d.project, title: d.title, entry_author: d.author, file: d.file }
       if (after(d.created)) out.push({ ...base, at: d.created, event: 'created', role: 'agent', by: d.author })
       d.notes.forEach((n, i) => {
@@ -634,6 +641,43 @@ export class Store {
     if (!opts.force && d.after?.length && !isStartable(d, this.all()))
       throw new Error(t('core.store.cantStartAfter', { ref: refOf(d), after: d.after.join(' ') }))
     return this.mutate(d, (d) => ({ next: { ...d, state: 'in_progress', waitingOn: undefined }, move: d.archived ? 'unarchive' : undefined }))
+  }
+
+  /**
+   * 接活: records `by` as the one expanding this brief, under the node's lock,
+   * so two sessions can't both take it. Taking it again yourself is a no-op;
+   * anyone else is refused with who has it (`ClaimedError`).
+   */
+  claim(d: Decision, by: string, opts: { force?: boolean } = {}): { node: Decision; already: boolean } {
+    let already = false
+    const node = this.mutate(d, (d) => {
+      if (isTerminal(d.state)) throw new Error(t('core.store.claimFinished', { ref: refOf(d), state: statusLabel(d.state) }))
+      if (d.claimedBy && (sameAgent(d.claimedBy, by) || sameAgent(by, d.claimedBy))) {
+        already = true
+        return { next: d }
+      }
+      if (d.claimedBy && !opts.force) throw new ClaimedError(d)
+      const at = nowStamp(new Date(), { ms: true })
+      return {
+        next: {
+          ...d,
+          claimedBy: by,
+          claimedAt: at,
+          ownerAgent: by,
+          state: d.state === 'not_started' ? 'in_progress' : d.state,
+          body: appendSection(d.body, noteHeading(NOTE_KIND.claimed, 'agent', by, at), NOTE_TEXT.claimed),
+        },
+      }
+    })
+    return { node, already }
+  }
+
+  /** Rewrites the description above `## 原话`; the owner's words and every note below stay as they are. */
+  expand(d: Decision, e: { description: string; title?: string }): Decision {
+    return this.mutate(d, (d) => {
+      const original = noteHeading(NOTE_KIND.original, roleOf(d.author), d.author, d.created || nowStamp())
+      return { next: { ...d, title: e.title?.trim() || d.title, body: withDescription(d.body, e.description, original) } }
+    })
   }
 
   /** 等待: held up on something outside — not the owner (待决策), not another node (`after`). `start` resumes it. */
@@ -1073,6 +1117,20 @@ export function sameAgent(entryAuthor: string | undefined, me: string): boolean 
   if (!entryAuthor) return false
   const name = (s: string) => s.split(/[ \t]*·[ \t]*/)[0].trim()
   return entryAuthor.includes(me) || (name(me) !== '' && name(entryAuthor) === name(me))
+}
+
+/** Whether `me` answers for this node: it filed it, or it claimed the brief the owner filed. */
+export function ownedBy(d: Pick<Decision, 'author' | 'claimedBy'>, me: string): boolean {
+  return sameAgent(d.author, me) || (d.claimedBy !== undefined && (sameAgent(d.claimedBy, me) || sameAgent(me, d.claimedBy)))
+}
+
+/** A brief someone else has already claimed; carries the node so a caller can say who. */
+export class ClaimedError extends Error {
+  readonly node: Decision
+  constructor(d: Decision) {
+    super(t('core.store.alreadyClaimed', { ref: refOf(d), by: d.claimedBy ?? '', at: (d.claimedAt ?? '').slice(0, 16).replace('T', ' ') }))
+    this.node = d
+  }
 }
 
 /** Before roles, the owner signed as `owner` and nothing else did. */

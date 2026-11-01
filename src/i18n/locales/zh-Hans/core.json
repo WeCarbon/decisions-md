@@ -90,7 +90,10 @@
     "noSuchOption": "{{ref}} 没有选项「{{key}}」（有：{{keys}}）",
     "noSuchSubQuestion": "{{ref}} 没有子问题 {{key}}",
     "subQuestionNoSuchOption": "{{key}} 没有选项「{{option}}」（有：{{keys}}）",
-    "optionsCountWord_other": "{{count}} 个选项"
+    "optionsCountWord_other": "{{count}} 个选项",
+    "briefIsTask": "派活是任务：不能带选项，也不能是 --fyi",
+    "claimFinished": "{{ref}} 已经{{state}}，没什么可接的了",
+    "alreadyClaimed": "{{ref}} 已被 {{by}} 在 {{at}} 接走，交给它做（--force 强行接手）"
   },
   "duration": {
     "notADuration": "「{{value}}」不是一个时长——例如 90s、30m、1h、2d"

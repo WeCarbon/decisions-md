@@ -7,7 +7,7 @@ import type { Attachment, Decision, DecisionOption, NoteRole, AttachmentApproval
 /** Front matter key order — stable so diffs stay readable. */
 const KEY_ORDER = [
   'id', 'title', 'author', 'status', 'close_reason', 'waiting_on', 'deferred_at', 'deferred_by', 'created', 'updated_at',
-  'after', 'progress', 'progress_msg', 'est', 'when', 'stale_after', 'steps', 'owner_agent',
+  'after', 'progress', 'progress_msg', 'est', 'when', 'stale_after', 'steps', 'owner_agent', 'intake', 'claimed_by', 'claimed_at',
   'kind', 'urgency', 'due', 'default', 'question_defaults', 'if_no_answer', 'reversible',
   'pin', 'pinned_at', 'tags', 'session', 'supersedes', 'superseded_by', 'answer', 'approvals',
   'archived_at', 'reopened_at',
@@ -34,6 +34,9 @@ export function frontMatterOf(d: Decision): Record<string, unknown> {
   if (d.staleAfter) fm.stale_after = d.staleAfter
   if (d.steps !== undefined) fm.steps = d.steps
   if (d.ownerAgent) fm.owner_agent = d.ownerAgent
+  if (d.intake) fm.intake = true
+  if (d.claimedBy) fm.claimed_by = d.claimedBy
+  if (d.claimedAt) fm.claimed_at = d.claimedAt
   if (d.default) fm.default = d.default
   const qd = Object.fromEntries((d.questions ?? []).filter((q) => q.default).map((q) => [q.key, q.default!]))
   if (Object.keys(qd).length) fm.question_defaults = qd

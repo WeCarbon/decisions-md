@@ -1,3 +1,4 @@
+import { isUnclaimedBrief } from '../core/intake.ts'
 import { benchOrder } from '../core/order.ts'
 import { NOTE_KIND } from '../core/format.ts'
 import { parseNotes } from '../core/parse.ts'
@@ -444,8 +445,11 @@ export function decidedShape(d: Item): string {
   return started ? GLYPH.in_progress : GLYPH.not_started
 }
 
+/** 派活 the owner filed that no AI has picked up yet — its own shape, whatever the state says. */
+export const BRIEF_GLYPH = '✎'
+
 /** The glyph text for `d`, whatever its state. */
-export const glyphText = (d: Item) => (d.state === 'decided' ? decidedShape(d) : GLYPH[d.state])
+export const glyphText = (d: Item) => (isUnclaimedBrief(d) ? BRIEF_GLYPH : d.state === 'decided' ? decidedShape(d) : GLYPH[d.state])
 
 /**
  * ◆ is yellow, bold while an AI is stuck on it, dim if answerable early.
@@ -454,6 +458,7 @@ export const glyphText = (d: Item) => (d.state === 'decided' ? decidedShape(d) :
  */
 export function glyphOf(d: Item, items: Item[], now = Date.now()): Glyph {
   const text = glyphText(d)
+  if (isUnclaimedBrief(d)) return { text, color: 'blue', bold: true }
   switch (d.state) {
     case 'not_started':
       return { text, dim: true }
@@ -491,6 +496,12 @@ export function suffixOf(d: Item, items: Item[], now: number, row?: Row): Segmen
     const since = d.deferredAt ? ago(minutesSince({ updatedAt: d.deferredAt, created: d.created }, now)) : ''
     if (since) forms.push([...fold, { text: t('bench.badge.deferredSince', { since }), dim: true }])
     forms.push([...fold, { text: t('bench.badge.deferred'), dim: true }])
+    return forms
+  }
+  if (isUnclaimedBrief(d)) {
+    const since = ago(minutesSince({ updatedAt: d.created, created: d.created }, now))
+    forms.push([...fold, { text: t('bench.badge.briefSince', { since }), color: 'blue' }])
+    forms.push([...fold, { text: t('bench.badge.brief'), color: 'blue' }])
     return forms
   }
   switch (d.state) {

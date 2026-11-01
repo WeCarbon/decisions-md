@@ -21,7 +21,9 @@
     "undeferred": "استئناف",
     "completed": "اكتمل",
     "superseded": "استُبدل",
-    "newQuestion": "سؤال جديد"
+    "newQuestion": "سؤال جديد",
+    "original": "الكلمات الأصلية",
+    "claimed": "تم الاستلام"
   },
   "lang": {
     "unknown": "لغة غير معروفة \"{{code}}\" — استخدم إحدى: {{codes}}",

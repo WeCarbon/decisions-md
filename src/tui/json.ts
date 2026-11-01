@@ -6,6 +6,7 @@ import { readProjectConfig } from '../core/project.ts'
 import { dependentsOf } from '../core/sequence.ts'
 import { stalenessOf } from '../core/staleness.ts'
 import { dependenciesOf, isTerminal } from '../core/status.ts'
+import { projectSessions } from '../core/listeners.ts'
 import type { Store } from '../core/store.ts'
 import type { Decision as Item } from '../core/types.ts'
 import { isRtl, lang, t } from '../i18n/index.ts'
@@ -214,17 +215,21 @@ export function benchJson(store: Store, opts: { project?: string; now?: number }
   })
   const links = backlinkIndex(store, items)
   const nodes = Object.fromEntries(items.filter((d) => !d.archived).map((d) => [keyOf(d), nodeJson(d, items, now, links.get(keyOf(d)) ?? [])]))
+  const sessions = projectSessions(store, now)
   return {
     now: new Date(now).toISOString(),
     lang: lang(),
     rtl: isRtl(),
     labels: { defaultMark: t('bench.detail.defaultMark') },
-    projects: store.layouts.map((l) => ({
+    // `listening`: a main session's `nod monitor` is running there, so a new brief will be picked up.
+    projects: store.layouts.map((l, i) => ({
       project: store.projectName(l),
       name: store.displayName(l),
       letter: store.letterOf(l),
       former_letters: readProjectConfig(l).former_letters ?? [],
       root: l.projectRoot,
+      listening: sessions[i].listening,
+      sessions: sessions[i].sessions,
     })),
     views,
     nodes,

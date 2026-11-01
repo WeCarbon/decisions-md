@@ -21,7 +21,9 @@
     "undeferred": "Repris",
     "completed": "Terminé",
     "superseded": "Remplacé",
-    "newQuestion": "Nouvelle question"
+    "newQuestion": "Nouvelle question",
+    "original": "Mots d’origine",
+    "claimed": "Pris en charge"
   },
   "lang": {
     "unknown": "langue inconnue « {{code}} » — utilisez l’une de : {{codes}}",

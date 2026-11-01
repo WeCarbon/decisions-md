@@ -1,3 +1,7 @@
+import { briefTitle } from '../core/intake.ts'
+import { isListening } from '../core/listeners.ts'
+import type { Layout } from '../core/paths.ts'
+import { agentArg, describeStart, startSession } from '../cli/commands/session.ts'
 import { spawn } from 'node:child_process'
 import { existsSync, watch, type FSWatcher } from 'node:fs'
 import { createElement as h, useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -7,6 +11,8 @@ import { openerFor } from '../core/opener.ts'
 import { buildOverview, type Overview } from '../core/overview.ts'
 import { refOf } from '../core/ref.ts'
 import { listSources, type SourceSummary } from '../core/sources.ts'
+import { projectSessions } from '../core/listeners.ts'
+import type { ProjectSessions } from '../core/overview.ts'
 import { findRef, isDeferred, isTerminal, statusLabel, waitingOnOwner } from '../core/status.ts'
 import type { Store } from '../core/store.ts'
 import { type Decision } from '../core/types.ts'
@@ -78,9 +84,9 @@ export function repaintRows(frame: Line[], from: number, to: number): string {
 const MIN_PANEL_COLS = 12
 
 type Line = Segment[]
-export type Mode = 'browse' | 'confirm' | 'note' | 'attach' | 'help' | 'image' | 'questions' | 'qnote' | 'close' | 'goto' | 'settings'
+export type Mode = 'browse' | 'confirm' | 'note' | 'attach' | 'help' | 'image' | 'questions' | 'qnote' | 'close' | 'goto' | 'settings' | 'brief' | 'session'
 /** Modes where keystrokes go into the prompt-line draft. */
-const TEXT_MODES: Mode[] = ['confirm', 'note', 'qnote', 'close', 'goto']
+const TEXT_MODES: Mode[] = ['confirm', 'note', 'qnote', 'close', 'goto', 'brief']
 
 interface Props {
   store: Store
@@ -134,6 +140,7 @@ function useWatch(store: Store, onChange: () => void): void {
 interface Snapshot {
   items: Decision[]
   sources: SourceSummary[]
+  sessions: ProjectSessions[]
   now: number
 }
 
@@ -143,9 +150,13 @@ function snapshot(store: Store, project?: string): Snapshot {
   return {
     items: project ? all.filter((d) => d.project === store.projectKey(project)) : all,
     sources: listSources(store, now).filter((s) => !project || s.project === store.projectKey(project)),
+    sessions: projectSessions(store, now).filter((p) => !project || p.project === store.projectKey(project)),
     now,
   }
 }
+
+/** Who is connected, minus the heartbeat clock — a beat alone is not a change worth redrawing for. */
+const sessionsKey = (s: Snapshot) => JSON.stringify(s.sessions.map((p) => p.sessions.map((x) => [x.pid, x.role, x.author])))
 
 /** What changed between two reads, said in one line: new nodes, and nodes that just started waiting on the owner. */
 export function changeBanner(prev: Decision[], next: Decision[]): string | null {
@@ -170,7 +181,7 @@ export function App({ store, view: initialView, openDeferred, project }: Props) 
   const width = Math.max(20, cols - 1)
 
   const [snap, setSnap] = useState<Snapshot>(() => snapshot(store, project))
-  const { items, sources, now } = snap
+  const { items, sources, sessions, now } = snap
   const [view, setView] = useState<View>(initialView)
   // Folds persist per viewer across sessions (`$DECS_HOME/bench-state.json`).
   const [folds, setFolds] = useState<FoldMap>(() => ({ ...loadFolds(), ...(openDeferred ? { [DEFERRED_FOLD_KEY]: 'expanded' as const } : {}) }))
@@ -182,6 +193,9 @@ export function App({ store, view: initialView, openDeferred, project }: Props) 
   const [draft, setDraft] = useState('')
   const [caret, setCaret] = useState(0)
   const [pendingKey, setPendingKey] = useState<string | null>(null)
+  /** 派活 (`p` / `P`): where the new brief goes, and — once filed with nobody listening — which project to offer a session for. */
+  const [briefAt, setBriefAt] = useState<{ parent?: Decision; layout: Layout } | null>(null)
+  const [sessionFor, setSessionFor] = useState<{ layout: Layout; project: string } | null>(null)
   const [qIndex, setQIndex] = useState(0)
   const [qPicks, setQPicks] = useState<Record<string, string>>({})
   const [qNotes, setQNotes] = useState<Record<string, string>>({})
@@ -209,7 +223,7 @@ export function App({ store, view: initialView, openDeferred, project }: Props) 
     bannerTimer.current = setTimeout(() => setBanner(null), 2600)
   }, [])
 
-  const overview = useMemo(() => buildOverview(items, now, sources), [items, now, sources])
+  const overview = useMemo(() => buildOverview(items, now, sources, sessions), [items, now, sources, sessions])
   const rootOf = useCallback((d: Decision) => store.layoutOf(d).projectRoot, [store])
   const { collapsed, expanded, openGroups } = useMemo(() => foldSets(items, folds, rootOf), [items, folds, rootOf])
   const list = useMemo(() => rowsFor(view, items, { collapsed, expanded, openGroups }), [view, items, collapsed, expanded, openGroups])
@@ -253,7 +267,7 @@ export function App({ store, view: initialView, openDeferred, project }: Props) 
     setSnap((prev) => {
       const next = snapshot(store, project)
       // Same array back means nothing changed; only advance the clock for 「N 分钟前」 labels.
-      if (next.items === prev.items && JSON.stringify(next.sources) === JSON.stringify(prev.sources)) {
+      if (next.items === prev.items && JSON.stringify(next.sources) === JSON.stringify(prev.sources) && sessionsKey(next) === sessionsKey(prev)) {
         return next.now - prev.now >= 60_000 ? { ...prev, now: next.now } : prev
       }
       const msg = changeBanner(prev.items, next.items)
@@ -430,6 +444,38 @@ export function App({ store, view: initialView, openDeferred, project }: Props) 
     if (q) setQNotes((n) => ({ ...n, [q.key]: draft.trim() }))
     setDraft('')
     setMode('questions')
+  }
+
+  /** Files the draft as a brief; with nobody listening in that project, offers to open a session. */
+  const commitBrief = () => {
+    const at = briefAt
+    const words = draft.trim()
+    setDraft('')
+    setBriefAt(null)
+    setMode('browse')
+    if (!at || !words) return
+    try {
+      const d = store.create({ title: briefTitle(words), author: 'owner', body: words, task: true, intake: true, parent: at.parent ? refOf(at.parent) : undefined }, at.layout)
+      reload()
+      if (isListening(at.layout.projectRoot)) return say(t('bench.toast.briefFiled', { ref: refOf(d) }))
+      say(t('bench.toast.briefNobody', { ref: refOf(d) }))
+      setSessionFor({ layout: at.layout, project: d.project })
+      setMode('session')
+    } catch (e) {
+      say((e as Error).message)
+    }
+  }
+
+  const answerSession = (yes: boolean) => {
+    const target = sessionFor
+    setSessionFor(null)
+    setMode('browse')
+    if (!yes || !target) return
+    try {
+      say(describeStart(startSession(target.layout, agentArg(undefined)), target.project))
+    } catch (e) {
+      say((e as Error).message)
+    }
   }
 
   const startText = (m: Mode, initial = '') => {
@@ -644,6 +690,8 @@ export function App({ store, view: initialView, openDeferred, project }: Props) 
     zoom, zoomable: imgMeta !== null, detailFocus, pickToOpen,
     imageSize: imgMeta ? { width: imgMeta.width, height: imgMeta.height } : null,
     qIndex, qPicks, qNotes, settingIndex,
+    briefTarget: briefAt ? (briefAt.parent ? refOf(briefAt.parent) : store.projectName(briefAt.layout)) : undefined,
+    sessionProject: sessionFor?.project,
   }
   const geom = useMemo(
     () => geometry(frameInput),
@@ -725,9 +773,16 @@ export function App({ store, view: initialView, openDeferred, project }: Props) 
       return
     }
 
+    if (mode === 'session') {
+      if (input === 'y' || input === 'Y') return answerSession(true)
+      if (input === 'n' || input === 'N' || key.escape || key.return) return answerSession(false)
+      return
+    }
+
     if (TEXT_MODES.includes(mode)) {
       if (key.escape) {
         setDraft('')
+        setBriefAt(null)
         if (mode === 'qnote') return setMode('questions')
         if (mode === 'confirm' && current?.questions?.length && pendingKey === '2') return setMode('questions')
         setMode('browse')
@@ -739,6 +794,7 @@ export function App({ store, view: initialView, openDeferred, project }: Props) 
         if (mode === 'note') return commitNote()
         if (mode === 'qnote') return commitQNote()
         if (mode === 'close') return commitClose()
+        if (mode === 'brief') return commitBrief()
         return commitGoto()
       }
       if (key.leftArrow) return setCaret((c) => Math.max(0, c - 1))
@@ -853,6 +909,14 @@ export function App({ store, view: initialView, openDeferred, project }: Props) 
       return setMode('settings')
     }
 
+    if (input === 'p' || input === 'P') {
+      // p: under the selected node (when it can still take children); P: at its project's top level.
+      const layout = current ? store.layoutOf(current) : store.primary
+      const parent = input === 'p' && current && !current.archived && !isTerminal(current.state) ? current : undefined
+      setBriefAt({ parent, layout })
+      return startText('brief')
+    }
+
     if (!current) return
     if (input === 'o') {
       if (!current.attachments.length) return say(t('bench.toast.noAttachments'))
@@ -910,6 +974,7 @@ export function App({ store, view: initialView, openDeferred, project }: Props) 
     [
       list, index, current, view, items, overview, now, backlinks, rows, width, listTop, offset, condensed, mode, draft, caret,
       imageSel, pendingKey, banner, geom, zoom, imgMeta, detailFocus, pickToOpen, qIndex, qPicks, qNotes, settingIndex, settingsVersion,
+      briefAt, sessionFor,
     ],
   )
   frameRef.current = frame
@@ -971,6 +1036,10 @@ export interface FrameInput {
   qNotes?: Record<string, string>
   /** The `,` dialog: index into `SETTINGS` of the highlighted row. */
   settingIndex?: number
+  /** `brief` mode: the ref or project the new brief goes under. */
+  briefTarget?: string
+  /** `session` mode: the project nobody is listening in. */
+  sessionProject?: string
 }
 
 /** Below this, the full hint line (natural truncation aside) crowds out too
@@ -1712,6 +1781,7 @@ function promptPrefix(s: FrameInput): Line | null {
   const d = s.current
   if (s.banner) return null
   if (s.mode === 'goto') return [{ text: t('bench.prompt.goto'), color: 'cyan', bold: true }]
+  if (s.mode === 'brief') return [{ text: t('bench.prompt.brief', { target: s.briefTarget ?? '' }), color: 'blue', bold: true }]
   if (!d) return null
   if (s.mode === 'confirm') {
     const qs = d.questions ?? []
@@ -1773,6 +1843,7 @@ const PLACEHOLDER: Partial<Record<Mode, () => string>> = {
   qnote: () => t('bench.placeholder.typeHere'),
   close: () => t('bench.placeholder.closeReason'),
   goto: () => t('bench.placeholder.goto'),
+  brief: () => t('bench.placeholder.brief'),
 }
 
 function promptLine(s: FrameInput): Line {
@@ -1785,6 +1856,7 @@ function promptLine(s: FrameInput): Line {
   if (s.mode === 'questions') {
     return [{ text: t('bench.prompt.questionsMode'), color: 'cyan', bold: true }]
   }
+  if (s.mode === 'session') return [{ text: t('bench.prompt.startSession', { project: s.sessionProject ?? '' }), color: 'yellow', bold: true }]
   if (s.mode === 'attach') {
     return [{ text: s.pickToOpen ? t('bench.prompt.attachPickOpen') : t('bench.prompt.attachPickView'), color: 'cyan' }]
   }

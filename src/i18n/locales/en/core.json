@@ -93,7 +93,10 @@
     "noSuchSubQuestion": "{{ref}} has no sub-question {{key}}",
     "subQuestionNoSuchOption": "{{key}} has no option \"{{option}}\" (has: {{keys}})",
     "optionsCountWord_one": "{{count}} option",
-    "optionsCountWord_other": "{{count}} options"
+    "optionsCountWord_other": "{{count}} options",
+    "briefIsTask": "a brief is a task: no options, no --fyi",
+    "claimFinished": "{{ref}} is {{state}} — nothing left to pick up",
+    "alreadyClaimed": "{{ref}} was already picked up by {{by}} at {{at}} — leave it to them (--force takes it over)"
   },
   "duration": {
     "notADuration": "\"{{value}}\" is not a duration — e.g. 90s, 30m, 1h, 2d"
