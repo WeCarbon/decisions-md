@@ -3,7 +3,9 @@ import { OPTIONS_HEADING_RE } from '../core/parse.ts'
 import { QUESTIONS_HEADING_RE } from '../core/questions.ts'
 import { toJSON } from '../core/render.ts'
 import { readProjectConfig } from '../core/project.ts'
-import { isTerminal } from '../core/status.ts'
+import { dependentsOf } from '../core/sequence.ts'
+import { stalenessOf } from '../core/staleness.ts'
+import { dependenciesOf, isTerminal } from '../core/status.ts'
 import type { Store } from '../core/store.ts'
 import type { Decision as Item } from '../core/types.ts'
 import { isRtl, lang, t } from '../i18n/index.ts'
@@ -110,12 +112,41 @@ function withoutLiveChoices(body: string): string {
   return lines.join('\n')
 }
 
+const OPTION_HEADING = /^###[ \t]+([A-Za-z0-9]{1,4})[ \t]*(?:[·:：．.\-—–]{1,2}[ \t]*(.*))?$/
+
+/**
+ * Options whose cost is written in the body under their own `### 1 · …` heading rather than
+ * under the option: the window shows that text on the option's card, so it is taken out of
+ * the body here and handed back per option key.
+ */
+function optionCosts(body: string, keys: string[]): { body: string; costs: Record<string, string> } {
+  const lines = body.split('\n')
+  const costs: Record<string, string> = {}
+  for (let i = 0; i < lines.length; i++) {
+    const m = OPTION_HEADING.exec(lines[i])
+    if (!m || !keys.includes(m[1]) || costs[m[1]] !== undefined) continue
+    let end = i + 1
+    while (end < lines.length && !/^#{2,3}[ \t]+\S/.test(lines[end])) end++
+    costs[m[1]] = lines.slice(i + 1, end).join('\n').trim()
+    lines.splice(i, end - i)
+    i--
+  }
+  return { body: lines.join('\n'), costs }
+}
+
+/** A node another one points at, as a window draws it: a small linked pill. */
+const pill = (o: Item, items: Item[], now: number) => ({ key: keyOf(o), ref: refOf(o), title: o.title, state: o.state, glyph: plain([glyphOf(o, items, now)])[0] })
+
 /** The 附件 line bench writes above attachment images is plain text in a terminal; a window draws it as the heading it is. */
 const asHeading = (heading: string) => (r: BodyRow, i: number, rows: BodyRow[]): BodyRow =>
   !r.style && r.text === heading && rows[i + 1]?.image !== undefined ? { text: heading.replace(/^#+\s*/, ''), style: { bold: true, color: 'cyan' } } : r
 
 function nodeJson(d: Item, items: Item[], now: number, backlinks: Item[]): Record<string, unknown> {
   const { body: _body, ...fields } = toJSON(d)
+  const live = withoutLiveChoices(d.body)
+  const { body: rest, costs } = optionCosts(live, d.options.filter((o) => !o.body.trim()).map((o) => o.key))
+  const byKey = new Map(items.map((i) => [keyOf(i), i]))
+  const parent = d.parent !== undefined ? byKey.get(`${d.project}#${d.parent}`) : undefined
   const images = nodeImages(d).map((im) => ({
     name: imageName(im),
     alt: im.alt,
@@ -134,7 +165,13 @@ function nodeJson(d: Item, items: Item[], now: number, backlinks: Item[]): Recor
     can_pin: canPin(d),
     status_line: plain(statusSegments(d, items, now)),
     meta: metaLines(d, items, now, META_WIDTH, backlinks).map(plain),
-    body_rows: bodyRows({ ...d, body: withoutLiveChoices(d.body) }, NO_WRAP, false, nodeImages(d)).map(asHeading(t('bench.detail.attachmentsHeading'))).map((r) => ({
+    options: d.options.map((o) => ({ key: o.key, label: o.label, body: o.body.trim() || costs[o.key] || '' })),
+    parent_node: parent ? pill(parent, items, now) : null,
+    after_nodes: dependenciesOf(d, items).map((dep) => (typeof dep === 'string' ? { key: null, ref: dep, title: null, state: null, glyph: null } : pill(dep, items, now))),
+    blocking_nodes: dependentsOf(d, items).map((b) => pill(b, items, now)),
+    referenced_by: backlinks.map((b) => pill(b, items, now)),
+    staleness: stalenessOf(d, now),
+    body_rows: bodyRows({ ...d, body: rest }, NO_WRAP, false, nodeImages(d)).map(asHeading(t('bench.detail.attachmentsHeading'))).map((r) => ({
       text: r.text,
       ...(r.image !== undefined ? { image: r.image } : {}),
       ...(r.style ? { style: plain([{ text: '', ...r.style }])[0] } : {}),

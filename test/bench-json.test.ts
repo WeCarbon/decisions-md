@@ -12,7 +12,7 @@ interface BenchJson {
   lang: string
   projects: { project: string; letter: string; root: string }[]
   views: { view: string; count: number | null; rows: JsonRow[] }[]
-  nodes: Record<string, { ref: string; options: { key: string }[]; status: string; status_line: Seg[]; meta: Seg[][]; body_rows: { text: string; image?: number; style?: Seg }[]; images: { name: string; path: string }[]; can_default: boolean; backlinks: string[] }>
+  nodes: Record<string, { ref: string; options: { key: string; body: string }[]; parent_node: { ref: string }; after_nodes: { ref: string }[]; blocking_nodes: { ref: string }[]; status: string; status_line: Seg[]; meta: Seg[][]; body_rows: { text: string; image?: number; style?: Seg }[]; images: { name: string; path: string }[]; can_default: boolean; backlinks: string[] }>
 }
 
 function project(t: { after: (fn: () => void) => void }): string {
@@ -30,8 +30,8 @@ test('decs bench --json: every view with its rows, glyphs and badges, without a 
   decs(root, ['add', 'ship the docs', '--task'])
   decs(root, ['start', '1'])
   decs(root, ['progress', '40', '--node', '1'])
-  decs(root, ['add', 'which cdn', '-o', 'default:1=keep the current one', '2=switch', '--parent', '1'])
-  decs(root, ['add', 'later thing', '--task'])
+  decs(root, ['add', 'which cdn', '-o', 'default:1=keep the current one', '2=switch', '--parent', '1'], {}, 'Why it matters.\n\n### 1 · keep the current one\nNo work, slower in Asia.\n\n### 2 · switch\nA day of work.\n')
+  decs(root, ['add', 'later thing', '--task', '--after', '2'])
 
   const j = benchJson(root)
   assert.equal(j.lang, 'en')
@@ -54,6 +54,12 @@ test('decs bench --json: every view with its rows, glyphs and badges, without a 
   assert.equal(d.status_line[0].text, '◆')
   assert.deepEqual(d.options.map((o) => o.key), ['1', '2'])
   assert.ok(!d.body_rows.some((r) => r.text === 'Options'), 'the live options come as data, not as body text')
+  assert.deepEqual(d.options.map((o) => o.body), ['No work, slower in Asia.', 'A day of work.'], "each option's cost moves onto its card")
+  assert.ok(!d.body_rows.some((r) => /slower in Asia/.test(r.text)), 'and out of the body')
+  assert.ok(d.body_rows.some((r) => r.text === 'Why it matters.'))
+  assert.equal(d.parent_node.ref, 'X1')
+  assert.deepEqual(d.blocking_nodes.map((n) => n.ref), ['X3'])
+  assert.deepEqual(j.nodes[`${j.projects[0].project}#3`].after_nodes.map((n) => n.ref), ['X2'])
 })
 
 test('decs bench --json: finished children sit under their fold row in All; attachments come with an absolute path', (t) => {
