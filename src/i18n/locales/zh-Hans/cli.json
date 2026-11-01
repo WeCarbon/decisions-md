@@ -17,7 +17,8 @@
     "noDecisionsHere": "这里以及上级目录都没有 decisions/ 目录。\n在项目根目录跑 `decs init`，或者传 --dir <project>。",
     "letterClash": "项目字母 {{letter}} 同时属于 {{projects}}——这些项目只能用项目名引用（{{example}}:305）",
     "noAuthor": "这是谁写的？传 --author \"<智能体> · <在做什么>\"，或者设 DECS_AUTHOR。",
-    "otherAuthor": "提示：{{ref}} 的提出者是「{{author}}」，不是你（{{me}}）。你挂的 decs monitor --mine 看不到它的答复——主控会话请不加 --mine 跑监听。"
+    "otherAuthor": "提示：{{ref}} 的提出者是「{{author}}」，不是你（{{me}}）。你挂的 decs monitor --mine 看不到它的答复——主控会话请不加 --mine 跑监听。",
+    "notYours": "{{ref}} 是「{{author}}」提的，不是你（{{me}}）——先核对编号。确实要动它，加 --force。"
   },
   "help": {
     "approved": "decs approved <id> --check <path>\n\n检查 <path> 现在的内容，和负责人批准这个节点时记下的哈希是否一致。\n发送任何用 `decs attach --approval-content` 标过的内容之前，先跑这个——\n不一致，或者从没被批准过，就不要发。\n\n  --json\n\n退出码：0 = 一致；2 = 这个节点没有名字匹配的待批准附件、还没被批准过，\n或者负责人的答复不是算批准的那个选项；\n1 = 内容变了，和批准时不一致。原因打在 stderr（或 --json 的 reason 里）。",

@@ -30,3 +30,31 @@ test('the plugin entry runs a command once and exits 0 — regression: it import
   assert.equal(r.stdout.trim().split('\n').length, 1)
   assert.match(r.stdout, /^decs \d/)
 })
+
+test('a lane cannot finish, close, hold, ask on or reopen a node another agent filed without --force; its own and its children are fine', () => {
+  const root = scratch()
+  decsResult(root, ['init', '--no-register'], { DECS_LANG: 'en' })
+  const as = (author: string, argv: string[]) => decsResult(root, argv, { DECS_LANG: 'en', DECS_AUTHOR: author })
+  assert.equal(as('lead · x', ['add', 'lead node', '--task', '--author', 'lead · x']).code, 0)
+  assert.equal(as('lane-a · x', ['add', 'lane a node', '--task', '--parent', '1', '--author', 'lane-a · x']).code, 0)
+  assert.equal(as('lane-b · x', ['add', 'lane b node', '--task', '--author', 'lane-b · x']).code, 0)
+
+  const wrong = as('lane-a · x', ['done', '3'])
+  assert.notEqual(wrong.code, 0)
+  assert.match(wrong.stderr, /filed by "lane-b", not you \(lane-a\)/)
+  for (const argv of [['close', '3', '--reason', 'obsolete'], ['hold', '3', '--on', 'someone'], ['start', '3']])
+    assert.notEqual(as('lane-a · x', argv).code, 0, argv.join(' '))
+
+  assert.equal(as('lane-a · x', ['done', '2']).code, 0, 'its own node')
+  assert.equal(as('lead · x', ['start', '2', '--force']).code, 0)
+  assert.equal(as('lead · x', ['done', '2']).code, 0, 'the lead filed the parent')
+  assert.equal(as('lane-a · x', ['done', '3', '--force']).code, 0, '--force goes through')
+})
+
+test('the owner\'s own terminal is never stopped by the other-author check', () => {
+  const root = scratch()
+  decsResult(root, ['init', '--no-register'], { DECS_LANG: 'en' })
+  assert.equal(decsResult(root, ['add', 'lane node', '--task', '--author', 'lane-b · x'], { DECS_LANG: 'en' }).code, 0)
+  const r = decsResult(root, ['done', '1'], { DECS_LANG: 'en', CLAUDECODE: '', DECS_ROLE: 'human', DECS_AUTHOR: 'owner' })
+  assert.equal(r.code, 0, r.stderr)
+})

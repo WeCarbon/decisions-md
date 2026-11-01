@@ -126,7 +126,7 @@ function fileFormatUnder(lang: string): string {
     run(['note', '1', 'additional context for the lane', '--agent'])
     run(['attach', '1', shot])
     run(['defer', '1'])
-    run(['hold', '1', '--on', 'someone external'])
+    run(['hold', '1', '--on', 'someone external', '--author', 'lane-x · testing'])
 
     const file = readdirSync(join(root, 'decisions', 'active')).find((f) => f.startsWith('1-'))!
     return normalizeTimestamps(readFileSync(join(root, 'decisions', 'active', file), 'utf8'))

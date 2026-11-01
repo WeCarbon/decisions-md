@@ -4,8 +4,9 @@ import { resolve } from 'node:path'
 import { readProjects } from '../core/config.ts'
 import { findLayout, layoutFor, type Layout } from '../core/paths.ts'
 import { Store, sameAgent } from '../core/store.ts'
-import type { NoteRole } from '../core/types.ts'
-import { many, one, type Args } from './args.ts'
+import type { Decision, NoteRole } from '../core/types.ts'
+import { refOf } from '../core/ref.ts'
+import { bool, many, one, type Args } from './args.ts'
 import { list, t } from '../i18n/index.ts'
 
 /**
@@ -145,4 +146,26 @@ export function warnOtherAuthor(nodeAuthor: string, ref: string): void {
   if (!me || sameAgent(nodeAuthor, me) || sameAgent(me, nodeAuthor)) return
   const name = nodeAuthor.split(/[ \t]*·[ \t]*/)[0]
   process.stderr.write(`${t('cli.context.otherAuthor', { ref, author: name, me: me.split(/[ \t]*·[ \t]*/)[0] })}\n`)
+}
+
+/**
+ * A lane finishing, closing, holding, asking on or reopening a node another
+ * agent filed is almost always a mistyped number. Refuse unless --force, or
+ * unless this agent filed one of the node's ancestors (a lead tidying its lanes).
+ * The owner's own terminal is never stopped.
+ */
+export function guardOtherAuthor(store: Store, d: Decision, args: Args, env: NodeJS.ProcessEnv = process.env): void {
+  const me = one(args, 'author') ?? env.DECS_AUTHOR
+  if (bool(args, 'force') || !me || shellRole(env) !== 'agent') return
+  const mine = (author: string | undefined) => sameAgent(author, me) || (author !== undefined && sameAgent(me, author))
+  if (mine(d.author)) return
+  const all = store.all()
+  for (let p = d.parent; p !== undefined; ) {
+    const up = all.find((x) => x.project === d.project && x.id === p)
+    if (!up) break
+    if (mine(up.author)) return
+    p = up.parent
+  }
+  const name = (s: string) => s.split(/[ \t]*·[ \t]*/)[0]
+  throw new Error(t('cli.context.notYours', { ref: refOf(d), author: name(d.author ?? ''), me: name(me) }))
 }

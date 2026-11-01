@@ -97,7 +97,7 @@ test('decs ask via the CLI with the text on stdin: three options, no read-back w
   t.after(() => rmSync(root, { recursive: true, force: true }))
   decs(root, ['init', '--no-register'])
   decs(root, ['add', 'check delivery', '--author', 'a · x', '--task'])
-  const r = decsResult(root, ['ask', '1', '-o', '1=test it from an outside mailbox', '2=have the admin run a trace', '3=ask the customer（默认）', '--default', '1', '--author', 'mail · x'], {}, TEXT)
+  const r = decsResult(root, ['ask', '1', '-o', '1=test it from an outside mailbox', '2=have the admin run a trace', '3=ask the customer（默认）', '--default', '1', '--author', 'a · x'], {}, TEXT)
   assert.equal(r.code, 0, r.stderr)
   assert.doesNotMatch(r.stdout + r.stderr, /did not read back/)
   const got = JSON.parse(decs(root, ['get', '1', '--json']))

@@ -1,6 +1,6 @@
 import { statusLabel } from '../../core/status.ts'
 import { bool, one, optionsAndDefault, type Args } from '../args.ts'
-import { readStdin, requireDecision, resolveAuthor, resolveStore, warnOtherAuthor } from '../context.ts'
+import { guardOtherAuthor, readStdin, requireDecision, resolveAuthor, resolveStore, warnOtherAuthor } from '../context.ts'
 import { refOf } from '../../core/ref.ts'
 import { dim, toJSON } from '../../core/render.ts'
 import { type Decision } from '../../core/types.ts'
@@ -33,6 +33,7 @@ export async function run(args: Args, verb = ''): Promise<number> {
 
   if (verb === 'ask') {
     const d = requireDecision(store, args._[0], args)
+    guardOtherAuthor(store, d, args)
     const { options, default: def } = optionsAndDefault(args)
     const text = one(args, 'text') ?? ((await readStdin()).trim() || undefined)
     const next = store.ask(d, { options, default: def, text, author: resolveAuthor(args) })
@@ -43,6 +44,7 @@ export async function run(args: Args, verb = ''): Promise<number> {
 
   for (const ref of args._) {
     const d = requireDecision(store, ref, args)
+    guardOtherAuthor(store, d, args)
     if (verb === 'start') report(args, store.start(d, { force }), t('cli.lifecycle.started'))
     else if (verb === 'hold') {
       const on = one(args, 'on')

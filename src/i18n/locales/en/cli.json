@@ -17,7 +17,8 @@
     "noDecisionsHere": "no decisions/ directory here or in any parent.\nRun `decs init` in the project root, or pass --dir <project>.",
     "letterClash": "project letter {{letter}} belongs to more than one project ({{projects}}) — refer to these by project name instead (e.g. {{example}}:305)",
     "noAuthor": "who is writing this? pass --author \"<agent> · <what it is doing>\", or set DECS_AUTHOR.",
-    "otherAuthor": "note: {{ref}} was proposed by \"{{author}}\", not you ({{me}}). Your `decs monitor --mine` will not see its reply — the lead should run monitor without --mine."
+    "otherAuthor": "note: {{ref}} was proposed by \"{{author}}\", not you ({{me}}). Your `decs monitor --mine` will not see its reply — the lead should run monitor without --mine.",
+    "notYours": "{{ref}} was filed by \"{{author}}\", not you ({{me}}) — check the number. If you really mean to act on it, add --force."
   },
   "help": {
     "approved": "decs approved <id> --check <path>\n\nChecks whether <path>'s current content matches the hash recorded when the\nowner approved this node. Run this before sending anything marked with\n`decs attach --approval-content` — don't send it if it doesn't match, or\nwas never approved.\n\n  --json\n\nExit code: 0 = matches; 2 = this node has no pending attachment matching that\nname, it was never approved, or the owner's answer wasn't the approving one;\n1 = the content changed since it was approved. The reason goes to stderr (or\n--json's reason field).",

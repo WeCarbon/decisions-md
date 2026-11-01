@@ -17,7 +17,8 @@
     "noDecisionsHere": "pas de dossier decisions/ ici ni dans un parent.\nLancez `decs init` à la racine du projet, ou passez --dir <projet>.",
     "letterClash": "la lettre de projet {{letter}} appartient à plus d’un projet ({{projects}}) — référez-vous à eux par nom de projet (ex. {{example}}:305)",
     "noAuthor": "qui écrit ceci ? passez --author \"<agent> · <ce qu’il fait>\", ou définissez DECS_AUTHOR.",
-    "otherAuthor": "remarque : {{ref}} a été proposé par « {{author}} », pas par vous ({{me}}). Votre `decs monitor --mine` ne verra pas sa réponse — la session principale devrait lancer la surveillance sans --mine."
+    "otherAuthor": "remarque : {{ref}} a été proposé par « {{author}} », pas par vous ({{me}}). Votre `decs monitor --mine` ne verra pas sa réponse — la session principale devrait lancer la surveillance sans --mine.",
+    "notYours": "{{ref}} a été créé par « {{author}} », pas par vous ({{me}}) — vérifiez le numéro. Si c’est bien voulu, ajoutez --force."
   },
   "help": {
     "approved": "decs approved <id> --check <path>\n\nVérifie si le contenu actuel de <path> correspond au hash enregistré quand\nle responsable a approuvé ce nœud. À lancer avant d’envoyer tout ce qui a été marqué avec\n`decs attach --approval-content` — ne l’envoyez pas si ça ne correspond pas, ou si\nce n’a jamais été approuvé.\n\n  --json\n\nCode de sortie : 0 = correspond ; 2 = ce nœud n’a pas de pièce jointe en attente\nqui corresponde à ce nom, elle n’a jamais été approuvée, ou la réponse du responsable\nn’était pas celle qui approuve ; 1 = le contenu a changé depuis l’approbation.\nLa raison est sur stderr (ou dans le champ reason du --json).",
