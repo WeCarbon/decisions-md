@@ -1,4 +1,4 @@
-import { Bot, CalendarClock, CornerLeftUp, Flame, GitFork, Link2, MessageSquare, Pin, PinOff, Plus, CheckCheck, Timer, User } from 'lucide-preact'
+import { Bot, CalendarClock, CornerLeftUp, Flame, GitFork, Link2, MessageSquare, PenLine, Pin, PinOff, Plus, Radio, CheckCheck, Timer, User } from 'lucide-preact'
 import type { ComponentChildren } from 'preact'
 import { Bar, Glyph, segClass } from './segs.tsx'
 import { s } from './strings.ts'
@@ -103,7 +103,7 @@ function Timeline({ n }: { n: Node }) {
   )
 }
 
-export function NodeHeader({ n, onJump }: { n: Node; onJump: (key: string) => void }) {
+export function NodeHeader({ n, onJump, listening }: { n: Node; onJump: (key: string) => void; listening: { on: boolean; who: string | null } | null }) {
   const waitingSince = n.status === 'needs_decision' ? n.updated_at ?? n.created : null
   const steps = Array.isArray(n.steps) ? (n.steps as { label: string; done: boolean }[]) : []
   const next = steps.findIndex((x) => !x.done)
@@ -120,10 +120,30 @@ export function NodeHeader({ n, onJump }: { n: Node; onJump: (key: string) => vo
         )}
         {n.pin && <Chip icon={n.pin === 'top' ? <Pin {...ICON} /> : <PinOff {...ICON} />}>{n.pin === 'top' ? s('pinnedTop') : s('pinnedBottom')}</Chip>}
         {n.deferred_at && <Chip icon={<Timer {...ICON} />}>{s('deferred')}</Chip>}
+        {n.brief === 'unclaimed' && (
+          <Chip icon={<PenLine {...ICON} />} tone="c-blue brief">
+            {s('briefWaiting')}
+          </Chip>
+        )}
+        {n.brief === 'claimed' && n.claimed_by && (
+          <Chip icon={<Bot {...ICON} />} title={fullTime(n.claimed_at)}>
+            {s('briefPicked', { who: n.claimed_by.split(/\s*·\s*/)[0] })}
+          </Chip>
+        )}
+        {listening && !n.terminal && (
+          <Chip icon={<Radio {...ICON} />} tone={listening.on ? 'c-green' : 'muted'}>
+            {listening.on ? s('listening', { who: listening.who?.split(/\s*·\s*/)[0] ?? 'AI' }) : s('notListening')}
+          </Chip>
+        )}
       </div>
       <h2 class="node-title" dir="auto">
         {n.title}
       </h2>
+      {n.intake && n.original && n.original.trim() !== n.title.trim() && (
+        <blockquote class="original" dir="auto" title={s('briefOriginal')}>
+          {n.original}
+        </blockquote>
+      )}
       <div class="mchips">
         <Chip icon={<User {...ICON} />} title={n.author}>
           {n.who}

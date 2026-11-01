@@ -112,6 +112,12 @@ export interface Node {
   backlinks: string[]
   progress: number | null
   progress_msg: string | null
+  /** The owner's own words, filed with Cmd+K for an AI to expand. */
+  intake?: boolean
+  brief?: 'unclaimed' | 'claimed' | null
+  claimed_by?: string | null
+  claimed_at?: string | null
+  original?: string | null
   steps: unknown
   created: string
   updated_at: string | null
@@ -145,6 +151,8 @@ export interface Note {
 export interface Project {
   /** The folder name: the key in node keys (`web#305`). */
   project: string
+  /** An AI session's monitor is live in it (newer CLIs only). */
+  listening?: boolean
   /** What people see: `decs config name`, else the folder name. */
   name: string
   letter: string

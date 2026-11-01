@@ -24,7 +24,7 @@ export DECS_HOME="$work/home" DECS_APP_DATA="$work/app" DECS_LANG=en DECS_APP_TI
 export DECS_APP_BACKGROUND=${DECS_APP_BACKGROUND:-1}
 front() { osascript -e 'tell application "System Events" to get name of first process whose frontmost is true' 2>/dev/null; }
 front_before=$(front)
-export DECS_BIN="$repo/bin/nod" DECS_APP_PICK="$work/shop" DECS_APP_SCRIPT="$here/walkthrough.js"
+export DECS_BIN="${E2E_NOD:-$repo/bin/nod}" DECS_APP_PICK="$work/shop" DECS_APP_SCRIPT="$here/walkthrough.js"
 mkdir -p "$DECS_HOME" "$DECS_APP_PICK" "$DECS_APP_DATA"
 # No real notifications and no global hotkey during the run: the walkthrough sets what it tests.
 printf '{"notify":"off","hotkey":"","keepInTray":true}' > "$DECS_APP_DATA/settings.json"
@@ -91,6 +91,9 @@ if [ "$status" -eq 0 ]; then
   check 7 "d.status === 'completed'"
   check 1 "d.project_name === 'Shop front' && d.ref === 'Q1'"
   check X1 "d.ref === 'Q1'"
+  if grep -q "STEP brief$" "$work/log"; then
+    check 9 "d.intake === true && d.brief === 'unclaimed' && d.original === 'Add rate limits to the export endpoint'"
+  fi
   # Unlinked: out of the registry, folder and files untouched.
   ! grep -q '"root"' "$DECS_HOME/config.json"
   [ -f "$DECS_APP_PICK/decisions/decs.json" ]

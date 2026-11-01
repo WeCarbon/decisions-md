@@ -196,9 +196,26 @@ pub(crate) fn decs_command(env: &ShellEnv, args: &[String], cwd: Option<&str>) -
 }
 
 #[tauri::command]
-async fn decs(app: AppHandle, state: State<'_, AppState>, args: Vec<String>, cwd: Option<String>) -> Result<RunOutput, String> {
+async fn decs(app: AppHandle, state: State<'_, AppState>, args: Vec<String>, cwd: Option<String>, stdin: Option<String>) -> Result<RunOutput, String> {
     let env = cached_env(&app, &state).unwrap_or_else(|| refresh_env(&app, &state));
-    let out = decs_command(&env, &args, cwd.as_deref())?.output().await.map_err(|e| e.to_string())?;
+    let mut args = args;
+    // In background (test) mode nothing opens a terminal: the CLI only reports what it would run.
+    if background() && args.len() >= 2 && args[0] == "session" && args[1] == "start" && !args.iter().any(|a| a == "--dry-run") {
+        args.push("--dry-run".into());
+    }
+    let mut cmd = decs_command(&env, &args, cwd.as_deref())?;
+    let out = match stdin {
+        Some(text) => {
+            use tokio::io::AsyncWriteExt;
+            cmd.stdin(Stdio::piped()).stdout(Stdio::piped()).stderr(Stdio::piped());
+            let mut child = cmd.spawn().map_err(|e| e.to_string())?;
+            if let Some(mut pipe) = child.stdin.take() {
+                pipe.write_all(text.as_bytes()).await.map_err(|e| e.to_string())?;
+            }
+            child.wait_with_output().await.map_err(|e| e.to_string())?
+        }
+        None => cmd.output().await.map_err(|e| e.to_string())?,
+    };
     Ok(RunOutput {
         code: out.status.code().unwrap_or(-1),
         stdout: String::from_utf8_lossy(&out.stdout).into_owned(),

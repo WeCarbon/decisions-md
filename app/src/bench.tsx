@@ -2,10 +2,11 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import * as api from './backend.ts'
 import { Body } from './body.tsx'
 import { NodeHeader } from './header.tsx'
+import { QuickEntry, StartSession } from './quick.tsx'
 import {
   ArrowDownToLine, ArrowRight, Ban, CaseUpper, CheckCheck, ChevronsDownUp, ChevronsUpDown, CircleCheck, Copy, CornerLeftUp, ExternalLink, Eye, FileText,
   FolderSearch, Hash, Inbox, Keyboard, ListChecks, Lock, Maximize2, MessageSquareReply, Paperclip, PenLine, Pin, PinOff, Play, Plus, RotateCcw,
-  Settings as SettingsIcon, Timer, TimerOff, Unlink, type LucideIcon,
+  Settings as SettingsIcon, SquareTerminal, Timer, TimerOff, Unlink, type LucideIcon,
 } from 'lucide-preact'
 
 /** One size and stroke for every icon in a menu. */
@@ -109,6 +110,37 @@ export function Bench(props: {
   const [error, setError] = useState<string | null>(null)
   const [toast, showToast] = useToast()
   const [menu, setMenu] = useState<MenuState | null>(null)
+  const [quick, setQuick] = useState(() => new URLSearchParams(location.search).has('quick'))
+  // A node filed from here shows up only in the next bench: select it once that arrives.
+  const pendingJump = useRef<string | null>(null)
+  useEffect(() => {
+    const key = pendingJump.current
+    if (key && bench.nodes[key]) {
+      pendingJump.current = null
+      jumpRef.current(key)
+    }
+  }, [bench])
+  const [startFor, setStartFor] = useState<{ project: Project; reason: 'brief' | 'menu' } | null>(null)
+  const [live, setLive] = useState<Record<string, api.ProjectSessions>>({})
+  // Who is listening where: sessions heartbeat every 30 s, so poll at that pace (and after every change).
+  useEffect(() => {
+    let gone = false
+    const poll = () =>
+      void api.sessions().then((list) => {
+        if (!gone && list) setLive(Object.fromEntries(list.map((x) => [x.project, x])))
+      })
+    poll()
+    const t = window.setInterval(poll, 30_000)
+    return () => {
+      gone = true
+      clearInterval(t)
+    }
+  }, [bench])
+  const withLive = (pr: Project): Project => {
+    const l = live[pr.project]
+    return l ? { ...pr, listening: l.listening } : pr
+  }
+  const listenerOf = (pr: Project) => live[pr.project]?.sessions.find((x) => x.role === 'lead') ?? null
   const [renaming, setRenaming] = useState<string | null>(null)
   const [letterFor, setLetterFor] = useState<Project | null>(null)
   const [unlinkFor, setUnlinkFor] = useState<Project | null>(null)
@@ -304,6 +336,7 @@ export function Bench(props: {
   }
 
   const projectMenu = (p: Project): MenuItem[] => [
+    ...(live[p.project] && !live[p.project].listening ? [{ label: s('ctxStartSession'), icon: I(SquareTerminal), run: () => setStartFor({ project: withLive(p), reason: 'menu' }) } as MenuItem, { kind: 'separator' } as MenuItem] : []),
     { label: s('ctxRename'), icon: I(PenLine), run: () => setRenaming(p.root) },
     { label: s('ctxChangeLetter'), icon: I(CaseUpper), run: () => (setDialogError(null), setLetterFor(p)) },
     { label: s('ctxUnlink'), icon: I(Unlink), danger: true, run: () => (setDialogError(null), setUnlinkFor(p)) },
@@ -405,6 +438,8 @@ export function Bench(props: {
     const target = stuck[(after + 1) % stuck.length]
     jump(target.node!)
   }
+  const jumpRef = useRef<(key: string) => void>(() => {})
+  jumpRef.current = (key: string) => jump(key)
   const jump = (nodeKey: string) => {
     for (const v of [view, ...bench.views.filter((x) => x !== view && x.view === 'all')]) {
       const folds = reveal(bench, v, nodeKey, prefs.folds)
@@ -438,7 +473,7 @@ export function Bench(props: {
         setError(null)
         return
       }
-      if (palette || settingsOpen || menu || letterFor || unlinkFor || renaming || isTyping(e)) return
+      if (palette || settingsOpen || menu || letterFor || unlinkFor || renaming || quick || startFor || isTyping(e)) return
       if (e.key === 'ContextMenu' || (e.key === 'F10' && e.shiftKey)) {
         e.preventDefault()
         return openMenuAt(listRef.current?.querySelector<HTMLElement>('.row.sel'))
@@ -458,6 +493,10 @@ export function Bench(props: {
       if (meta && e.key.toLowerCase() === 'r') {
         e.preventDefault()
         return void refresh()
+      }
+      if (meta && e.key.toLowerCase() === 'k') {
+        e.preventDefault()
+        return setQuick(true)
       }
       if (meta && e.key === ',') {
         e.preventDefault()
@@ -564,6 +603,10 @@ export function Bench(props: {
           <div class="section-label">{s('projects')}</div>
           {bench.projects.map((p) => (
             <div key={p.root} class={`project ${renaming === p.root ? 'editing' : ''}`} title={p.root} data-ctx="project" data-root={p.root}>
+              <span
+                class={`live-dot ${live[p.project] ? (live[p.project].listening ? 'on' : 'off') : 'unknown'}`}
+                title={live[p.project] ? (live[p.project].listening ? s('listening', { who: listenerOf(p)?.author ?? listenerOf(p)?.harness ?? 'AI' }) : s('notListening')) : ''}
+              />
               <span class="letter" onDblClick={() => (setDialogError(null), setLetterFor(p))}>
                 {p.letter}
               </span>
@@ -664,6 +707,11 @@ export function Bench(props: {
             onClose={startClose}
             onSeen={seen}
             onJump={jump}
+            listening={(() => {
+              const pr = bench.projects.find((x) => x.project === node.project)
+              const l = pr && live[pr.project]
+              return l ? { on: l.listening, who: l.sessions.find((x) => x.role === 'lead')?.author ?? null } : null
+            })()}
             onImage={setLightbox}
             onQuestions={(picks) => act(() => api.answerQuestions(rootOf(node), node.id, picks), s('sent'))}
           />
@@ -685,6 +733,34 @@ export function Bench(props: {
       {help && <Help onClose={() => setHelp(false)} />}
       {settingsOpen && <Settings onClose={() => setSettingsOpen(false)} />}
       {menu && <ContextMenu state={menu} onClose={() => setMenu(null)} />}
+      {quick && (
+        <QuickEntry
+          projects={bench.projects.map(withLive)}
+          project={withLive(bench.projects.find((x) => x.project === node?.project) ?? bench.projects[0])}
+          under={node && !node.terminal ? { ref: node.ref, title: node.title } : null}
+          onClose={() => setQuick(false)}
+          onFiled={(brief, pr) => {
+            setQuick(false)
+            showToast(s('filedBrief', { ref: brief.ref }))
+            pendingJump.current = `${brief.project}#${brief.id}`
+            void refresh()
+            const listening = brief.listening ?? live[pr.project]?.listening
+            if (listening === false) setStartFor({ project: pr, reason: 'brief' })
+          }}
+        />
+      )}
+      {startFor && (
+        <StartSession
+          project={startFor.project}
+          reason={startFor.reason}
+          onClose={() => setStartFor(null)}
+          onDone={(msg) => {
+            setStartFor(null)
+            showToast(msg)
+            setTimeout(() => void api.sessions().then((list) => list && setLive(Object.fromEntries(list.map((x) => [x.project, x])))), 4000)
+          }}
+        />
+      )}
       {letterFor && (
         <LetterPicker
           project={letterFor}
@@ -806,6 +882,7 @@ function Detail(p: {
   onClose: () => void
   onSeen: () => void
   onJump: (key: string) => void
+  listening: { on: boolean; who: string | null } | null
   onImage: (i: number) => void
   onQuestions: (picks: Record<string, string>) => void
 }) {
@@ -817,7 +894,7 @@ function Detail(p: {
     <>
     <div class="detail" ref={p.scrollRef}>
       <div class="detail-inner">
-        <NodeHeader n={n} onJump={p.onJump} />
+        <NodeHeader n={n} onJump={p.onJump} listening={p.listening} />
 
         {n.options.length > 0 && !n.questions.length && (
           <section class="decide">
@@ -1075,6 +1152,7 @@ function Help({ onClose }: { onClose: () => void }) {
     ['W', s('keyNext')],
     ['J K', s('keyScroll')],
     ['⌘O', s('keyAdd')],
+    ['⌘K', s('keyQuick')],
     ['⌘,', s('keySettings')],
     ['Esc', s('keyClose')],
   ]

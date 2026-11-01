@@ -198,6 +198,23 @@
     // The runner files a decision from outside now; it must reach the bench (and be announced, which the runner checks).
     await until('the new decision on the bench', () => $$('.row.node').some((r) => r.textContent.includes('Pick a CDN')), 30000)
 
+    const cli = await invoke('decs', { args: ['sessions', '--json'], cwd: null, stdin: null })
+    if (cli.code === 0) {
+      log('STEP brief')
+      key('k', { metaKey: true })
+      const words = await until('quick entry', () => $('.quick textarea'))
+      type(words, 'Add rate limits to the export endpoint')
+      words.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }))
+      await toast('Filed')
+      // Nobody listens in a scratch project: the app offers to start a session; in test mode that is a dry run.
+      await until('start-session prompt', () => $('.confirm .primary'))
+      await shot('start-session')
+      $('.confirm .primary').click()
+      await toast('test mode')
+      await until('the brief selected, waiting for an AI', () => $('.mchip.brief'))
+      await shot('brief')
+    } else log('STEP brief-skipped (this CLI has no sessions command)')
+
     log('STEP project-menu')
     const projectRow = () => $('.project[data-ctx="project"]')
     rightClick(projectRow())

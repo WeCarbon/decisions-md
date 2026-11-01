@@ -17,13 +17,13 @@ async function invoke<T>(cmd: string, args?: Record<string, unknown>): Promise<T
 
 export class DecsError extends Error {}
 
-async function run(args: string[], cwd?: string): Promise<RunOutput> {
+async function run(args: string[], cwd?: string, stdin?: string): Promise<RunOutput> {
   if (!inDesktop) return demoRun(args)
-  return invoke<RunOutput>('decs', { args, cwd: cwd ?? null })
+  return invoke<RunOutput>('decs', { args, cwd: cwd ?? null, stdin: stdin ?? null })
 }
 
-async function ok(args: string[], cwd?: string): Promise<string> {
-  const out = await run(args, cwd)
+async function ok(args: string[], cwd?: string, stdin?: string): Promise<string> {
+  const out = await run(args, cwd, stdin)
   if (out.code !== 0) throw new DecsError((out.stderr || out.stdout).replace(/^nod [a-z]+: /, '').trim())
   return out.stdout
 }
@@ -98,6 +98,82 @@ export async function copyText(text: string): Promise<void> {
 }
 
 export const isDebugBuild = async (): Promise<boolean> => (inDesktop ? invoke<boolean>('is_debug').catch(() => false) : true)
+
+export interface Session {
+  pid: number
+  author: string | null
+  harness: 'claude-code' | 'codex' | null
+  role: 'lead' | 'teammate'
+  started_at: string
+  last_seen: string
+}
+
+export interface ProjectSessions {
+  project: string
+  letter: string
+  root: string
+  listening: boolean
+  sessions: Session[]
+}
+
+/** Which projects have an AI session listening; older CLIs without `sessions` report none. */
+export async function sessions(): Promise<ProjectSessions[] | null> {
+  if (!inDesktop) return demoSessions()
+  const out = await run(['sessions', '--json'])
+  if (out.code !== 0) return null
+  try {
+    return (JSON.parse(out.stdout) as { projects: ProjectSessions[] }).projects
+  } catch {
+    return null
+  }
+}
+
+export interface FiledBrief {
+  ref: string
+  id: number
+  project: string
+  title: string
+  listening?: boolean
+}
+
+/** The owner's own words, filed for an AI to pick up and expand. More than one line goes in on stdin. */
+export async function fileBrief(root: string, text: string, parentRef?: string): Promise<FiledBrief> {
+  const words = text.trim()
+  const multi = words.includes('\n')
+  const title = words.split('\n')[0].trim()
+  const args = ['add', title, '--brief', ...(parentRef ? ['--parent', parentRef] : []), '--dir', root, '--json']
+  if (!inDesktop) return { ref: 'W11', id: 11, project: 'web', title, listening: false }
+  return JSON.parse(await ok(args, undefined, multi ? words : undefined)) as FiledBrief
+}
+
+export type AgentKind = 'claude' | 'codex' | 'kimi'
+
+export interface SessionStart {
+  ok: boolean
+  started?: boolean
+  reason?: string
+  plan?: { agent: string; root: string; terminal: string; command: string; exec: unknown }
+  dry_run?: boolean
+}
+
+/** Opens a terminal in the project running the agent, which then picks up what is waiting. */
+export async function startSession(root: string, agent: AgentKind): Promise<SessionStart> {
+  if (!inDesktop) return { ok: true, started: true, dry_run: true }
+  const out = await run(['session', 'start', '--agent', agent, '--dir', root, '--json'])
+  try {
+    return JSON.parse(out.stdout) as SessionStart
+  } catch {
+    throw new DecsError((out.stderr || out.stdout).replace(/^nod [a-z]+: /, '').trim())
+  }
+}
+
+function demoSessions(): ProjectSessions[] {
+  const now = new Date().toISOString()
+  return [
+    { project: 'web', letter: 'W', root: '/Users/alice/Code/web', listening: true, sessions: [{ pid: 1, author: 'lane-auth', harness: 'claude-code', role: 'lead', started_at: now, last_seen: now }] },
+    { project: 'api', letter: 'A', root: '/Users/alice/Code/api', listening: false, sessions: [] },
+  ]
+}
 
 export const initProject = (dir: string) => ok(['init', dir])
 
