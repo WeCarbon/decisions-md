@@ -192,7 +192,9 @@
     "pruned": "{{name}} retiré  {{root}}",
     "unknownSubcommand": "sous-commande inconnue « {{verb}} » (list | add | rm | prune)",
     "none": "Aucun projet enregistré. `nod init` en enregistre un automatiquement ; ou `nod projects add <path>`.",
-    "decisionsGone": "(decisions/ n’existe plus)"
+    "decisionsGone": "(decisions/ n’existe plus)",
+    "notRegistered": "aucun projet enregistré ne s’appelle {{target}} — `nod projects` les liste",
+    "removedKeep": "{{name}} délié : {{root}} et son decisions/ restent intacts ; `nod projects add {{root}}` le remet"
   },
   "migrate": {
     "noLegacyFiles": "nod migrate : pas de DECISIONS.md ni DECISIONS.old.md dans {{dir}}",
@@ -360,13 +362,18 @@
     "noneMatching": "Aucun nœud ne correspond."
   },
   "config": {
-    "help": "nod config                      tous les réglages, d’où vient leur valeur, et la lettre de ce projet\nnod config <réglage>            la valeur d’un réglage et sa provenance\nnod config <réglage> <valeur>   le définit pour vous (dans ~/.decs/config.json)\nnod config <réglage> --off      le supprime ; retour à la valeur par défaut\nnod config letter [W]           la lettre de ce projet (dans decisions/decs.json)\n\nRéglages (une variable d’environnement, s’il y en a une, l’emporte sur la valeur enregistrée) :\n{{settings}}\n\nLes mêmes réglages sont dans le tableau : appuyez sur , pour les ouvrir.\n\nlang — {{languages}}. Ordre : --lang sur n’importe quelle commande, puis\nDECS_LANG, puis nod config lang, puis la langue du système (LC_ALL /\nLC_MESSAGES / LANG, ou la langue de l’OS), puis l’anglais.\n\nLa lettre distingue les projets quand le tableau en affiche plusieurs : donnez W\nà web et son 305 s’affiche W305. Les noms de fichiers ne changent pas\n(305-….md ; les anciens D305-….md restent lus). Un projet sans lettre s’affiche {{defaultLetter}}305.\nRéférences : 305, W305, D305 (ancienne forme), W:305 et web:305 sont acceptés.",
+    "help": "nod config                      tous les réglages, d’où vient leur valeur, et la lettre de ce projet\nnod config <réglage>            la valeur d’un réglage et sa provenance\nnod config <réglage> <valeur>   le définit pour vous (dans ~/.decs/config.json)\nnod config <réglage> --off      le supprime ; retour à la valeur par défaut\nnod config letter [W]           la lettre de ce projet (dans decisions/decs.json)\nnod config name [\"Site web\"]    le nom affiché de ce projet (decisions/decs.json) ; --off revient au nom du dossier\n\nRéglages (une variable d’environnement, s’il y en a une, l’emporte sur la valeur enregistrée) :\n{{settings}}\n\nLes mêmes réglages sont dans le tableau : appuyez sur , pour les ouvrir.\n\nlang — {{languages}}. Ordre : --lang sur n’importe quelle commande, puis\nDECS_LANG, puis nod config lang, puis la langue du système (LC_ALL /\nLC_MESSAGES / LANG, ou la langue de l’OS), puis l’anglais.\n\nLa lettre distingue les projets quand le tableau en affiche plusieurs : donnez W\nà web et son 305 s’affiche W305. Les noms de fichiers ne changent pas\n(305-….md ; les anciens D305-….md restent lus). Un projet sans lettre s’affiche {{defaultLetter}}305.\nRéférences : 305, W305, D305 (ancienne forme), W:305 et web:305 sont acceptés.",
     "unknownKey": "réglage inconnu « {{key}} » — il existe : {{keys}}",
     "letterUnset": "{{letter}} (non définie)",
     "letterSet": "Lettre du projet {{letter}} : les nœuds de ce projet s’affichent {{letter}}<numéro>",
     "current": "{{value}}, d’après {{source}}",
     "set": "{{key}} = {{value}}  {{path}}",
-    "cleared": "{{key}} supprimé — retour à la valeur par défaut  {{path}}"
+    "cleared": "{{key}} supprimé — retour à la valeur par défaut  {{path}}",
+    "nameSet": "Nom du projet {{name}} : le tableau et la fenêtre l’affichent à la place du dossier {{folder}}",
+    "nameCleared": "Nom du projet retiré — affiché de nouveau comme {{folder}}",
+    "nameUnset": "{{folder}} (nom du dossier ; non défini)",
+    "letterTaken": "{{project}} utilise déjà {{letter}} : une référence comme {{letter}}305 serait ambiguë. Choisissez une autre lettre, ou ajoutez --force (les références comme {{example}} restent valables).",
+    "letterFormer": "les références écrites avec {{former}} restent valables"
   },
   "setup": {
     "heading": "nod setup — {{dir}}",

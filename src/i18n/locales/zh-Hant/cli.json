@@ -184,7 +184,9 @@
     "pruned": "已移除 {{name}}  {{root}}",
     "unknownSubcommand": "不認識的子命令「{{verb}}」（list | add | rm | prune）",
     "none": "沒有註冊的專案。`nod init` 會自動註冊；也可以 `nod projects add <path>`。",
-    "decisionsGone": "（decisions/ 不在了）"
+    "decisionsGone": "（decisions/ 不在了）",
+    "notRegistered": "沒有登記叫 {{target}} 的專案——`nod projects` 可以列出來",
+    "removedKeep": "已取消關聯 {{name}}：{{root}} 和裡面的 decisions/ 都沒動；`nod projects add {{root}}` 可以加回來"
   },
   "migrate": {
     "noLegacyFiles": "nod migrate：{{dir}} 裡沒有 DECISIONS.md 或 DECISIONS.old.md",
@@ -350,13 +352,18 @@
     "noneMatching": "沒有匹配的節點。"
   },
   "config": {
-    "help": "nod config                      所有設定、各自的值從哪來，以及這個專案的字母\nnod config <設定>                一項設定的值和來源\nnod config <設定> <值>            為你設定（存在 ~/.decs/config.json）\nnod config <設定> --off          刪除，回到預設值\nnod config letter [W]           這個專案的字母（存在 decisions/decs.json）\n\n設定（有環境變數的，環境變數優先於存下的值）：\n{{settings}}\n\n看板裡也有同樣的設定：按 , 開啟。\n\nlang —— {{languages}}。順序：任何指令上的 --lang，然後 DECS_LANG，然後\nnod config lang，然後系統語言（LC_ALL / LC_MESSAGES / LANG，或作業系統語言），\n最後是英文。\n\n專案字母讓多個專案一起開看板時分得清楚：web 設 W，它的 305 就顯示成 W305。\n檔名不變（305-….md，舊的 D305-….md 也照常讀取）。沒設字母的專案顯示成 {{defaultLetter}}305。\n引用時 305、W305、D305（舊寫法）、W:305、web:305 都可以。",
+    "help": "nod config                      所有設定、各自的值從哪來，以及這個專案的字母\nnod config <設定>                一項設定的值和來源\nnod config <設定> <值>            為你設定（存在 ~/.decs/config.json）\nnod config <設定> --off          刪除，回到預設值\nnod config letter [W]           這個專案的字母（存在 decisions/decs.json）\nnod config name [\"網站\"]         這個專案的顯示名稱（存在 decisions/decs.json）；--off 回到資料夾名\n\n設定（有環境變數的，環境變數優先於存下的值）：\n{{settings}}\n\n看板裡也有同樣的設定：按 , 開啟。\n\nlang —— {{languages}}。順序：任何指令上的 --lang，然後 DECS_LANG，然後\nnod config lang，然後系統語言（LC_ALL / LC_MESSAGES / LANG，或作業系統語言），\n最後是英文。\n\n專案字母讓多個專案一起開看板時分得清楚：web 設 W，它的 305 就顯示成 W305。\n檔名不變（305-….md，舊的 D305-….md 也照常讀取）。沒設字母的專案顯示成 {{defaultLetter}}305。\n引用時 305、W305、D305（舊寫法）、W:305、web:305 都可以。",
     "unknownKey": "無法辨識的設定「{{key}}」——目前有：{{keys}}",
     "letterUnset": "{{letter}}（未設定）",
     "letterSet": "專案字母 {{letter}}：這個專案的節點顯示為 {{letter}}<編號>",
     "current": "{{value}}，來自 {{source}}",
     "set": "{{key}} = {{value}}  {{path}}",
-    "cleared": "已刪除 {{key}}——回到預設值  {{path}}"
+    "cleared": "已刪除 {{key}}——回到預設值  {{path}}",
+    "nameSet": "專案名稱 {{name}}：看板和視窗裡用它代替資料夾名 {{folder}}",
+    "nameCleared": "專案名稱已移除——重新顯示為 {{folder}}",
+    "nameUnset": "{{folder}}（資料夾名；未設定）",
+    "letterTaken": "{{project}} 已經在用 {{letter}}：{{letter}}305 這種不帶專案名的編號會分不清。換個字母，或者加 --force（{{example}} 這種寫法照樣能用）。",
+    "letterFormer": "用 {{former}} 寫的舊編號照樣能找到"
   },
   "setup": {
     "heading": "nod setup —— {{dir}}",

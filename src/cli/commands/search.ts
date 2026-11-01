@@ -16,7 +16,7 @@ export function run(args: Args): number {
   const hits = store
     .all()
     .filter((d) => bool(args, 'all') || !d.archived)
-    .filter((d) => !project || d.project === project)
+    .filter((d) => !project || d.project === store.projectKey(project))
     .filter((d) => {
       const hay = [d.title, d.body, ...d.attachments.map((a) => `${a.label} ${a.target}`)].join('\n').toLowerCase()
       return words.every((w) => hay.includes(w))

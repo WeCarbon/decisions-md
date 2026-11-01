@@ -216,8 +216,10 @@ export interface Decision {
   file: string
   slug: string
   archived: boolean
-  /** Basename of the project root — how `decs bench` labels a joined view. */
+  /** Basename of the project root: the stable key (`web#305`, `web:305`). */
   project: string
+  /** What the project is shown as — `decs config name`, else `project`. Filled in by the Store. */
+  projectName?: string
   /** Display letter — `W` in `W305`. Filled in by the Store from `decisions/decs.json`. */
   letter?: string
 }

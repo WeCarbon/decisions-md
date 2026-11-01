@@ -188,7 +188,9 @@
     "pruned": "removed {{name}}  {{root}}",
     "unknownSubcommand": "unknown subcommand \"{{verb}}\" (list | add | rm | prune)",
     "none": "No project registered. `nod init` registers one automatically; or `nod projects add <path>`.",
-    "decisionsGone": "(decisions/ is gone)"
+    "decisionsGone": "(decisions/ is gone)",
+    "notRegistered": "no registered project called {{target}} — `nod projects` lists them",
+    "removedKeep": "unlinked {{name}}: {{root}} and its decisions/ are untouched; `nod projects add {{root}}` brings it back"
   },
   "migrate": {
     "noLegacyFiles": "nod migrate: no DECISIONS.md or DECISIONS.old.md in {{dir}}",
@@ -355,13 +357,18 @@
     "noneMatching": "No matching nodes."
   },
   "config": {
-    "help": "nod config                      every setting, where its value comes from, and this project's letter\nnod config <setting>            one setting's value and where it comes from\nnod config <setting> <value>    set it for you (stored in ~/.decs/config.json)\nnod config <setting> --off      remove it; back to the default\nnod config letter [W]           this project's letter (stored in decisions/decs.json)\n\nSettings (an environment variable, where there is one, wins over the stored value):\n{{settings}}\n\nThe same settings are in the bench: press , to open them.\n\nlang — {{languages}}. Order: --lang on any command, then DECS_LANG, then\nnod config lang, then the system locale (LC_ALL / LC_MESSAGES / LANG, or the\nOS language), then English.\n\nThe project letter tells projects apart when the bench shows several: give\nweb W and its 305 shows as W305. File names do not change (305-….md; old\nD305-….md files still read). A project without a letter shows as {{defaultLetter}}305.\nRefs: 305, W305, D305 (old style), W:305 and web:305 all work.",
+    "help": "nod config                      every setting, where its value comes from, and this project's letter\nnod config <setting>            one setting's value and where it comes from\nnod config <setting> <value>    set it for you (stored in ~/.decs/config.json)\nnod config <setting> --off      remove it; back to the default\nnod config letter [W]           this project's letter (stored in decisions/decs.json)\nnod config name [\"Web app\"]     this project's display name (decisions/decs.json); --off goes back to the folder name\n\nSettings (an environment variable, where there is one, wins over the stored value):\n{{settings}}\n\nThe same settings are in the bench: press , to open them.\n\nlang — {{languages}}. Order: --lang on any command, then DECS_LANG, then\nnod config lang, then the system locale (LC_ALL / LC_MESSAGES / LANG, or the\nOS language), then English.\n\nThe project letter tells projects apart when the bench shows several: give\nweb W and its 305 shows as W305. File names do not change (305-….md; old\nD305-….md files still read). A project without a letter shows as {{defaultLetter}}305.\nRefs: 305, W305, D305 (old style), W:305 and web:305 all work.",
     "unknownKey": "unknown setting \"{{key}}\" — there is: {{keys}}",
     "letterUnset": "{{letter}} (not set)",
     "letterSet": "Project letter {{letter}}: this project's nodes show as {{letter}}<number>",
     "current": "{{value}}, from {{source}}",
     "set": "{{key}} = {{value}}  {{path}}",
-    "cleared": "{{key}} removed — back to its default  {{path}}"
+    "cleared": "{{key}} removed — back to its default  {{path}}",
+    "nameSet": "Project name {{name}}: the bench and the window show it instead of the folder name {{folder}}",
+    "nameCleared": "Project name removed — shown as {{folder}} again",
+    "nameUnset": "{{folder}} (folder name; not set)",
+    "letterTaken": "{{project}} already uses {{letter}}: bare refs like {{letter}}305 would be ambiguous. Pick another letter, or pass --force (refs like {{example}} keep working).",
+    "letterFormer": "refs written with {{former}} keep working"
   },
   "setup": {
     "heading": "nod setup — {{dir}}",

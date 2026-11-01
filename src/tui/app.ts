@@ -141,8 +141,8 @@ function snapshot(store: Store, project?: string): Snapshot {
   const now = Date.now()
   const all = store.all()
   return {
-    items: project ? all.filter((d) => d.project === project) : all,
-    sources: listSources(store, now).filter((s) => !project || s.project === project),
+    items: project ? all.filter((d) => d.project === store.projectKey(project)) : all,
+    sources: listSources(store, now).filter((s) => !project || s.project === store.projectKey(project)),
     now,
   }
 }

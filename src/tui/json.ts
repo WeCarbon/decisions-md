@@ -2,6 +2,7 @@ import { parseBodyRefs, refOf } from '../core/ref.ts'
 import { OPTIONS_HEADING_RE } from '../core/parse.ts'
 import { QUESTIONS_HEADING_RE } from '../core/questions.ts'
 import { toJSON } from '../core/render.ts'
+import { readProjectConfig } from '../core/project.ts'
 import { isTerminal } from '../core/status.ts'
 import type { Store } from '../core/store.ts'
 import type { Decision as Item } from '../core/types.ts'
@@ -160,7 +161,8 @@ export function nodeDetailJson(store: Store, d: Item, now = Date.now()): Record<
 export function benchJson(store: Store, opts: { project?: string; now?: number } = {}): Record<string, unknown> {
   const now = opts.now ?? Date.now()
   const all = store.all()
-  const items = opts.project ? all.filter((d) => d.project === opts.project) : all
+  const key = store.projectKey(opts.project)
+  const items = key ? all.filter((d) => d.project === key) : all
   const openAll = { expanded: new Set(items.map(keyOf)), openGroups: everyFoldKey(items) }
   const views = VIEWS.map((view) => {
     const rows = rowsFor(view, items, openAll)
@@ -180,7 +182,13 @@ export function benchJson(store: Store, opts: { project?: string; now?: number }
     lang: lang(),
     rtl: isRtl(),
     labels: { defaultMark: t('bench.detail.defaultMark') },
-    projects: store.layouts.map((l) => ({ project: store.projectName(l), letter: store.letterOf(l), root: l.projectRoot })),
+    projects: store.layouts.map((l) => ({
+      project: store.projectName(l),
+      name: store.displayName(l),
+      letter: store.letterOf(l),
+      former_letters: readProjectConfig(l).former_letters ?? [],
+      root: l.projectRoot,
+    })),
     views,
     nodes,
   }

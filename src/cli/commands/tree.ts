@@ -26,7 +26,7 @@ export function run(args: Args): number {
   } else {
     roots = items.filter((d) => d.parent === undefined && (bool(args, 'all') || !d.archived))
     const project = one(args, 'project', 'p')
-    if (project) roots = roots.filter((d) => d.project === project)
+    if (project) roots = roots.filter((d) => d.project === store.projectKey(project))
   }
 
   if (bool(args, 'json')) {

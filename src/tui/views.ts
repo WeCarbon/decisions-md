@@ -180,10 +180,10 @@ export function isCollapsed(d: Item, opts: TreeOptions): boolean {
 }
 
 /** Project order as the store lists them, so a joined bench keeps a stable layout. */
-function projectsOf(items: Item[]): { project: string; letter?: string }[] {
-  const seen = new Map<string, string | undefined>()
-  for (const i of items) if (!seen.has(i.project)) seen.set(i.project, i.letter)
-  return [...seen].map(([project, letter]) => ({ project, letter }))
+function projectsOf(items: Item[]): { project: string; letter?: string; name: string }[] {
+  const seen = new Map<string, Item>()
+  for (const i of items) if (!seen.has(i.project)) seen.set(i.project, i)
+  return [...seen].map(([project, i]) => ({ project, letter: i.letter, name: i.projectName ?? project }))
 }
 
 const isRoot = (i: Item, byKey: Map<string, Item>) => i.parent === undefined || !byKey.has(`${i.project}#${i.parent}`)
@@ -216,7 +216,7 @@ export function filteredTreeRows(view: View, items: Item[], opts: TreeOptions = 
         key: `project:${p.project}`,
         kind: 'header',
         depth: 0,
-        text: t('bench.header.viewCount', { letter: p.letter ?? 'X', project: p.project, count: n, label: VIEW_LABEL[view] }),
+        text: t('bench.header.viewCount', { letter: p.letter ?? 'X', project: p.name, count: n, label: VIEW_LABEL[view] }),
       })
     }
     for (const r of roots) walk(r, 0)
@@ -260,8 +260,8 @@ export function treeRows(items: Item[], opts: TreeOptions = {}): Row[] {
         kind: 'header',
         depth: 0,
         text: done
-          ? t('bench.header.inProgressDone', { letter: p.letter ?? 'X', project: p.project, count: mine.length - done, done })
-          : t('bench.header.inProgress', { letter: p.letter ?? 'X', project: p.project, count: mine.length - done }),
+          ? t('bench.header.inProgressDone', { letter: p.letter ?? 'X', project: p.name, count: mine.length - done, done })
+          : t('bench.header.inProgress', { letter: p.letter ?? 'X', project: p.name, count: mine.length - done }),
       })
     }
     for (const r of open) walk(r, 0)
@@ -289,7 +289,7 @@ export function ownerRows(items: Item[]): Row[] {
   for (const p of projectsOf(items)) {
     const list = ownerQueue(items).filter((i) => i.project === p.project)
     if (!list.length) continue
-    out.push({ key: `project:${p.project}`, kind: 'header', depth: 0, text: t('bench.header.decide', { letter: p.letter ?? 'X', project: p.project, count: list.length }) })
+    out.push({ key: `project:${p.project}`, kind: 'header', depth: 0, text: t('bench.header.decide', { letter: p.letter ?? 'X', project: p.name, count: list.length }) })
     for (const d of list) out.push({ key: keyOf(d), kind: 'node', node: d, depth: 0 })
   }
   return out

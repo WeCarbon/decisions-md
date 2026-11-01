@@ -44,7 +44,7 @@ export function deferredLabel(d: Pick<Decision, 'deferredAt' | 'deferredBy'>, no
 
 export function summaryLine(d: Decision, opts: { project?: boolean } = {}): string {
   const bits = [cyan(refOf(d))]
-  if (opts.project && d.project) bits.push(dim(d.project))
+  if (opts.project && d.project) bits.push(dim(d.projectName ?? d.project))
   if (d.pin === 'top') bits.push(yellow('↑'))
   if (d.pin === 'bottom') bits.push(dim('↓'))
   if (d.urgency === 'high') bits.push(yellow(bold(i18n('core.render.urgent'))))
@@ -159,6 +159,7 @@ export function toJSON(d: Decision): Record<string, unknown> {
     id: d.id,
     ref: refOf(d),
     project: d.project,
+    project_name: d.projectName ?? d.project,
     title: d.title,
     author: d.author,
     status: d.state,

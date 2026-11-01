@@ -184,7 +184,9 @@
     "pruned": "已移除 {{name}}  {{root}}",
     "unknownSubcommand": "不认识的子命令「{{verb}}」（list | add | rm | prune）",
     "none": "没有注册的项目。`nod init` 会自动注册；也可以 `nod projects add <path>`。",
-    "decisionsGone": "（decisions/ 不在了）"
+    "decisionsGone": "（decisions/ 不在了）",
+    "notRegistered": "没有登记叫 {{target}} 的项目——`nod projects` 可以列出来",
+    "removedKeep": "已取消关联 {{name}}：{{root}} 和里面的 decisions/ 都没动；`nod projects add {{root}}` 可以加回来"
   },
   "migrate": {
     "noLegacyFiles": "nod migrate：{{dir}} 里没有 DECISIONS.md 或 DECISIONS.old.md",
@@ -350,13 +352,18 @@
     "noneMatching": "没有匹配的节点。"
   },
   "config": {
-    "help": "nod config                      所有设置、各自的值从哪来，以及这个项目的字母\nnod config <设置>                一项设置的值和来源\nnod config <设置> <值>            为你设定（存在 ~/.decs/config.json）\nnod config <设置> --off          删掉，回到默认值\nnod config letter [W]           这个项目的字母（存在 decisions/decs.json）\n\n设置（有环境变量的，环境变量优先于存下的值）：\n{{settings}}\n\n看板里也有同样的设置：按 , 打开。\n\nlang —— {{languages}}。顺序：任何命令上的 --lang，然后 DECS_LANG，然后\nnod config lang，然后系统语言（LC_ALL / LC_MESSAGES / LANG，或操作系统语言），\n最后是英文。\n\n项目字母让几个项目一起开看板时分得清：web 设 W，它的 305 就显示成 W305。\n文件名不变（305-….md，老的 D305-….md 也照常读）。没设字母的项目显示成 {{defaultLetter}}305。\n引用时 305、W305、D305（老写法）、W:305、web:305 都认。",
+    "help": "nod config                      所有设置、各自的值从哪来，以及这个项目的字母\nnod config <设置>                一项设置的值和来源\nnod config <设置> <值>            为你设定（存在 ~/.decs/config.json）\nnod config <设置> --off          删掉，回到默认值\nnod config letter [W]           这个项目的字母（存在 decisions/decs.json）\nnod config name [\"网站\"]         这个项目的显示名称（存在 decisions/decs.json）；--off 回到文件夹名\n\n设置（有环境变量的，环境变量优先于存下的值）：\n{{settings}}\n\n看板里也有同样的设置：按 , 打开。\n\nlang —— {{languages}}。顺序：任何命令上的 --lang，然后 DECS_LANG，然后\nnod config lang，然后系统语言（LC_ALL / LC_MESSAGES / LANG，或操作系统语言），\n最后是英文。\n\n项目字母让几个项目一起开看板时分得清：web 设 W，它的 305 就显示成 W305。\n文件名不变（305-….md，老的 D305-….md 也照常读）。没设字母的项目显示成 {{defaultLetter}}305。\n引用时 305、W305、D305（老写法）、W:305、web:305 都认。",
     "unknownKey": "不认识的设置「{{key}}」——现在有：{{keys}}",
     "letterUnset": "{{letter}}（未设置）",
     "letterSet": "项目字母 {{letter}}：这个项目的节点显示为 {{letter}}<编号>",
     "current": "{{value}}，来自 {{source}}",
     "set": "{{key}} = {{value}}  {{path}}",
-    "cleared": "已删除 {{key}}——回到默认值  {{path}}"
+    "cleared": "已删除 {{key}}——回到默认值  {{path}}",
+    "nameSet": "项目名称 {{name}}：看板和窗口里用它代替文件夹名 {{folder}}",
+    "nameCleared": "项目名称已移除——重新显示为 {{folder}}",
+    "nameUnset": "{{folder}}（文件夹名；未设置）",
+    "letterTaken": "{{project}} 已经在用 {{letter}}：{{letter}}305 这种不带项目名的编号会分不清。换个字母，或者加 --force（{{example}} 这种写法照样能用）。",
+    "letterFormer": "用 {{former}} 写的旧编号照样能找到"
   },
   "setup": {
     "heading": "nod setup —— {{dir}}",

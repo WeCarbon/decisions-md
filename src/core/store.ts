@@ -5,7 +5,7 @@ import { createFileAtomic, withFileLock, writeFileAtomic } from './lock.ts'
 import { collapseDuplicateOptions, type DuplicateOptionsBlock } from './repair.ts'
 import { attachmentDir, childDirOf, entryFileName, listEntryFiles, toPosixPath, type Layout } from './paths.ts'
 import { benchOrder } from './order.ts'
-import { projectLetter, readProjectConfig } from './project.ts'
+import { projectDisplayName, projectLetter, readProjectConfig } from './project.ts'
 import { parseBodyRefs, parseRef, refOf } from './ref.ts'
 import { dequeue, enqueue, readQueue } from './queue.ts'
 import { DEFAULT_MARK, HEADING, NOTE_KIND, NOTE_TEXT, isAnswerKind, optionsHeading } from './format.ts'
@@ -86,8 +86,23 @@ export class Store {
     return this.layouts[0]
   }
 
+  /** The stable key: the folder name. Shown to people as `displayName`. */
   projectName(l: Layout): string {
     return basename(l.projectRoot)
+  }
+
+  displayName(l: Layout): string {
+    return projectDisplayName(l)
+  }
+
+  /** The key for whatever the user called a project: its folder name or its display name. */
+  projectKey(name: string | undefined): string | undefined {
+    if (!name) return name
+    const l =
+      this.layouts.find((x) => this.projectName(x) === name) ??
+      this.layouts.find((x) => this.displayName(x) === name) ??
+      this.layouts.find((x) => this.displayName(x).toLowerCase() === name.toLowerCase())
+    return l ? this.projectName(l) : name
   }
 
   /** Cached by path while mtime/size/queue-membership match; `mutate()` re-reads on write so this never feeds one. */
@@ -172,7 +187,7 @@ export class Store {
       .filter(keep)
       .filter((d) => (archived === 'all' ? true : d.archived === archived))
       .filter((d) => (filter.author ? sameAgent(d.author, filter.author) : true))
-      .filter((d) => (filter.project ? d.project === filter.project : true))
+      .filter((d) => (filter.project ? d.project === this.projectKey(filter.project) : true))
       .sort(benchOrder)
   }
 
@@ -182,7 +197,8 @@ export class Store {
   }
 
   get(id: number, project?: string): Decision | null {
-    const hits = this.all().filter((d) => d.id === id && (!project || d.project === project))
+    const key = this.projectKey(project)
+    const hits = this.all().filter((d) => d.id === id && (!key || d.project === key))
     if (hits.length > 1) {
       const where = hits.map((h) => refOf(h)).join(', ')
       throw new Error(t('core.store.idInMultipleProjects', { id, where, example: refOf(hits[0]) }))
@@ -525,7 +541,7 @@ export class Store {
     const out: Decision[] = []
     for (const l of this.layouts) {
       const project = this.projectName(l)
-      if (filter.project && project !== filter.project) continue
+      if (filter.project && project !== this.projectKey(filter.project)) continue
       // Only the queued entries are read; the array order is the FIFO order.
       const byId = new Map(listEntryFiles(l).map((f) => [f.id, f]))
       for (const id of readQueue(l)) {
@@ -557,7 +573,7 @@ export class Store {
       return !Number.isNaN(t) && t + precisionMs > cut
     }
     for (const d of this.all()) {
-      if (filter.project && d.project !== filter.project) continue
+      if (filter.project && d.project !== this.projectKey(filter.project)) continue
       if (filter.author && !sameAgent(d.author, filter.author)) continue
       const base = { id: d.id, ref: refOf(d), project: d.project, title: d.title, entry_author: d.author, file: d.file }
       if (after(d.created)) out.push({ ...base, at: d.created, event: 'created', role: 'agent', by: d.author })
@@ -962,7 +978,8 @@ export class Store {
     const d = parseDecision(readFileSync(path, 'utf8'), path, inArchive, this.projectName(l), { queued: isQueued })
     const up = dirname(path)
     const m = up === l.activeDir || up === l.archivedDir ? null : /^D?(\d+)(?:-.*)?$/.exec(basename(up))
-    return { ...d, letter: this.letterOf(l), ...(m ? { parent: Number(m[1]) } : {}) }
+    const shown = this.displayName(l)
+    return { ...d, letter: this.letterOf(l), ...(shown !== d.project ? { projectName: shown } : {}), ...(m ? { parent: Number(m[1]) } : {}) }
   }
 
   private letters = new Map<Layout, string>()
@@ -990,7 +1007,9 @@ export class Store {
     const r = parseRef(raw)
     let name = project ?? r.project
     if (r.letter && !name) {
-      const hits = this.layouts.filter((l) => this.letterOf(l) === r.letter)
+      let hits = this.layouts.filter((l) => this.letterOf(l) === r.letter)
+      // A letter the project used to have: refs written before the change keep working.
+      if (!hits.length) hits = this.layouts.filter((l) => readProjectConfig(l).former_letters?.includes(r.letter!))
       const known = [...new Set(this.layouts.map((l) => `${this.letterOf(l)}=${this.projectName(l)}`))].join(' ')
       // `D305` from before project letters existed: "305, here". A project
       // that really is lettered D wins, because that is what its refs print.
