@@ -4,7 +4,7 @@ import { execFileSync, spawn } from 'node:child_process'
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, realpathSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 
 import { parseArgs, parseOptionPairs, many, one, bool, oneLine } from '../src/cli/args.ts'
 import { parseAttachments, parseDecision, parseOptions, splitFrontMatter } from '../src/core/parse.ts'
@@ -925,14 +925,16 @@ test('bench opens every registered folder from anywhere; `.` narrows to the curr
     assert.equal(reg.projects.length, 2, 'the registry lives in $DECS_HOME/config.json')
 
     // Exercised through resolveStore in a child process so DECS_HOME is read fresh.
+    // A Windows path (`D:\...`) isn't a valid ESM import specifier — only a
+    // relative path or a URL is, so these go through file:// URLs instead.
     const probe = (cwd: string, argv: string[]) =>
       execFileSync(
         process.execPath,
         [
           '--input-type=module',
           '-e',
-          `import { resolveStore } from ${JSON.stringify(join(ROOT, 'src/cli/context.ts'))};
-           import { parseArgs } from ${JSON.stringify(join(ROOT, 'src/cli/args.ts'))};
+          `import { resolveStore } from ${JSON.stringify(pathToFileURL(join(ROOT, 'src/cli/context.ts')).href)};
+           import { parseArgs } from ${JSON.stringify(pathToFileURL(join(ROOT, 'src/cli/args.ts')).href)};
            const s = resolveStore(parseArgs(${JSON.stringify(argv)}), { allowRegistry: true, preferRegistry: true, positionalDirs: true });
            console.log(s.layouts.length)`,
         ],

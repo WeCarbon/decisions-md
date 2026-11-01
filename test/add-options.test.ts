@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { chmodSync, readdirSync, rmSync } from 'node:fs'
+import { mkdirSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
 
 import { initLayout } from '../src/core/paths.ts'
 import { Store, optionDiff } from '../src/core/store.ts'
@@ -135,17 +135,18 @@ test('a create that fails validation reserves no id; the next one gets the numbe
 test('a create whose file write fails gives its reserved id back', (t) => {
   const { store, layout } = fresh(t)
   store.create({ title: 'one', author: 'a · x', task: true })
-  chmodSync(layout.activeDir, 0o500)
-  t.after(() => {
-    try {
-      chmodSync(layout.activeDir, 0o755)
-    } catch {
-      /* already cleaned up */
-    }
-  })
-  assert.throws(() => store.create({ title: 'blocked', author: 'a · x', task: true }), /EACCES|permission/i)
+  // A permission trick (chmod the directory read-only) isn't portable — Windows
+  // doesn't enforce it the same way a POSIX box does. Swapping active/ for a
+  // plain file blocks the write everywhere instead: `mkdirSync(..., {
+  // recursive: true })` — the first thing create() does — fails with EEXIST
+  // on every OS once a non-directory sits at that path.
+  rmSync(layout.activeDir, { recursive: true, force: true })
+  writeFileSync(layout.activeDir, '')
+  t.after(() => rmSync(layout.activeDir, { force: true }))
+  assert.throws(() => store.create({ title: 'blocked', author: 'a · x', task: true }), /EEXIST/i)
   assert.deepEqual(ids(layout.idsDir), [1], 'the number taken for the failed write was released')
-  chmodSync(layout.activeDir, 0o755)
+  rmSync(layout.activeDir, { force: true })
+  mkdirSync(layout.activeDir, { recursive: true })
   assert.equal(store.create({ title: 'two', author: 'a · x', task: true }).id, 2)
 })
 

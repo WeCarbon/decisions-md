@@ -1,4 +1,4 @@
-import { execFileSync, spawn } from 'node:child_process'
+import { execFileSync, spawn, type ChildProcess } from 'node:child_process'
 import { mkdtempSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -51,5 +51,35 @@ export function decsAsync(cwd: string, args: string[]): Promise<void> {
     })
     child.once('error', reject)
     child.once('exit', (code) => (code === 0 ? resolve() : reject(new Error(`exit ${code}`))))
+  })
+}
+
+/**
+ * Ends a long-lived child (`decs monitor`, …) and waits for it to actually
+ * exit before the test moves on. Windows has no SIGTERM semantics — `.kill()`
+ * terminates the process forcefully regardless of what's passed — but a test
+ * that fires it and moves on without waiting can still finish before the OS
+ * has reaped the process; an orphan left running past the last test is what
+ * keeps `node --test` itself from exiting. Closing stdin first unblocks a
+ * child that might otherwise be waiting on it.
+ */
+export function killAndWait(child: ChildProcess, timeoutMs = 5000): Promise<void> {
+  return new Promise((resolve) => {
+    if (child.exitCode !== null || child.signalCode !== null) {
+      resolve()
+      return
+    }
+    const done = () => {
+      clearTimeout(timer)
+      resolve()
+    }
+    const timer = setTimeout(done, timeoutMs)
+    child.once('exit', done)
+    try {
+      child.stdin?.end()
+    } catch {
+      /* already closed */
+    }
+    child.kill()
   })
 }

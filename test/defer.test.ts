@@ -13,7 +13,7 @@ import { Store } from '../src/core/store.ts'
 import { readQueue } from '../src/core/queue.ts'
 import { NOTE_KIND, NOTE_TEXT } from '../src/core/format.ts'
 import { DEFERRED_GROUP, VIEWS, homeView, inView, rowsFor, viewCount, viewFromArg } from '../src/tui/views.ts'
-import { BIN, decs, decsResult, scratch } from './helpers.ts'
+import { BIN, decs, decsResult, killAndWait, scratch } from './helpers.ts'
 import { bench, has, KEY } from './tui-harness.ts'
 
 const A = 'lane-defer · test'
@@ -194,8 +194,6 @@ test('decs defer / --off / undefer: role follows the shell; show deferred lists 
 test('decs monitor tells the lane "owner Deferred", and nothing is queued', async (t) => {
   const root = scratch()
   const home = scratch()
-  t.after(() => rmSync(root, { recursive: true, force: true }))
-  t.after(() => rmSync(home, { recursive: true, force: true }))
   decs(root, ['init', '--no-register'])
   decs(root, ['add', 'run the gate', '--task'])
   decs(root, ['start', '1'])
@@ -204,11 +202,16 @@ test('decs monitor tells the lane "owner Deferred", and nothing is queued', asyn
     cwd: root,
     env: { ...process.env, NO_COLOR: '1', DECS_AUTHOR: 'cli-test · lane', CLAUDECODE: '1', DECS_HOME: home },
   })
+  // Registered before the directory removals below: Windows won't remove a
+  // directory that's still a live process's cwd (root) or holds a file it
+  // has open (home), so the monitor must be dead first.
+  t.after(() => killAndWait(child))
+  t.after(() => rmSync(root, { recursive: true, force: true }))
+  t.after(() => rmSync(home, { recursive: true, force: true }))
   let out = ''
   let err = ''
   child.stdout.on('data', (b) => (out += b))
   child.stderr.on('data', (b) => (err += b))
-  t.after(() => child.kill())
   // Wait on what the monitor says, not on a clock: a loaded machine made fixed sleeps flaky.
   const until = async (ok: () => boolean, what: string) => {
     for (const end = Date.now() + 10_000; !ok(); await new Promise((r) => setTimeout(r, 50)))

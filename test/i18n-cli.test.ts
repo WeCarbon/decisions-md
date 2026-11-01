@@ -7,7 +7,7 @@ import { spawn } from 'node:child_process'
 import { LANGUAGES, setLang, t, type Lang } from '../src/i18n/index.ts'
 import { padLeftToWidth } from '../src/core/render.ts'
 import { BIDI_CONTROLS } from '../src/i18n/bidi.ts'
-import { BIN, decs, decsResult, scratch } from './helpers.ts'
+import { BIN, decs, decsResult, killAndWait, scratch } from './helpers.ts'
 
 // ---------------------------------------------------------------------------
 // decs --help / decs add --help in every language
@@ -67,7 +67,6 @@ function spawnMonitor(root: string, args: string[], env: Record<string, string>)
 for (const lng of LANGUAGES) {
   test(`decs monitor: DECS-UNCLAIMED stays byte-identical under --lang ${lng}`, async (t) => {
     const root = scratch()
-    t.after(() => rmSync(root, { recursive: true, force: true }))
     decs(root, ['init', '--no-register'])
     // Filed under a different author so the startup "already queued" dump
     // (filtered by --mine) skips it, and only the unfiltered safety net reports it.
@@ -77,7 +76,10 @@ for (const lng of LANGUAGES) {
     const { child, out } = spawnMonitor(root, ['--lang', lng, '--mine', '--unclaimed-after', '0s', '--interval', '200'], {
       DECS_AUTHOR: 'lead · collecting',
     })
-    t.after(() => child.kill())
+    // Before the rmSync below: Windows won't remove a directory that's still
+    // a live process's cwd.
+    t.after(() => killAndWait(child))
+    t.after(() => rmSync(root, { recursive: true, force: true }))
     const unclaimed = () => out().trim().split('\n').filter((l) => l.startsWith('DECS-UNCLAIMED'))
     for (let waited = 0; waited < 8000 && !unclaimed().length; waited += 100) await new Promise((r) => setTimeout(r, 100))
     // One more interval, to catch a duplicate if the monitor were to report it twice.

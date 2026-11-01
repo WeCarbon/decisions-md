@@ -9,7 +9,7 @@ import { initLayout } from '../src/core/paths.ts'
 import { Store, lastHumanAt, reopenedAfterArchive } from '../src/core/store.ts'
 import { parseDuration, parseSince } from '../src/core/duration.ts'
 import { setLang } from '../src/i18n/index.ts'
-import { BIN, decs, decsResult, scratch } from './helpers.ts'
+import { BIN, decs, decsResult, killAndWait, scratch } from './helpers.ts'
 import { spawnSync } from 'node:child_process'
 
 test('note headings: old owner-only shape reads as human, new shape carries the role', () => {
@@ -332,7 +332,6 @@ const settle = () => new Promise((r) => setTimeout(r, 800))
 
 test('decs monitor prints one line per owner reply or answer, never an agent record, and resumes with since=', async (t) => {
   const root = scratch()
-  t.after(() => rmSync(root, { recursive: true, force: true }))
   decs(root, ['init', '--no-register'])
   decs(root, ['add', 'should we ship', '-o', '1=ship', '2=hold off', '--default', '1'])
   const { spawn } = await import('node:child_process')
@@ -343,7 +342,7 @@ test('decs monitor prints one line per owner reply or answer, never an agent rec
   })
   let out = ''
   child.stdout.on('data', (b) => (out += b))
-  t.after(() => child.kill())
+  t.after(() => killAndWait(child))
   await waitFor(monitorReady(home), 'the monitor to start')
   decs(root, ['note', '1', '--human', "wait for Carol's reply first"])
   decs(root, ['note', '1', '--agent', "lane's own note"])
@@ -355,7 +354,7 @@ test('decs monitor prints one line per owner reply or answer, never an agent rec
 
   // re-arming with the last since= replays nothing already seen, but picks up what happened while no monitor ran
   const since = lines[0].split('since=')[1]
-  child.kill()
+  await killAndWait(child)
   decs(root, ['note', '1', '--human', 'ship it after all'])
   const replay = spawn(process.execPath, [BIN, 'monitor', '--since', since, '--interval', '200'], {
     cwd: root,
@@ -363,13 +362,15 @@ test('decs monitor prints one line per owner reply or answer, never an agent rec
   })
   let out2 = ''
   replay.stdout.on('data', (b) => (out2 += b))
-  t.after(() => replay.kill())
+  t.after(() => killAndWait(replay))
   await waitFor(() => /ship it after all/.test(out2), 'the reply made while no monitor ran')
+  // Registered last, so it runs last — after both monitors above are confirmed
+  // dead. Windows won't remove a directory that's still a live process's cwd.
+  t.after(() => rmSync(root, { recursive: true, force: true }))
 })
 
 test('decs monitor --mine still reports an answer nobody collected on a node filed under another name', async (t) => {
   const root = scratch()
-  t.after(() => rmSync(root, { recursive: true, force: true }))
   decs(root, ['init', '--no-register'])
   // A lead files for a lane: the node is signed by the lane, not by the lead.
   decs(root, ['add', 'check the mail', '--author', 'mail-deliv · check delivery', '-o', '1=check', '2=skip it'])
@@ -381,7 +382,10 @@ test('decs monitor --mine still reports an answer nobody collected on a node fil
   })
   let out = ''
   child.stdout.on('data', (b) => (out += b))
-  t.after(() => child.kill())
+  // Before the rmSync below: Windows won't remove a directory that's still a
+  // live process's cwd.
+  t.after(() => killAndWait(child))
+  t.after(() => rmSync(root, { recursive: true, force: true }))
   await waitFor(() => out.includes('DECS-UNCLAIMED'), 'the unclaimed-answer line')
   await settle()
   const lines = out.trim().split('\n').filter((l) => l.startsWith('DECS-UNCLAIMED'))
@@ -402,7 +406,6 @@ test('decs add under another agent\'s name warns that --mine will not see it', (
 
 test('a bare decs monitor re-armed after a gap picks up what happened in between, without since=', async (t) => {
   const root = scratch()
-  t.after(() => rmSync(root, { recursive: true, force: true }))
   decs(root, ['init', '--no-register'])
   decs(root, ['add', 'should we ship', '-o', '1=ship', '2=hold off'])
   const { spawn } = await import('node:child_process')
@@ -411,18 +414,20 @@ test('a bare decs monitor re-armed after a gap picks up what happened in between
     const c = spawn(process.execPath, [BIN, 'monitor', '--interval', '200', '--no-sources'], { cwd: root, env })
     let out = ''
     c.stdout.on('data', (b) => (out += b))
-    t.after(() => c.kill())
+    t.after(() => killAndWait(c))
     return { c, out: () => out }
   }
   const first = start()
   await waitFor(monitorReady(join(root, 'home')), 'the first monitor to save where it got to')
-  first.c.kill()
-  await new Promise((r) => first.c.once('exit', r))
+  await killAndWait(first.c)
   // Happens while no monitor is running — the gap between expiry and re-arm.
   decs(root, ['note', '1', '--human', 'said in the gap'])
   decs(root, ['read', '1'])
   const second = start()
   await waitFor(() => /said in the gap/.test(second.out()), 'the reply made in the gap')
+  // Registered last, after both monitors' own kill hooks above: Windows won't
+  // remove a directory that's still a live process's cwd.
+  t.after(() => rmSync(root, { recursive: true, force: true }))
 })
 
 test('decs monitor goes offline by itself after --idle-exit with no events, saying so', async (t) => {
@@ -436,7 +441,7 @@ test('decs monitor goes offline by itself after --idle-exit with no events, sayi
   })
   let out = ''
   child.stdout.on('data', (b) => (out += b))
-  t.after(() => child.kill())
+  t.after(() => killAndWait(child))
   const code = await new Promise<number | null>((r) => child.on('exit', r))
   assert.equal(code, 0)
   assert.match(out, /^DECS-IDLE .*monitor going offline/m)
@@ -493,7 +498,9 @@ async function monitorAs(teammate: string, args: string[], act: (root: string) =
   act(root)
   await waitFor(() => out.includes('for lane-a'), "lane-a's reply")
   await settle()
-  child.kill()
+  // Windows won't remove a directory that's still a live process's cwd —
+  // the monitor must actually be gone before the rmSync below runs.
+  await killAndWait(child)
   rmSync(root, { recursive: true, force: true })
   return out
 }
