@@ -1,5 +1,5 @@
 import { closeSync, existsSync, openSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
-import { basename, join } from 'node:path'
+import { basename, join, sep } from 'node:path'
 import { bool, one, type Args } from '../args.ts'
 import { resolveStore } from '../context.ts'
 import { stripPrefix, upgradeOptionLists, upgradeStatuses, type Step } from '../../core/upgrade.ts'
@@ -153,7 +153,8 @@ function upgrade(args: Args): number {
   // Prefix first: the status pass reads the files where they end up.
   if (bool(args, 'strip-prefix')) steps.push(...stripPrefix(layout, { dryRun }))
   if (bool(args, 'upgrade')) steps.push(...upgradeStatuses(store, { dryRun }), ...upgradeOptionLists(store, { dryRun }))
-  const rel = (p: string) => p.replace(`${layout.root}/`, '')
+  // join()'d paths use the host separator — a hard-coded `/` never matched on Windows.
+  const rel = (p: string) => p.replace(`${layout.root}${sep}`, '')
   for (const s of steps) console.log(`${dryRun ? t('cli.migrate.wouldPrefix') : ''}${s.what}  ${rel(s.from)}${s.to ? ` → ${rel(s.to)}` : ''}`)
   console.log(
     steps.length
