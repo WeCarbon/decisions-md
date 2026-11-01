@@ -21,8 +21,10 @@ function tmp(t: { after: (fn: () => void) => void }, prefix: string): string {
 // ---------------------------------------------------------------------------
 
 test('benchStatePath follows DECS_HOME, read when called', () => {
-  assert.equal(benchStatePath({ DECS_HOME: '/x/y' }), '/x/y/bench-state.json')
-  assert.match(benchStatePath({}), /\.decs\/bench-state\.json$/)
+  // join() uses the host separator, so the expected value is built the same way
+  // rather than hard-coded with `/` — on Windows that would never match.
+  assert.equal(benchStatePath({ DECS_HOME: join('/x', 'y') }), join('/x', 'y', 'bench-state.json'))
+  assert.match(benchStatePath({}), new RegExp(`\\.decs[/\\\\]bench-state\\.json$`))
 })
 
 test('foldFor stores only departures from the default', () => {

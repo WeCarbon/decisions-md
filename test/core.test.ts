@@ -549,11 +549,14 @@ test('a lane inside a git worktree files into the main tree, not its own copy', 
   assert.ok(existsSync(join(wt, 'decisions', 'active')), 'the decoy copy must actually exist')
 
   const found = findLayout(wt)
-  assert.equal(found?.projectRoot, realpathSync(main), 'a worktree must resolve to the main tree')
+  // findLayout resolves through realpathSync.native (paths.ts's canonical()) — on
+  // Windows that can disagree with the plain realpathSync used here, so the
+  // assertion compares against the same resolver the code under test uses.
+  assert.equal(found?.projectRoot, realpathSync.native(main), 'a worktree must resolve to the main tree')
 
   const store = new Store([found!])
   const d = store.create({ title: 'filed from inside the worktree', author: 'lane · working in the worktree' })
-  assert.ok(d.file.startsWith(realpathSync(main)), `wrote to ${d.file}`)
+  assert.ok(d.file.startsWith(realpathSync.native(main)), `wrote to ${d.file}`)
   assert.equal(readdirSync(join(main, 'decisions', 'active')).length, 2)
   assert.equal(readdirSync(join(wt, 'decisions', 'active')).length, 1, "the worktree's stale copy is untouched")
   assert.equal(d.id, 2, 'numbering comes from the main tree too')

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import { spawn } from 'node:child_process'
 import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { basename, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { initLayout } from '../src/core/paths.ts'
@@ -398,7 +398,7 @@ test('sourceEventsSince: only events strictly after the given timestamp come bac
   const since = sourceEventsSince(store, cursor)
   assert.deepEqual(since.map((e) => e.id), ['2'])
   assert.equal(since[0].kind, 'new')
-  assert.equal(since[0].project, baseName(root))
+  assert.equal(since[0].project, basename(root))
 
   const all = sourceEventsSince(store, undefined)
   assert.equal(all.length, 2)
@@ -534,10 +534,6 @@ test('heartbeatSource: refuses an unregistered source, otherwise bumps heartbeat
   const at = heartbeatSource(layout, 'github-issues')
   assert.equal(readSourceState(layout, 'github-issues').heartbeatAt, at)
 })
-
-function baseName(p: string): string {
-  return p.split('/').filter(Boolean).pop() ?? p
-}
 
 test('integration: buildOverview carries listSources, and decs changes lists source events', async (t) => {
   const { overviewOf } = await import('../src/core/overview.ts')

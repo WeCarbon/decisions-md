@@ -1,7 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
-import { join } from 'node:path'
+import { join, sep } from 'node:path'
 
 import { initLayout } from '../src/core/paths.ts'
 import { Store } from '../src/core/store.ts'
@@ -35,7 +35,10 @@ test('migrate --strip-prefix renames files, child folders and attachments, and k
   const l = legacyRepo(root)
 
   const dry = decs(root, ['migrate', '--strip-prefix', '--dry-run'])
-  assert.match(dry, /would rename  active\/D1-root\.md → active\/1-root\.md/)
+  // The dry-run line carries a full, host-native path — on Windows that's
+  // `active\D1-root.md`, not `active/D1-root.md`.
+  const s = sep === '\\' ? '\\\\' : '/'
+  assert.match(dry, new RegExp(`would rename  active${s}D1-root\\.md → active${s}1-root\\.md`))
   assert.ok(existsSync(join(l.activeDir, 'D1-root.md')), 'dry run touches nothing')
 
   decs(root, ['migrate', '--strip-prefix'])

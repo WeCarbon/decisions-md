@@ -52,15 +52,23 @@ test('--notify runs DECS_NOTIFY_CMD with the entry in env, and is a no-op withou
   t.after(() => rmSync(root, { recursive: true, force: true }))
   decs(root, ['init', '--no-register'])
   const out = join(root, 'pinged.txt')
+  // DECS_NOTIFY_CMD runs through the host's own shell — sh on POSIX, cmd.exe on
+  // Windows — so `printf`/`touch` and `$VAR` only work on one of them. A Node
+  // one-liner (no `$`, no backtick, so neither shell's own expansion kicks in)
+  // runs the same under both; the output path travels as an env var rather than
+  // being interpolated into the command text, so it never needs OS-specific quoting.
+  const writeFromEnv = `node -e "require('fs').writeFileSync(process.env.DECS_TEST_OUT, [process.env.DECS_REF, process.env.DECS_TITLE, process.env.DECS_URGENCY].join('|'))"`
+  const touchFile = `node -e "require('fs').writeFileSync(process.env.DECS_TEST_OUT, '')"`
   decs(root, ['add', 'should notify', '--urgency', 'high', '--notify'], {
-    DECS_NOTIFY_CMD: `printf '%s|%s|%s' "$DECS_REF" "$DECS_TITLE" "$DECS_URGENCY" > '${out}'`,
+    DECS_NOTIFY_CMD: writeFromEnv,
+    DECS_TEST_OUT: out,
   })
   assert.equal(readFileSync(out, 'utf8'), 'X1|should notify|high')
 
   const quiet = decsResult(root, ['add', 'should not notify', '--notify'], { DECS_NOTIFY_CMD: '' })
   assert.equal(quiet.code, 0)
   rmSync(out)
-  decs(root, ['add', 'no notify flag'], { DECS_NOTIFY_CMD: `touch '${out}'` })
+  decs(root, ['add', 'no notify flag'], { DECS_NOTIFY_CMD: touchFile, DECS_TEST_OUT: out })
   assert.ok(!existsSync(out), 'default off: nothing is pushed without --notify')
 })
 

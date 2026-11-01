@@ -2,7 +2,7 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { existsSync, readFileSync, rmSync, writeFileSync, mkdirSync, mkdtempSync } from 'node:fs'
 import { tmpdir } from 'node:os'
-import { join, relative } from 'node:path'
+import { join, relative, sep } from 'node:path'
 
 import { initLayout, listEntryFiles } from '../src/core/paths.ts'
 import { Store } from '../src/core/store.ts'
@@ -20,7 +20,8 @@ test('children live in the parent folder; get --json shows parent and children',
   decs(root, ['add', 'run the gate', '--task', '--parent', '2'])
 
   const l = initLayout(root)
-  const rel = (p: string) => relative(l.activeDir, p)
+  // `relative()` uses the host separator; the expectations below are written with `/`.
+  const rel = (p: string) => relative(l.activeDir, p).split(sep).join('/')
   const files = listEntryFiles(l).map((f) => [f.id, rel(f.path), f.parent ?? null])
   assert.deepEqual(files, [
     [1, '1-ship-v2-4.md', null],
