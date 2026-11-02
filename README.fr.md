@@ -12,7 +12,16 @@ questions, et vous donne un seul écran pour tout surveiller. Les agents
 demandent ; vous répondez d’une touche ; l’agent en est informé et
 reprend — pendant qu’il tourne encore.**
 
-![Démo : le tableau nod s’ouvre sur l’arbre du travail en cours ; on lit une décision en attente, on y répond d’une touche, puis un agent récupère la réponse avec nod read](docs/demo.gif)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/WeCarbon/noddit/main/docs/app.fr.dark.png">
+  <img alt="L’application de bureau Noddit : la vue Disponible avec une décision en attente ouverte, ses deux options en cartes, des barres d’avancement et une nouvelle demande en attente d’une IA" src="https://raw.githubusercontent.com/WeCarbon/noddit/main/docs/app.fr.png">
+</picture>
+
+<sub>Application de bureau — à construire depuis <code>app/</code> pour l’instant, pas encore de version publiée</sub>
+
+![Démo : le tableau nod s’ouvre sur l’arbre du travail en cours ; on lit une décision en attente, on y répond d’une touche, puis un agent récupère la réponse avec nod read](https://raw.githubusercontent.com/WeCarbon/noddit/main/docs/demo.gif)
+
+<sub>Dans le terminal</sub>
 
 ## Pourquoi
 

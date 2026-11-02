@@ -12,7 +12,16 @@
 لمراقبة كل ذلك. يسأل الوكيل؛ تُجيب بضغطة مفتاح واحدة؛ يعلم الوكيل بالأمر
 فورًا ويستمر — وهو لا يزال يعمل.**
 
-![عرض توضيحي: تُفتح لوحة nod على شجرة العمل الجاري؛ قراءة قرار معلّق والإجابة عنه بضغطة مفتاح، ثم يستلم وكيلٌ الإجابة عبر nod read](docs/demo.gif)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/WeCarbon/noddit/main/docs/app.ar.dark.png">
+  <img alt="تطبيق Noddit لسطح المكتب: عرض «متاح» وفيه قرار معلّق مفتوح، وخياراه بطاقتان، مع أشرطة تقدّم وطلب جديد بانتظار وكيل" src="https://raw.githubusercontent.com/WeCarbon/noddit/main/docs/app.ar.png">
+</picture>
+
+<sub>تطبيق سطح المكتب — يُبنى من <code>app/</code> حاليًا، ولا إصدار منشورًا بعد</sub>
+
+![عرض توضيحي: تُفتح لوحة nod على شجرة العمل الجاري؛ قراءة قرار معلّق والإجابة عنه بضغطة مفتاح، ثم يستلم وكيلٌ الإجابة عبر nod read](https://raw.githubusercontent.com/WeCarbon/noddit/main/docs/demo.gif)
+
+<sub>في الطرفية</sub>
 
 ## لماذا
 

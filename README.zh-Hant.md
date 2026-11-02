@@ -9,7 +9,16 @@
 **Noddit 給你的 AI 代理一個地方放工作和問題，給你一個畫面看著全部。AI 代理
 發問，你按一個鍵回覆，AI 代理當場收到通知，接著往下做。**
 
-![示範：nod 看板一打開就是一棵進行中的任務樹；讀一個待決策問題，按一個鍵回覆，然後 agent 用 nod read 取走回覆](docs/demo.gif)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/WeCarbon/noddit/main/docs/app.zh-Hant.dark.png">
+  <img alt="Noddit 桌面 app：「可用」視圖，打開一個待決策問題，兩個選項是卡片，還有進度條和一條等 AI 來接的新任務" src="https://raw.githubusercontent.com/WeCarbon/noddit/main/docs/app.zh-Hant.png">
+</picture>
+
+<sub>桌面 app——目前從 <code>app/</code> 建置，還沒有發布版</sub>
+
+![示範：nod 看板一打開就是一棵進行中的任務樹；讀一個待決策問題，按一個鍵回覆，然後 agent 用 nod read 取走回覆](https://raw.githubusercontent.com/WeCarbon/noddit/main/docs/demo.gif)
+
+<sub>在終端機裡</sub>
 
 ## 為什麼
 

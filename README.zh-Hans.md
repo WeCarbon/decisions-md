@@ -9,7 +9,16 @@
 **Noddit 给你的智能体一个地方放工作和问题，给你一个屏幕看着全部。智能体发问，
 你按一个键答复，智能体当场收到，接着往下做。**
 
-![演示：nod 看板打开就是一棵正在进行的任务树；读一个待决策问题，按一个键答复，然后 agent 用 nod read 取走答复](docs/demo.gif)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/WeCarbon/noddit/main/docs/app.zh-Hans.dark.png">
+  <img alt="Noddit 桌面 app：「可用」视图，打开一个待决策问题，两个选项是卡片，还有进度条和一条等 AI 来接的新任务" src="https://raw.githubusercontent.com/WeCarbon/noddit/main/docs/app.zh-Hans.png">
+</picture>
+
+<sub>桌面 app——目前从 <code>app/</code> 构建，还没有发布版</sub>
+
+![演示：nod 看板打开就是一棵正在进行的任务树；读一个待决策问题，按一个键答复，然后 agent 用 nod read 取走答复](https://raw.githubusercontent.com/WeCarbon/noddit/main/docs/demo.gif)
+
+<sub>在终端里</sub>
 
 ## 为什么
 

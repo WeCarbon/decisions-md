@@ -10,7 +10,16 @@ weren't watching, and you can't tell which one is still working.
 gives you one screen to watch it all. Agents ask; you answer with one keypress;
 the agent hears about it and carries on — while it's still running.**
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/WeCarbon/noddit/main/docs/app.en.dark.png">
+  <img alt="The Noddit desktop app: the Available view with a pending decision open, its two options as cards, progress bars and a new request waiting for an AI" src="https://raw.githubusercontent.com/WeCarbon/noddit/main/docs/app.en.png">
+</picture>
+
+<sub>Desktop app — built from <code>app/</code> for now, no release yet</sub>
+
 ![Demo: the nod bench opens on a tree of running work; read a pending decision, answer it with a keystroke, then an agent picks up the answer with nod read](https://raw.githubusercontent.com/WeCarbon/noddit/main/docs/demo.gif)
+
+<sub>In the terminal</sub>
 
 ## Why
 
