@@ -97,6 +97,9 @@ export async function copyText(text: string): Promise<void> {
   }
 }
 
+/** Native OS menus in the desktop app, except in background (test) mode. */
+export const useNativeMenus = async (): Promise<boolean> => (inDesktop ? !(await invoke<boolean>('is_background').catch(() => false)) : false)
+
 export const isDebugBuild = async (): Promise<boolean> => (inDesktop ? invoke<boolean>('is_debug').catch(() => false) : true)
 
 export interface Session {

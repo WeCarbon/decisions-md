@@ -14,6 +14,7 @@ const I = (Icon: LucideIcon) => <Icon size={14} strokeWidth={1.75} />
 import { Bar, Glyph, Segs } from './segs.tsx'
 import { hiddenCount, isSelectable, nodeCollapsed, reveal, visibleRows, type Folds } from './rows.ts'
 import { ContextMenu, type MenuItem, type MenuState } from './menu.tsx'
+import { popupNative } from './native-menu.ts'
 import { LetterPicker, RenameField, UnlinkConfirm } from './projects.tsx'
 import { Settings } from './settings.tsx'
 import { s } from './strings.ts'
@@ -390,6 +391,14 @@ export function Bench(props: {
     return null
   }
 
+  // The OS draws the menu in the desktop app; the drawn one stands in for the browser demo and for
+  // scripted runs, which cannot reach a native menu and must not put one on the screen.
+  const nativeMenus = useRef(false)
+  useEffect(() => void api.useNativeMenus().then((v) => (nativeMenus.current = v)), [])
+  const showMenu = (state: MenuState) => {
+    if (!nativeMenus.current) return setMenu(state)
+    void popupNative(state.items, state.x, state.y).then((shown) => shown || setMenu(state))
+  }
   const debugBuild = useRef(false)
   useEffect(() => void api.isDebugBuild().then((v) => (debugBuild.current = v)), [])
   const openMenuRef = useRef<(e: MouseEvent) => void>(() => {})
@@ -400,7 +409,7 @@ export function Bench(props: {
     if (editable || (debugBuild.current && e.altKey)) return
     e.preventDefault()
     const items = menuFor(target)
-    if (items?.length) setMenu({ x: e.clientX, y: e.clientY, items })
+    if (items?.length) showMenu({ x: e.clientX, y: e.clientY, items })
   }
   useEffect(() => {
     const listener = (e: MouseEvent) => openMenuRef.current(e)
@@ -412,7 +421,7 @@ export function Bench(props: {
     const items = menuFor(el)
     if (!items?.length) return
     const r = el.getBoundingClientRect()
-    setMenu({ x: Math.min(r.right - 8, r.left + 200), y: r.bottom - 4, items })
+    showMenu({ x: Math.min(r.right - 8, r.left + 200), y: r.bottom - 4, items })
   }
 
   const projectAct = async (fn: () => Promise<unknown>, done: string, close: () => void) => {
@@ -811,7 +820,7 @@ function ListRow(p: { row: Row; selected: boolean; open: boolean; hidden: number
     return (
       <div class={`row fold ${p.selected ? 'sel' : ''}`} style={indent} onClick={() => (p.onClick(), p.onToggle())}>
         <span class={`caret ${p.open ? 'open' : ''}`}>›</span>
-        <span class="fold-text">{r.text}</span>
+        <span class="fold-text">{r.text?.replace(/^[⏷⏵▾▸▼▶]\s*/u, '')}</span>
       </div>
     )
   const badge = r.badge ?? []

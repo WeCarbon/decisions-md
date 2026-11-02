@@ -467,6 +467,16 @@ kbd {
   display: none;
 }
 
+.badge > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.badge > span:first-child:not(:last-child) {
+  flex-shrink: 0;
+}
+
 .list {
   container-type: inline-size;
 }

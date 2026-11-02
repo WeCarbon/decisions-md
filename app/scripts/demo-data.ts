@@ -84,7 +84,7 @@ decs(web, docs, ['pin', '6', 'top'])
 decs(web, docs, ['push', '7', '2', '--note', 'system stack, keep it light', '--human'])
 decs(web, docs, ['add', 'Publish the API reference', '--task'])
 decs(web, docs, ['start', '8'])
-decs(web, docs, ['hold', '8', '--on', 'Carol to send the staging keys'])
+decs(web, docs, ['hold', '8', '--on', 'Carol to send the staging keys once the vendor security review (ticket SEC-4471) signs off on the new API scopes'])
 decs(web, docs, ['add', 'Clean up old feature flags', '--task'])
 decs(web, docs, ['defer', '9', '--human'])
 decs(web, docs, ['add', 'Release notes are ready', '--body', 'Drafted from the merged PRs; 6 items, nothing breaking.'])
@@ -98,11 +98,14 @@ execFileSync(process.execPath, [BIN, 'add', 'Export orders as CSV for finance', 
   stdio: 'ignore',
 })
 
-decs(api, orders, ['add', 'Pagination for /orders', '--task'])
+decs(api, orders, ['add', 'Migrate the billing webhooks', '--task'])
 decs(api, orders, ['start', '1'])
-decs(api, orders, ['progress', '20', '--node', '1'])
+decs(api, orders, ['hold', '1', '--on', '财务确认新的发票模板和税号；供应商说下周三之前给答复，在那之前不能切换回调地址'])
+decs(api, orders, ['add', 'Pagination for /orders', '--task'])
+decs(api, orders, ['start', '2'])
+decs(api, orders, ['progress', '20', '--node', '2'])
 decs(api, orders, [
-  'add', 'How should /orders page?', '--parent', '1',
+  'add', 'How should /orders page?', '--parent', '2',
   '--question', 'Q1', 'Paging style', '-o', 'Q1:A=Cursor', 'Q1:B=Offset', '--default', 'Q1:A',
   '--question', 'Q2', 'Default page size', '-o', 'Q2:1=50', 'Q2:2=100', '--default', 'Q2:1',
   '--body', 'Clients today fetch everything; the largest account has 180k orders.',

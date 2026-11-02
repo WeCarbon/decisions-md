@@ -320,6 +320,11 @@ fn is_debug() -> bool {
     cfg!(debug_assertions)
 }
 
+#[tauri::command]
+fn is_background() -> bool {
+    background()
+}
+
 /// Errors the page hits, on the app's stderr: the window has no console in a release build.
 #[tauri::command]
 fn log(line: String) {
@@ -372,6 +377,7 @@ pub fn run() {
             install_decs,
             log,
             is_debug,
+            is_background,
             pick_folder,
             e2e_shot,
             watch::settings_get,

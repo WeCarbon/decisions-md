@@ -28,7 +28,7 @@ const fullTime = (iso: string | null | undefined) => (iso ? new Date(iso).toLoca
 
 function Chip({ icon, children, title, tone }: { icon: ComponentChildren; children: ComponentChildren; title?: string; tone?: string }) {
   return (
-    <span class={`mchip ${tone ?? ''}`} title={title}>
+    <span class={`mchip ${tone ?? ''}`} title={title ?? (typeof children === 'string' ? children : undefined)}>
       {icon}
       <span class="mchip-text">{children}</span>
     </span>
@@ -60,15 +60,24 @@ function Pills({ icon, label, nodes, onJump }: { icon: ComponentChildren; label:
 }
 
 /** The status sentence decs prints, split: the state goes in the pill, the rest is its tooltip. */
-function StatusPill({ segs }: { segs: Seg[] }) {
+/** Short enough to sit in the pill; anything longer (a waiting reason, say) gets its own line. */
+const PILL_DETAIL_MAX = 28
+
+/** The status sentence decs prints, split: the state goes in the pill, a short detail beside it. */
+export function statusParts(segs: Seg[]) {
   const [glyph, label, ...rest] = segs
-  const tone = glyph ? segClass({ ...glyph, dim: false }) : ''
   const detail = rest.map((x) => x.text.replace(/^\s*·\s*/, '')).join(' · ').trim()
+  return { glyph, label: label?.text.trim() ?? '', detail, long: [...detail].length > PILL_DETAIL_MAX }
+}
+
+function StatusPill({ segs }: { segs: Seg[] }) {
+  const { glyph, label, detail, long } = statusParts(segs)
+  const tone = glyph ? segClass({ ...glyph, dim: false }) : ''
   return (
     <span class={`spill ${tone}`} title={detail || undefined}>
       <Glyph g={glyph} />
-      <span>{label?.text.trim()}</span>
-      {detail && <span class="spill-detail">{detail}</span>}
+      <span class="spill-label">{label}</span>
+      {detail && !long && <span class="spill-detail">{detail}</span>}
     </span>
   )
 }
@@ -136,6 +145,11 @@ export function NodeHeader({ n, onJump, listening }: { n: Node; onJump: (key: st
           </Chip>
         )}
       </div>
+      {statusParts(n.status_line).long && (
+        <p class={`status-note ${segClass({ ...statusParts(n.status_line).glyph, dim: false })}`} dir="auto">
+          {statusParts(n.status_line).detail}
+        </p>
+      )}
       <h2 class="node-title" dir="auto">
         {n.title}
       </h2>

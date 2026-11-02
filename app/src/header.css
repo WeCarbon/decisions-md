@@ -328,3 +328,56 @@
   margin-inline-start: 6px;
   color: var(--text-3);
 }
+
+/* Pills and chips never wrap: labels keep their width, long values end in an ellipsis
+   (the full text is in the tooltip), and long free text gets its own line below. */
+
+.spill,
+.mchip,
+.npill,
+.chip,
+.qchip,
+.steps-list li {
+  white-space: nowrap;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.spill {
+  overflow: hidden;
+  flex-shrink: 1;
+}
+
+.spill > .glyph,
+.spill-label,
+.mchip > svg,
+.npill > .glyph,
+.npill-ref {
+  flex-shrink: 0;
+}
+
+.spill-detail {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nhead-top {
+  min-width: 0;
+}
+
+.nhead-top > * {
+  flex-shrink: 1;
+}
+
+.status-note {
+  margin: 8px 0 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.steps-list li {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

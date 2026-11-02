@@ -1,0 +1,170 @@
+/*
+ * The drawn context menu (browser demo, scripted runs): as close to the OS one as CSS gets.
+ * The desktop app shows the real OS menu instead.
+ */
+
+[data-platform='mac'] .ctx-menu {
+  min-width: 200px;
+  padding: 5px;
+  border-radius: 6px;
+  font: 13px/1 -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+  background: rgba(246, 246, 246, 0.95);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.18), 0 10px 30px rgba(0, 0, 0, 0.18);
+  animation: none;
+}
+
+[data-platform='mac'] .ctx-item {
+  height: 22px;
+  padding: 0 10px 0 4px;
+  border-radius: 4px;
+  gap: 4px;
+  color: #1d1d1f;
+}
+
+[data-platform='mac'] .ctx-item.on {
+  background: #0a64d8;
+  color: #fff;
+}
+
+[data-platform='mac'] .ctx-check {
+  width: 16px;
+  font-size: 12px;
+}
+
+/* the OS menu has no item icons: the check column only ever shows a check */
+[data-platform='mac'] .ctx-check svg,
+[data-platform='win'] .ctx-check svg {
+  display: none;
+}
+
+[data-platform='mac'] .ctx-key {
+  font: 13px -apple-system, BlinkMacSystemFont, sans-serif;
+  color: rgba(0, 0, 0, 0.4);
+  margin-inline-start: 24px;
+  letter-spacing: 0.04em;
+}
+
+[data-platform='mac'] .ctx-item.on .ctx-key,
+[data-platform='mac'] .ctx-item.on .ctx-arrow {
+  color: rgba(255, 255, 255, 0.8);
+  opacity: 1;
+}
+
+[data-platform='mac'] .ctx-arrow {
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.5);
+}
+
+[data-platform='mac'] .ctx-sep {
+  height: 1px;
+  margin: 5px 10px;
+  background: rgba(0, 0, 0, 0.1);
+}
+
+[data-platform='mac'] .ctx-item.danger:not(.on),
+[data-platform='win'] .ctx-item.danger {
+  color: #1d1d1f;
+}
+
+[data-platform='mac'] .ctx-item.disabled {
+  opacity: 0.35;
+}
+
+/* Windows 11 */
+
+[data-platform='win'] .ctx-menu {
+  min-width: 220px;
+  padding: 4px;
+  border-radius: 8px;
+  font: 14px/1 'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif;
+  background: rgba(249, 249, 249, 0.97);
+  backdrop-filter: blur(30px) saturate(125%);
+  -webkit-backdrop-filter: blur(30px) saturate(125%);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.06), 0 8px 16px rgba(0, 0, 0, 0.14);
+  animation: none;
+}
+
+[data-platform='win'] .ctx-item {
+  height: 32px;
+  padding: 0 12px 0 8px;
+  border-radius: 4px;
+  color: #1a1a1a;
+}
+
+[data-platform='win'] .ctx-item.on {
+  background: rgba(0, 0, 0, 0.055);
+  color: #1a1a1a;
+}
+
+[data-platform='win'] .ctx-key {
+  font: 12px 'Segoe UI Variable Text', 'Segoe UI', sans-serif;
+  color: #5d5d5d;
+  margin-inline-start: 32px;
+}
+
+[data-platform='win'] .ctx-item.on .ctx-key,
+[data-platform='win'] .ctx-item.on .ctx-arrow {
+  color: #5d5d5d;
+  opacity: 1;
+}
+
+[data-platform='win'] .ctx-sep {
+  margin: 4px 0;
+  background: rgba(0, 0, 0, 0.08);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light'])[data-platform='mac'] .ctx-menu {
+    background: rgba(40, 40, 42, 0.94);
+    box-shadow: 0 0 0 0.5px rgba(255, 255, 255, 0.16), 0 10px 30px rgba(0, 0, 0, 0.5);
+  }
+  :root:not([data-theme='light'])[data-platform='mac'] .ctx-item,
+  :root:not([data-theme='light'])[data-platform='mac'] .ctx-item.danger:not(.on) {
+    color: rgba(255, 255, 255, 0.88);
+  }
+  :root:not([data-theme='light'])[data-platform='mac'] .ctx-key,
+  :root:not([data-theme='light'])[data-platform='mac'] .ctx-arrow {
+    color: rgba(255, 255, 255, 0.4);
+  }
+  :root:not([data-theme='light'])[data-platform='mac'] .ctx-sep {
+    background: rgba(255, 255, 255, 0.12);
+  }
+  :root:not([data-theme='light'])[data-platform='win'] .ctx-menu {
+    background: rgba(44, 44, 44, 0.97);
+  }
+  :root:not([data-theme='light'])[data-platform='win'] .ctx-item,
+  :root:not([data-theme='light'])[data-platform='win'] .ctx-item.on {
+    color: #fff;
+  }
+  :root:not([data-theme='light'])[data-platform='win'] .ctx-item.on {
+    background: rgba(255, 255, 255, 0.08);
+  }
+}
+
+:root[data-theme='dark'][data-platform='mac'] .ctx-menu {
+  background: rgba(40, 40, 42, 0.94);
+  box-shadow: 0 0 0 0.5px rgba(255, 255, 255, 0.16), 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+:root[data-theme='dark'][data-platform='mac'] .ctx-item,
+:root[data-theme='dark'][data-platform='mac'] .ctx-item.danger:not(.on) {
+  color: rgba(255, 255, 255, 0.88);
+}
+:root[data-theme='dark'][data-platform='mac'] .ctx-key,
+:root[data-theme='dark'][data-platform='mac'] .ctx-arrow {
+  color: rgba(255, 255, 255, 0.4);
+}
+:root[data-theme='dark'][data-platform='mac'] .ctx-sep {
+  background: rgba(255, 255, 255, 0.12);
+}
+:root[data-theme='dark'][data-platform='win'] .ctx-menu {
+  background: rgba(44, 44, 44, 0.97);
+}
+:root[data-theme='dark'][data-platform='win'] .ctx-item,
+:root[data-theme='dark'][data-platform='win'] .ctx-item.on {
+  color: #fff;
+}
+:root[data-theme='dark'][data-platform='win'] .ctx-item.on {
+  background: rgba(255, 255, 255, 0.08);
+}

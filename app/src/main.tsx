@@ -10,10 +10,13 @@ import './style.css'
 import './panels.css'
 import './header.css'
 import './quick.css'
+import './menu.css'
 
 const params = new URLSearchParams(location.search)
 const forcedTheme = params.get('theme')
 if (forcedTheme) document.documentElement.dataset.theme = forcedTheme
+// Menus and shortcut hints follow the platform's own conventions.
+document.documentElement.dataset.platform = params.get('platform') ?? (/Mac/.test(navigator.platform) ? 'mac' : /Win/.test(navigator.platform) ? 'win' : 'other')
 
 const DEFAULT_PREFS: Prefs = { view: 'available', selected: null, folds: { nodes: {}, groups: {} }, onboarded: false }
 

@@ -14,6 +14,13 @@ export interface MenuState {
   parentWidth?: number
 }
 
+/** macOS shows key glyphs; Windows spells keys out. */
+function shortcutText(k: string): string {
+  if (document.documentElement.dataset.platform !== 'win') return k
+  const words: Record<string, string> = { '⏎': 'Enter', '←': 'Left', '→': 'Right', '⇧F10': 'Shift+F10' }
+  return words[k] ?? k.replace('⌘', 'Ctrl+').replace('⇧', 'Shift+').replace('⌥', 'Alt+')
+}
+
 const isAction = (i: MenuItem): i is Extract<MenuItem, { kind?: 'item' }> => i.kind === undefined || i.kind === 'item'
 
 /**
@@ -36,6 +43,8 @@ export function ContextMenu({ state, onClose, onDone, nested = false }: { state:
     let y = state.y
     // A submenu that would run off the right edge opens to the left of its parent instead.
     if (x + r.width > window.innerWidth - pad) x = nested ? state.x - r.width - (state.parentWidth ?? 0) + 8 : window.innerWidth - r.width - pad
+    // No room on either side: lay it over its parent, against the right edge.
+    if (nested && x < pad) x = window.innerWidth - r.width - pad
     if (y + r.height > window.innerHeight - pad) y = Math.max(pad, window.innerHeight - r.height - pad)
     setPos({ x: Math.max(pad, x), y })
     el.focus()
@@ -97,7 +106,7 @@ export function ContextMenu({ state, onClose, onDone, nested = false }: { state:
 
   return (
     <>
-      <div ref={ref} class="ctx-menu" role="menu" tabIndex={-1} style={{ left: `${pos.x}px`, top: `${pos.y}px` }} onContextMenu={(e) => e.preventDefault()}>
+      <div ref={ref} class="ctx-menu" role="menu" tabIndex={-1} style={{ left: `${pos.x}px`, top: `${pos.y}px`, zIndex: nested ? 51 : undefined }} onContextMenu={(e) => e.preventDefault()}>
         {state.items.map((item, n) => {
           if (item.kind === 'separator') return <div key={n} class="ctx-sep" role="separator" />
           if (item.kind === 'header') return <div key={n} class="ctx-header">{item.label}</div>
@@ -121,7 +130,7 @@ export function ContextMenu({ state, onClose, onDone, nested = false }: { state:
               <span class="ctx-label" dir="auto">
                 {item.label}
               </span>
-              {item.shortcut && <span class="ctx-key">{item.shortcut}</span>}
+              {item.shortcut && <span class="ctx-key">{shortcutText(item.shortcut)}</span>}
               {item.sub && <span class="ctx-arrow">›</span>}
             </div>
           )
