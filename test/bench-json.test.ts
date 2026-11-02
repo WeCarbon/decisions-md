@@ -2,9 +2,9 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { spawn } from 'node:child_process'
 import { rmSync, writeFileSync } from 'node:fs'
-import { join } from 'node:path'
+import { isAbsolute, join } from 'node:path'
 
-import { BIN, decs, scratch } from './helpers.ts'
+import { BIN, decs, killAndWait, scratch } from './helpers.ts'
 
 interface Seg { text: string; color?: string; bold?: boolean; dim?: boolean }
 interface JsonRow { key: string; kind: string; depth: number; fold: string | null; node?: string; ref?: string; glyph?: Seg; badge?: Seg[]; collapsed?: boolean; text?: string; count?: number }
@@ -15,9 +15,13 @@ interface BenchJson {
   nodes: Record<string, { ref: string; options: { key: string; body: string }[]; parent_node: { ref: string }; after_nodes: { ref: string }[]; blocking_nodes: { ref: string }[]; status: string; status_line: Seg[]; meta: Seg[][]; body_rows: { text: string; image?: number; style?: Seg }[]; images: { name: string; path: string }[]; can_default: boolean; backlinks: string[] }>
 }
 
+/** Retries past a lingering lock on Windows — a just-killed child can hold its cwd open
+ *  a moment longer than its own 'exit' event. */
+const rmScratch = (dir: string) => rmSync(dir, { recursive: true, force: true, maxRetries: 10, retryDelay: 200 })
+
 function project(t: { after: (fn: () => void) => void }): string {
   const root = scratch()
-  t.after(() => rmSync(root, { recursive: true, force: true }))
+  t.after(() => rmScratch(root))
   decs(root, ['init', '--no-register'])
   return root
 }
@@ -86,7 +90,7 @@ test('decs bench --json: finished children sit under their fold row in All; atta
 
   const kid = j.nodes[all.find((r) => r.ref === 'X3')!.node!]
   assert.equal(kid.images.length, 1)
-  assert.ok(kid.images[0].path.startsWith('/'), kid.images[0].path)
+  assert.ok(isAbsolute(kid.images[0].path), kid.images[0].path)
 
   assert.ok(all.some((r) => r.ref === 'X4'))
   assert.equal(j.nodes[all.find((r) => r.ref === 'X4')!.node!], undefined, 'archived nodes are listed, not detailed')
@@ -99,26 +103,31 @@ test('decs bench --json: finished children sit under their fold row in All; atta
 test('decs monitor --with-parent: the monitor goes when the process that started it goes', async (t) => {
   const root = project(t)
   const home = scratch()
-  t.after(() => rmSync(home, { recursive: true, force: true }))
+  t.after(() => rmScratch(home))
   const parent = spawn(process.execPath, ['-e', 'setTimeout(() => {}, 60000)'])
-  t.after(() => parent.kill())
+  t.after(() => killAndWait(parent))
   const child = spawn(process.execPath, [BIN, 'monitor', '--with-parent', String(parent.pid), '--interval', '200', '--idle-exit', '0'], {
     cwd: root,
     env: { ...process.env, NO_COLOR: '1', DECS_AUTHOR: 'cli-test · lane', CLAUDECODE: '1', DECS_HOME: home },
   })
-  t.after(() => child.kill())
+  t.after(() => killAndWait(child))
   const exited = new Promise<number | null>((resolve) => child.once('exit', (code) => resolve(code)))
   await new Promise((r) => setTimeout(r, 600))
   assert.equal(child.exitCode, null, 'still running while the parent is')
   parent.kill()
-  const code = await Promise.race([exited, new Promise<string>((r) => setTimeout(() => r('timeout'), 5000))])
+  // A dead process can still answer `kill(pid, 0)` for a moment on Windows (a known, narrow
+  // libuv race around TerminateProcess) — generous, since the monitor only polls every 200ms.
+  const code = await Promise.race([exited, new Promise<string>((r) => setTimeout(() => r('timeout'), 15_000))])
   assert.equal(code, 0)
+  // Dead before `project()`'s own cleanup runs — Windows won't remove a directory
+  // that's still a live process's cwd.
+  await killAndWait(parent)
 })
 
 test('decs monitor --updates: an agent writing progress is a line, which plain monitor never reports', async (t) => {
   const root = project(t)
   const home = scratch()
-  t.after(() => rmSync(home, { recursive: true, force: true }))
+  t.after(() => rmScratch(home))
   decs(root, ['add', 'long job', '--task'])
   decs(root, ['start', '1'])
   const child = spawn(process.execPath, [BIN, 'monitor', '--updates', '--json', '--interval', '200', '--idle-exit', '0'], {
@@ -129,7 +138,7 @@ test('decs monitor --updates: an agent writing progress is a line, which plain m
   let err = ''
   child.stdout.on('data', (b) => (out += b))
   child.stderr.on('data', (b) => (err += b))
-  t.after(() => child.kill())
+  t.after(() => killAndWait(child))
   const until = async (ok: () => boolean, what: string) => {
     for (const end = Date.now() + 10_000; !ok(); await new Promise((r) => setTimeout(r, 50)))
       if (Date.now() > end) throw new Error(`timed out waiting for ${what}: ${out}${err}`)
@@ -142,4 +151,7 @@ test('decs monitor --updates: an agent writing progress is a line, which plain m
   const line = JSON.parse(out.trim().split('\n')[0])
   assert.deepEqual(line.refs, ['X1'])
   assert.deepEqual(line.gone, [])
+  // Dead before `project()`'s own cleanup runs — Windows won't remove a directory
+  // that's still a live process's cwd.
+  await killAndWait(child)
 })

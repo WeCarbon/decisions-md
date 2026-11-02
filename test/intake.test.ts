@@ -14,10 +14,14 @@ import { BIN, decs, decsResult, killAndWait, scratch } from './helpers.ts'
 /** The owner's own terminal: no CLAUDECODE, no DECS_AUTHOR. */
 const OWNER = { CLAUDECODE: undefined, DECS_AUTHOR: undefined }
 
+/** Retries past a lingering lock on Windows — a just-killed or detached child (the
+ *  $NODDIT_BRIEF_CMD hook) can hold `root` as its cwd a moment longer than the test sees. */
+const rmScratch = (dir: string) => rmSync(dir, { recursive: true, force: true, maxRetries: 10, retryDelay: 200 })
+
 function project(t: { after: (fn: () => void) => void }) {
   const root = scratch()
   const home = join(root, '.home')
-  t.after(() => rmSync(root, { recursive: true, force: true }))
+  t.after(() => rmScratch(root))
   decs(root, ['init', '--no-register'])
   const run = (args: string[], env: Record<string, string | undefined> = {}, input = '') => decs(root, args, { DECS_HOME: home, ...env }, input)
   const result = (args: string[], env: Record<string, string | undefined> = {}) => decsResult(root, args, { DECS_HOME: home, ...env })
@@ -317,4 +321,7 @@ test('a window\'s --updates monitor, or one with --no-heartbeat, is not a listen
   await settle()
   assert.equal(p.json(['sessions']).projects[0].listening, false)
   assert.equal(p.json(['add', 'fix login'], OWNER).listening, false)
+  // Dead before `project()`'s own cleanup runs — Windows won't remove a directory
+  // that's still a live process's cwd.
+  await Promise.all(kids.map((k) => killAndWait(k)))
 })

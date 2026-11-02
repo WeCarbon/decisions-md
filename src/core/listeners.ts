@@ -69,9 +69,11 @@ export function listenersFor(projectRoot: string, now = Date.now()): Listener[] 
   } catch {
     return []
   }
+  // .native to agree with core/paths.ts's own canonicalization — plain realpathSync can
+  // normalise a Windows path differently, breaking the identity check below.
   const real = (p: string) => {
     try {
-      return realpathSync(p)
+      return realpathSync.native(p)
     } catch {
       return resolve(p)
     }

@@ -11,7 +11,9 @@ import { t } from '../../i18n/index.ts'
 function findRegistered(target: string): ProjectEntry | undefined {
   const all = readProjects()
   // Through symlinks too: a path the store reports is canonical, the registry keeps what was typed.
-  const real = (p: string) => (existsSync(p) ? realpathSync(p) : resolve(p))
+  // .native to agree with core/paths.ts's own canonicalization — plain realpathSync can
+  // normalise a Windows path differently, breaking the identity check below.
+  const real = (p: string) => (existsSync(p) ? realpathSync.native(p) : resolve(p))
   const abs = real(target)
   return (
     all.find((p) => real(p.root) === abs) ??

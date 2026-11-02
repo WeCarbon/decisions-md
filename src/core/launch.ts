@@ -67,10 +67,12 @@ export function hostEnv(): LaunchEnv {
   }
 }
 
-/** The project's real root: symlinks resolved, so the agent opens where `decisions/` actually lives. */
+/** The project's real root: symlinks resolved, so the agent opens where `decisions/` actually lives.
+ *  `.native` to agree with `core/paths.ts`'s own canonicalization — plain `realpathSync` can
+ *  normalise a Windows path differently, breaking an identity check between the two. */
 export function realRoot(root: string): string {
   try {
-    return realpathSync(root)
+    return realpathSync.native(root)
   } catch {
     return root
   }

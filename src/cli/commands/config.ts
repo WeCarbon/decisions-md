@@ -98,7 +98,9 @@ function letter(args: Args, value: string | undefined): number {
 
 /** Another registered project already showing `letter`, by its display name. Only matters when this one is registered too. */
 function otherProjectWithLetter(self: Layout, letter: string): string | undefined {
-  const real = (p: string) => (existsSync(p) ? realpathSync(p) : resolve(p))
+  // .native to agree with core/paths.ts's own canonicalization — plain realpathSync can
+  // normalise a Windows path differently, breaking the identity check below.
+  const real = (p: string) => (existsSync(p) ? realpathSync.native(p) : resolve(p))
   const here = real(self.projectRoot)
   const registered = readProjects()
   if (!registered.some((p) => real(p.root) === here)) return undefined

@@ -234,7 +234,7 @@ export async function run(args: Args): Promise<number> {
    * A lead hears every brief; a --mine/teammate monitor only those filed under its own nodes.
    */
   const briefSeen = new Set<string>()
-  const reportBriefs = (first: boolean) => {
+  const reportBriefs = () => {
     const items = store.all()
     const byKey = new Map(items.map((d) => [`${d.project}#${d.id}`, d]))
     const underMine = (d: Decision) => {
@@ -255,13 +255,12 @@ export async function run(args: Args): Promise<number> {
       const json = { event: 'brief', ref: refOfNode(d), id: d.id, project: d.project, title: d.title, text: words ?? d.title, parent_ref: d.parent !== undefined ? refOfNode({ ...d, id: d.parent }) : null, since: cursor }
       if (!briefSeen.has(`b|${base}`)) {
         briefSeen.add(`b|${base}`)
-        if (first || !(age >= unclaimedMs)) {
-          if (age >= unclaimedMs) briefSeen.add(`r|${base}`)
-          lastEventAt = Date.now()
-          process.stdout.write(asJson ? `${JSON.stringify({ ...json, reminder: false })}\n` : `DECS-BRIEF ${t('cli.monitor.brief', { ref: refOfNode(d), title: d.title, extra })}  since=${cursor}\n`)
-          continue
-        }
+        lastEventAt = Date.now()
+        process.stdout.write(asJson ? `${JSON.stringify({ ...json, reminder: false })}\n` : `DECS-BRIEF ${t('cli.monitor.brief', { ref: refOfNode(d), title: d.title, extra })}  since=${cursor}\n`)
       }
+      // Independent of the line above: a brief already overdue the first time it's seen
+      // (a monitor that just started, or a slow first pass) gets both messages at once,
+      // rather than losing the reminder because it looked old on arrival.
       if (age >= unclaimedMs && !briefSeen.has(`r|${base}`)) {
         briefSeen.add(`r|${base}`)
         lastEventAt = Date.now()
@@ -327,7 +326,7 @@ export async function run(args: Args): Promise<number> {
       process.stdout.write(`DECS-ERROR ${flat((err as Error).message)}\n`)
     }
     try {
-      reportBriefs(first)
+      reportBriefs()
     } catch (err) {
       process.stdout.write(`DECS-ERROR ${flat((err as Error).message)}\n`)
     }
