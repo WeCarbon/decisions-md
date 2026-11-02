@@ -15,8 +15,21 @@ import { BIN, decs, decsResult, killAndWait, scratch } from './helpers.ts'
 const OWNER = { CLAUDECODE: undefined, DECS_AUTHOR: undefined }
 
 /** Retries past a lingering lock on Windows — a just-killed or detached child (the
- *  $NODDIT_BRIEF_CMD hook) can hold `root` as its cwd a moment longer than the test sees. */
-const rmScratch = (dir: string) => rmSync(dir, { recursive: true, force: true, maxRetries: 10, retryDelay: 200 })
+ *  $NODDIT_BRIEF_CMD hook) can hold `root` as its cwd, or hold a file inside it open,
+ *  a few seconds longer than the test ever sees it running. Generous and explicit
+ *  rather than relying on fs.rmSync's own built-in (and less predictable) backoff. */
+async function rmScratch(dir: string, ms = 10_000): Promise<void> {
+  for (const deadline = Date.now() + ms; ; ) {
+    try {
+      rmSync(dir, { recursive: true, force: true })
+      return
+    } catch (e) {
+      const code = (e as NodeJS.ErrnoException).code
+      if (Date.now() > deadline || (code !== 'EBUSY' && code !== 'ENOTEMPTY' && code !== 'EPERM')) throw e
+      await new Promise((r) => setTimeout(r, 200))
+    }
+  }
+}
 
 function project(t: { after: (fn: () => void) => void }) {
   const root = scratch()
